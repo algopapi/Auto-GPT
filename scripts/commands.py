@@ -92,7 +92,6 @@ def execute_command(command_name, arguments):
             return list_agents()
         elif command_name == "delete_agent":
             return delete_agent(arguments["key"])
-
         elif command_name == "get_text_summary":
             return get_text_summary(arguments["url"], arguments["question"])
         elif command_name == "get_hyperlinks":
