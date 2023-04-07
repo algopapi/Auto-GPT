@@ -55,13 +55,8 @@ class Config(metaclass=Singleton):
         self.google_api_key = os.getenv("GOOGLE_API_KEY")
         self.custom_search_engine_id = os.getenv("CUSTOM_SEARCH_ENGINE_ID")
 
-<<<<<<< HEAD
         self.pinecone_api_key = os.getenv("PINECONE_API_KEY")
         self.pinecone_region = os.getenv("PINECONE_ENV")
-=======
-        self.reflexion_llm_model = os.getenv("FAST_LLM_MODEL", "gpt-3.5-turbo")
-        self.reflexion_llm_token_limit = int(os.getenv("SMART_TOKEN_LIMIT", 8000))
->>>>>>> ce7d422 (auto GPT orginisation)
 
         self.image_provider = os.getenv("IMAGE_PROVIDER")
         self.huggingface_api_token = os.getenv("HUGGINGFACE_API_TOKEN")
@@ -87,10 +82,18 @@ class Config(metaclass=Singleton):
         self.redis_host = os.getenv("REDIS_HOST")
         self.redis_port = os.getenv("REDIS_PORT")
         self.redis_password = os.getenv("REDIS_PASSWORD")
+<<<<<<< HEAD
         # Note that indexes must be created on db 0 in redis, this is not configureable.
         
         self.memory_backend = os.getenv("MEMORY_BACKEND", 'pinecone')
 >>>>>>> 13030b8 (Implement redis memory backend.)
+=======
+        self.wipe_redis_on_start = os.getenv("WIPE_REDIS_ON_START", "True") == 'True'
+        self.memory_index = os.getenv("MEMORY_INDEX", 'auto-gpt')
+        # Note that indexes must be created on db 0 in redis, this is not configureable.
+
+        self.memory_backend = os.getenv("MEMORY_BACKEND", 'local')
+>>>>>>> e4689c7 (Implement local memory.)
         # Initialize the OpenAI API client
         openai.api_key = self.openai_api_key
 
