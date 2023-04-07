@@ -14,7 +14,7 @@ Still very experimental.
 - Together they form an organization. Organization handles running all agents and routing messages between them.
 - The status of the staff all hired staff added in context and updated every run cycle
 - Also kinda added reflexion every N steps (not working yet)
-- 
+
 
 ## How to Use
 
