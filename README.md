@@ -30,6 +30,7 @@ Here i made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP
 ## Current issues
 
 1. Fix the pinecone implementation
+2. The supervisor tends to keep "herassing" the staff. i.e., constantly asking them for updates. 
 
 ## Future work...
 1. Firing agents
