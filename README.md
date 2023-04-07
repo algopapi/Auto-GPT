@@ -3,9 +3,11 @@
 A cool AUTO-Gpt experiment. Allowing it to form an orgnazation. Let Agents hire staff with one founder at the helm. 
 Still very experimental.
 
-![alt text](https://i.imgur.com/efaLR9n.jpg)
+## Example
 
 Here i made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP500]. He proceeded to hire QUANT_A/B/C for each asset, and also a news reporter who kept him up to date with the latest news. 
+
+![alt text](https://i.imgur.com/efaLR9n.jpg)
 
 ## Changelog
 
