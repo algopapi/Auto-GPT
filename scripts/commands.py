@@ -66,6 +66,26 @@ def get_command(response):
     except Exception as e:
         return "Error:", str(e)
 
+def get_status(response):
+    try:
+        response_json = fix_and_parse_json(response)
+        
+        if "thoughts" not in response_json:
+            return "Error:" , "Missing 'command' object in JSON"
+        
+        thoughts = response_json["thoughts"]
+
+        if "status" not in thoughts:
+            return "Error:", "Missing 'name' field in 'command' object"
+        
+        status = thoughts["status"]
+
+        return status
+    except json.decoder.JSONDecodeError:
+        return "Error:", "Invalid JSON"
+    # All other errors, return "Error: + error message"
+    except Exception as e:
+        return "Error:", str(e)
 
 def execute_command(command_name, arguments):
     memory = get_memory(cfg)

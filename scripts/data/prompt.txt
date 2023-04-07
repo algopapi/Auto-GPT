@@ -52,6 +52,7 @@ RESPONSE FORMAT:
         "reasoning": "reasoning",
         "plan": "- short bulleted\n- list that conveys\n- long-term plan",
         "criticism": "constructive self-criticism",
+        "status": "idle, briefly outlining current engagement",
         "speak": "thoughts summary to say to user"
     },
     "command": {

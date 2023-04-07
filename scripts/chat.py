@@ -1,8 +1,9 @@
 import time
+
 import openai
-from dotenv import load_dotenv
-from config import Config
 import token_counter
+from config import Config
+from dotenv import load_dotenv
 
 cfg = Config()
 
@@ -35,6 +36,7 @@ def generate_context(prompt, relevant_memory, full_message_history, model):
     # Count the currently used tokens
     current_tokens_used = token_counter.count_message_tokens(current_context, model)
     return next_message_to_add_index, current_tokens_used, insertion_index, current_context
+
 
 
 # TODO: Change debug from hardcode to argument
