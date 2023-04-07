@@ -3,7 +3,7 @@
 A cool AUTO-GPT experiment. Allowing it to form an orgnazation. Let Agents hire staff with one founder at the helm. 
 Still very experimental.
 
-![alt text]([http://url/to/img.png](https://i.imgur.com/efaLR9n.jpg))
+![alt text](https://i.imgur.com/efaLR9n.jpg)
 
 ## Changelog
 
