@@ -6,7 +6,7 @@ from helper import print_to_console
 
 
 # An orginization conistis of multiple agent.
-class Orginization():
+class Organization():
     def __init__(self, name):
         self.orginization_name = name # The name of the org
         self.agents: List[Agent] = [] # All the active agents in the orginization
@@ -27,7 +27,7 @@ class Orginization():
         # print the task and supervisor
         print(f"ORG: Creating agent with task {task} and supervisor {supervisor_name}")
         new_agent = Agent(agent_id=len(self.agents),
-                          orginization=self,
+                          organization=self,
                           agent_name=name,
                           task=task,
                           goals=prompt,
@@ -35,7 +35,7 @@ class Orginization():
                           supervisor_name=supervisor_name,
                           founder=founder)
         self.agents.append(new_agent)
-        print("ORG: orginization agents = ", self.agents)
+        print("ORG: organization agents = ", self.agents)
         return new_agent # return the agent to the supervisor
 
 
@@ -50,7 +50,7 @@ class Orginization():
         reciever.recieve_message(sender, message)
 
 if __name__ == "__main__":
-    org = Orginization("A cool AGI orginization")
+    org = Organization("A cool AGI organization")
     org.create_agent(founder=True) # Founder of te orginization.
     org.run() # Run te org
 
