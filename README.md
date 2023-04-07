@@ -260,3 +260,8 @@ Stay up-to-date with the latest news, updates, and insights about Auto-GPT by fo
 
 We look forward to connecting with you and hearing your thoughts, ideas, and experiences with Auto-GPT. Join us on Twitter and let's explore the future of AI together!
 
+=> Wrapped main.py in a class and made a run function
+=> Agents can now hire other instances of agents, who can then hire agents themselves. 
+=> Together they form an orginazation. Organization handles running all agents and routing messages between them
+=> The status of the staff is added in context. 
+=> Added reflexion ever N steps. 
