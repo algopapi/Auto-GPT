@@ -66,6 +66,8 @@ class Config(metaclass=Singleton):
         self.image_provider = os.getenv("IMAGE_PROVIDER")
         self.huggingface_api_token = os.getenv("HUGGINGFACE_API_TOKEN")
 
+        self.huggingface_api_token = os.getenv("HUGGINGFACE_API_TOKEN")
+
         # User agent headers to use when browsing web
         # Some websites might just completely deny request with an error code if no user agent was found.
         self.user_agent_header = {

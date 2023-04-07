@@ -11,13 +11,12 @@ cfg = Config()
 
 working_directory = "auto_gpt_workspace"
 
+
 def generate_image(prompt):
-
     filename = str(uuid.uuid4()) + ".jpg"
-    
-    # DALL-E
-    if cfg.image_provider == 'dalle':
 
+    # DALL-E
+    if cfg.image_provider == "dalle":
         openai.api_key = cfg.openai_api_key
 
         response = openai.Image.create(
@@ -37,14 +36,19 @@ def generate_image(prompt):
         return "Saved to disk:" + filename
 
     # STABLE DIFFUSION
-    elif cfg.image_provider == 'sd':
-
-        API_URL = "https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4"
+    elif cfg.image_provider == "sd":
+        API_URL = (
+            "https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4"
+        )
         headers = {"Authorization": "Bearer " + cfg.huggingface_api_token}
 
-        response = requests.post(API_URL, headers=headers, json={
-            "inputs": prompt,
-        })
+        response = requests.post(
+            API_URL,
+            headers=headers,
+            json={
+                "inputs": prompt,
+            },
+        )
 
         image = Image.open(io.BytesIO(response.content))
         print("Image Generated for prompt:" + prompt)
