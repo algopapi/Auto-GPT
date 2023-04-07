@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Auto-GPT: An Autonomous GPT-4 Experiment
 ![GitHub Repo stars](https://img.shields.io/github/stars/Torantulino/auto-gpt?style=social)
 ![Twitter Follow](https://img.shields.io/twitter/follow/siggravitas?style=social)
@@ -259,9 +260,29 @@ Stay up-to-date with the latest news, updates, and insights about Auto-GPT by fo
 - **Entrepreneur-GPT**: Join the conversation with the AI itself by following [@En_GPT](https://twitter.com/En_GPT). Share your experiences, discuss the AI's outputs, and engage with the growing community of users.
 
 We look forward to connecting with you and hearing your thoughts, ideas, and experiences with Auto-GPT. Join us on Twitter and let's explore the future of AI together!
+=======
+# AUTO-GPT Organization Experiment
+>>>>>>> 47e25ac (Update README.md)
 
-=> Wrapped main.py in a class and made a run function
-=> Agents can now hire other instances of agents, who can then hire agents themselves. 
-=> Together they form an orginazation. Organization handles running all agents and routing messages between them
-=> The status of the staff is added in context. 
-=> Added reflexion ever N steps. 
+A cool AUTO-GPT experiment. Allowing it to form an orgnazation. Let Agents hire staff with one founder at the helm. 
+
+## Changelog
+
+### Latest Updates
+
+- Wrapped `main.py` in a class and made a `run` function.
+- Agents can now hire other instances of agents, who can then hire agents themselves.
+- Together they form an organization. Organization handles running all agents and routing messages between them.
+- The status of the staff is added in context.
+- Added reflexion every N steps.
+
+## How to Use
+
+1. Clone the repository.
+2. Install dependencies.
+3. Run the main script with appropriate parameters.
+4. Enjoy the power of AUTO-GPT Agent.
+
+## License
+
+All credit goes to the AUTO-GPT author
