@@ -1,8 +1,9 @@
 import time
+
 import openai
-from dotenv import load_dotenv
-from config import Config
 import token_counter
+from config import Config
+from dotenv import load_dotenv
 
 cfg = Config()
 
@@ -21,6 +22,7 @@ def create_chat_message(role, content):
     dict: A dictionary containing the role and content of the message.
     """
     return {"role": role, "content": content}
+
 
 
 

@@ -72,6 +72,7 @@ class Agent():
         self.agent_name = agent_name            # Name of the agent
         self.task = task                        # Task of the agent
         self.goals = goals                      # Goals of the agent
+        self.status = "No Status Set"
         self.orginization = orginization        # Orginization that the agent belongs to
         self.supervisor_id = supervisor_id      # ID of the supervisor
         self.supervisor_name = supervisor_name  # Name of the supervisor
@@ -92,6 +93,7 @@ class Agent():
         self.coworkers: List[Agent] = [] # List of workers that work for the agent
         self.pending_messages = deque() # List of responses that the agent should deal with]
 
+
     def set_everything(self, agent_id, agent_name, task, goals, orginization, supervisor_id, supervisor_name):
         self.agent_id = agent_id                # Unique ID for the agent
         self.agent_name = agent_name            # Name of the agent
@@ -101,16 +103,14 @@ class Agent():
         self.supervisor_id = supervisor_id      # ID of the supervisor
         self.supervisor_name = supervisor_name
 
+
     def create_coworker(self, name, task, prompt):
-        print("self.agent_name:", self.agent_name)
         new_coworker = self.orginization.create_agent(name, task, prompt, self.agent_id, self.agent_name)
-        print("new coworker: ", new_coworker)
         self.coworkers.append(new_coworker)
         return f'Succefully created coworker with agent_id:{new_coworker.agent_id}, task: {task}, and goals: {prompt}\n'
-
+    
 
     def message_staff(self, recipient_id, message):
-        print("sending message to coworker: ", recipient_id)
         self.orginization.route_message(self, self.orginization.agents[int(recipient_id)], message)
         return f'Succefully sent message to coworker {recipient_id}\n'
 
@@ -156,6 +156,12 @@ class Agent():
         # Get command name and arguments
         try:
             command_name, arguments = cmd.get_command(assistant_reply)
+        except Exception as e:
+            print_to_console("Error: \n", Fore.RED, str(e))
+
+        try:
+            status = cmd.get_status(assistant_reply)
+            self.status = status
         except Exception as e:
             print_to_console("Error: \n", Fore.RED, str(e))
 
@@ -217,19 +223,33 @@ class Agent():
                     "system", "Unable to execute command"))
             print_to_console("SYSTEM: ", Fore.YELLOW, "Unable to execute command")
 
+    
+    def build_status_update(self):
+        """
+            Staff information screen
+        """
+        staff_info = "STAFF STATUS: \n\n"
+        if len(self.coworkers) == 0:
+            staff_info += "You currently have no staff in service\n"
+
+        for staff in self.coworkers:
+            staff_info += f'{self.coworkers.index(staff) + 1}. Staff Id: {staff.agent_id}, Staff Name: {staff.agent_name}, Staff Task: {staff.task}, Status: {staff.status}\n'
+        print (staff_info)
+        return staff_info
+
 
     def build_agent_prompt(self, user_input, debug=False):
         """
             Construct the prompt that will be sent to the Agent.
         """ 
-
-
+        staff_info = self.build_status_update()
         context_token_limit = self.cfg.fast_token_limit - 1000 # reserve 1000 tokens for response
         # load the initial prompt and the the
         # permantent memory into the current context
         current_context = [
                 chat.create_chat_message("system", self.initial_prompt),
-                chat.create_chat_message("system", f"Permanent memory: {mem.permanent_memory}")
+                chat.create_chat_message("system", f"Permanent memory: {mem.permanent_memory}"),
+                chat.create_chat_message("system", staff_info)
         ]
 
         # Get message index
