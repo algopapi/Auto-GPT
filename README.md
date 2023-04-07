@@ -5,6 +5,8 @@ Still very experimental.
 
 ![alt text](https://i.imgur.com/efaLR9n.jpg)
 
+Here i made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP500]. He proceeded to hire QUANT_A/B/C for each asset, and also a news reporter who kept him up to date with the latest news. 
+
 ## Changelog
 
 ### Latest Updates
