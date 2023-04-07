@@ -1,5 +1,8 @@
 import json
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9ffeab9 (fixed merge errror (pinecone stuff))
 from call_ai_function import call_ai_function
 from config import Config
 

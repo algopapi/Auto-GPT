@@ -11,7 +11,7 @@ from typing import List
 import chat
 import commands as cmd
 import data
-import memory as mem
+from memory import PineconeMemory
 import openai
 import token_counter
 from ai_config import AIConfig, auto_construct_full_prompt
@@ -82,6 +82,8 @@ class Agent():
         self.ai_name = ""
         self.initial_prompt = construct_prompt(self.founder, self.agent_id, self.agent_name, self.task, self.goals, self.supervisor_name)
         self.full_message_history = []
+        self.memory = PineconeMemory()
+        self.memory.clear()
         self.reflexions = []
         self.result = None
         self.user_input = "Determine which next command to use, and respond using the format specified above:"
@@ -204,6 +206,13 @@ class Agent():
                 Fore.CYAN,
                 f"COMMAND = {Fore.CYAN}{command_name}{Style.RESET_ALL}  ARGUMENTS = {Fore.CYAN}{arguments}{Style.RESET_ALL}")
 
+
+        memory_to_add = f"Assistant Reply: {assistant_reply} " \
+                    f"\nResult: {result} " \
+                    f"\nHuman Feedback: {self.user_input} "
+
+        self.memory.add(memory_to_add)
+
         # Execute command
         if command_name.lower() == "error":
             result = f"Command {command_name} threw the following error: " + arguments
@@ -246,9 +255,12 @@ class Agent():
         context_token_limit = self.cfg.fast_token_limit - 1000 # reserve 1000 tokens for response
         # load the initial prompt and the the
         # permantent memory into the current context
+
+        relevant_memory = self.memory.get_relevant(str(self.full_message_history[-5:]), 10)
+
         current_context = [
                 chat.create_chat_message("system", self.initial_prompt),
-                chat.create_chat_message("system", f"Permanent memory: {mem.permanent_memory}"),
+                chat.create_chat_message("system", f"Permanent memory: {relevant_memory}"),
                 chat.create_chat_message("system", staff_info)
         ]
 
