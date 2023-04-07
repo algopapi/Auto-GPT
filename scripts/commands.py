@@ -82,7 +82,7 @@ def get_status(response):
 
 
 
-def execute_command(command_name, arguments):
+def execute_command(agent, command_name, arguments):
     memory = PineconeMemory()
     try:
         if command_name == "google":
