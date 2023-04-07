@@ -1,5 +1,4 @@
 import json
-https://github.com/algopapi/Auto-GPT/pull/1/conflict?name=scripts%252Fjson_parser.py&ancestor_oid=11ff9ed22e0a7af92f461f9de44cb63163f55886&base_oid=ab386e82a24a32d91b9b818b709b4265d1604d9a&head_oid=8ec9238b4daf2bc77af3c0652108c103db388606
 from call_ai_function import call_ai_function
 from config import Config
 
