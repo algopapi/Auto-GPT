@@ -1,5 +1,5 @@
 import json
-
+https://github.com/algopapi/Auto-GPT/pull/1/conflict?name=scripts%252Fjson_parser.py&ancestor_oid=11ff9ed22e0a7af92f461f9de44cb63163f55886&base_oid=ab386e82a24a32d91b9b818b709b4265d1604d9a&head_oid=8ec9238b4daf2bc77af3c0652108c103db388606
 from call_ai_function import call_ai_function
 from config import Config
 
@@ -27,7 +27,8 @@ def fix_and_parse_json(json_str: str, try_to_fix_with_gpt: bool = True):
     """
 
     try:
-        
+
+        json_str = json_str.replace('\t', '')
         return json.loads(json_str)
   
     except Exception as e:
@@ -57,7 +58,7 @@ def fix_and_parse_json(json_str: str, try_to_fix_with_gpt: bool = True):
 def fix_json(json_str: str, schema: str, debug=False) -> str:
     # Try to fix the JSON using gpt:
     function_string = "def fix_json(json_str: str, schema:str=None) -> str:"
-    args = [json_str, schema]
+    args = [f"'''{json_str}'''", f"'''{schema}'''"]
     description_string = """Fixes the provided JSON string to make it parseable and fully complient with the provided schema.\n If an object or field specifed in the schema isn't contained within the correct JSON, it is ommited.\n This function is brilliant at guessing when the format is incorrect."""
 
     # If it doesn't already start with a "`", add one:
@@ -73,7 +74,8 @@ def fix_json(json_str: str, schema: str, debug=False) -> str:
         print(f"Fixed JSON: {result_string}")
         print("----------- END OF FIX ATTEMPT ----------------")
     try:
-        return json.loads(result_string)
+        json.loads(result_string) # just check the validity
+        return result_string
     except:
         # Get the call stack:
         # import traceback
