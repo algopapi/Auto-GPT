@@ -27,6 +27,10 @@ Here i made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP
 3. Run the organization.py script with appropriate parameters (iam still working on making this easy).
 4. Enjoy the power of AUTO-GPT Agent.
 
+## Current issues
+
+1. Fix the pinecone implementation
+
 ## Future work...
 1. Firing agents
 2. Fix Staff quitting while their employees are still working (very bad)
