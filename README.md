@@ -265,6 +265,9 @@ We look forward to connecting with you and hearing your thoughts, ideas, and exp
 >>>>>>> 47e25ac (Update README.md)
 
 A cool AUTO-GPT experiment. Allowing it to form an orgnazation. Let Agents hire staff with one founder at the helm. 
+Still very experimental.
+
+![alt text]([http://url/to/img.png](https://imgur.com/efaLR9n))
 
 ## Changelog
 
@@ -280,7 +283,7 @@ A cool AUTO-GPT experiment. Allowing it to form an orgnazation. Let Agents hire 
 
 1. Clone the repository.
 2. Install dependencies.
-3. Run the main script with appropriate parameters.
+3. Run the organization.py script with appropriate parameters.
 4. Enjoy the power of AUTO-GPT Agent.
 
 ## License
