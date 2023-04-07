@@ -67,13 +67,13 @@ def construct_prompt(founder, agent_id=None, agent_name=None, agent_role=None, a
 
 
 class Agent():
-    def __init__(self, agent_id, orginization, founder, agent_name=None, task=None, goals=None, supervisor_id=None, supervisor_name=None):
+    def __init__(self, agent_id, organization, founder, agent_name=None, task=None, goals=None, supervisor_id=None, supervisor_name=None):
         self.agent_id = agent_id                # Unique ID for the agent
         self.agent_name = agent_name            # Name of the agent
         self.task = task                        # Task of the agent
         self.goals = goals                      # Goals of the agent
         self.status = "No Status Set"
-        self.orginization = orginization        # Orginization that the agent belongs to
+        self.organization = organization        # Orginization that the agent belongs to
         self.supervisor_id = supervisor_id      # ID of the supervisor
         self.supervisor_name = supervisor_name  # Name of the supervisor
         self.founder = founder                  # Is the agent the founder of the orginization?
