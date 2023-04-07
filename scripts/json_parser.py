@@ -1,6 +1,8 @@
 import json
+https://github.com/algopapi/Auto-GPT/pull/1/conflict?name=scripts%252Fjson_parser.py&ancestor_oid=11ff9ed22e0a7af92f461f9de44cb63163f55886&base_oid=ab386e82a24a32d91b9b818b709b4265d1604d9a&head_oid=8ec9238b4daf2bc77af3c0652108c103db388606
 from call_ai_function import call_ai_function
 from config import Config
+
 cfg = Config()
 
 def fix_and_parse_json(json_str: str, try_to_fix_with_gpt: bool = True):
@@ -18,15 +20,19 @@ def fix_and_parse_json(json_str: str, try_to_fix_with_gpt: bool = True):
         "reasoning": "reasoning",
         "plan": "- short bulleted\n- list that conveys\n- long-term plan",
         "criticism": "constructive self-criticism",
+        "status": "idle, briefly outlining current engagement",
         "speak": "thoughts summary to say to user"
     }
     }
     """
 
     try:
+
         json_str = json_str.replace('\t', '')
         return json.loads(json_str)
+  
     except Exception as e:
+     
         # Let's do something manually - sometimes GPT responds with something BEFORE the braces:
         # "I'm sorry, I don't understand. Please try again."{"text": "I'm sorry, I don't understand. Please try again.", "confidence": 0.0}
         # So let's try to find the first brace and then parse the rest of the string
@@ -38,7 +44,7 @@ def fix_and_parse_json(json_str: str, try_to_fix_with_gpt: bool = True):
           return json.loads(json_str)
         except Exception as e:
           if try_to_fix_with_gpt:
-            print(f"Warning: Failed to parse AI output, attempting to fix.\n If you see this warning frequently, it's likely that your prompt is confusing the AI. Try changing it up slightly.")
+            print(f"Warning: Failed to parse the folling ai output:{json_str}. \n\n attempting to fix.\n If you see this warning frequently, it's likely that your prompt is confusing the AI. Try changing it up slightly.")
             # Now try to fix this up using the ai_functions
             ai_fixed_json = fix_json(json_str, json_schema, False)
             if ai_fixed_json != "failed":

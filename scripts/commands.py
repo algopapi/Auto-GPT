@@ -2,7 +2,12 @@ import browse
 import json
 from memory import PineconeMemory
 import datetime
+import json
+
 import agent_manager as agents
+import ai_functions as ai
+import browse
+import memory as mem
 import speak
 from config import Config
 import ai_functions as ai
@@ -10,8 +15,12 @@ from file_operations import read_file, write_to_file, append_to_file, delete_fil
 from execute_code import execute_python_file
 from json_parser import fix_and_parse_json
 from duckduckgo_search import ddg
+from execute_code import execute_python_file
+from file_operations import (append_to_file, delete_file, read_file,
+                             write_to_file)
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from json_parser import fix_and_parse_json
 
 cfg = Config()
 
@@ -50,12 +59,33 @@ def get_command(response):
     except Exception as e:
         return "Error:", str(e)
 
+def get_status(response):
+    try:
+        response_json = fix_and_parse_json(response)
+        
+        if "thoughts" not in response_json:
+            return "Error:" , "Missing 'command' object in JSON"
+        
+        thoughts = response_json["thoughts"]
+
+        if "status" not in thoughts:
+            return "Error:", "Missing 'name' field in 'command' object"
+        
+        status = thoughts["status"]
+
+        return status
+    except json.decoder.JSONDecodeError:
+        return "Error:", "Invalid JSON"
+    # All other errors, return "Error: + error message"
+    except Exception as e:
+        return "Error:", str(e)
+
+
 
 def execute_command(command_name, arguments):
     memory = PineconeMemory()
     try:
         if command_name == "google":
-            
             # Check if the Google API key is set and use the official search method
             # If the API key is not set or has only whitespaces, use the unofficial search method
             if cfg.google_api_key and (cfg.google_api_key.strip() if cfg.google_api_key else None):
@@ -63,18 +93,24 @@ def execute_command(command_name, arguments):
             else:
                 return google_search(arguments["input"])
         elif command_name == "memory_add":
-            return memory.add(arguments["string"])
-        elif command_name == "start_agent":
-            return start_agent(
-                arguments["name"],
-                arguments["task"],
-                arguments["prompt"])
-        elif command_name == "message_agent":
-            return message_agent(arguments["key"], arguments["message"])
-        elif command_name == "list_agents":
-            return list_agents()
-        elif command_name == "delete_agent":
+            return commit_memory(arguments["string"])
+        elif command_name == "memory_del":
+            return delete_memory(arguments["key"])
+        elif command_name == "memory_ovr":
+            return overwrite_memory(arguments["key"], arguments["string"])
+        
+        # Old Agent commands
+        elif command_name == "create_staff":
+            return agent.create_coworker(arguments["name"], arguments["task"], arguments["goals"])
+        elif command_name == "message_staff":
+            return agent.message_staff(arguments["agent_id"], arguments["message"])
+        elif command_name == "list_staff":
+            return agent.list_staff()
+        elif command_name == "fire_staff":
             return delete_agent(arguments["key"])
+        elif command_name == "message_supervisor":
+            return agent.message_supervisor(arguments["message"])
+        
         elif command_name == "get_text_summary":
             return get_text_summary(arguments["url"], arguments["question"])
         elif command_name == "get_hyperlinks":
@@ -124,9 +160,10 @@ def google_search(query, num_results=8):
     return json.dumps(search_results, ensure_ascii=False, indent=4)
 
 def google_official_search(query, num_results=8):
+    import json
+
     from googleapiclient.discovery import build
     from googleapiclient.errors import HttpError
-    import json
 
     try:
         # Get the Google API key and Custom Search Engine ID from the config file
