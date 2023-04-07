@@ -1,6 +1,8 @@
 import data
 import os
 
+import yaml
+from data.response_prompt import load_prompt
 import os
 
 
@@ -19,14 +21,13 @@ class AIConfig:
         try:
             with open(config_file) as file:
                 config_params = yaml.load(file, Loader=yaml.FullLoader)
+                ai_name = config_params.get("ai_name", "")
+                ai_role = config_params.get("ai_role", "")
+                ai_goals = config_params.get("ai_goals", [])
+
+                return cls(ai_name, ai_role, ai_goals)
         except FileNotFoundError:
-            config_params = {}
-
-        ai_name = config_params.get("ai_name", "")
-        ai_role = config_params.get("ai_role", "")
-        ai_goals = config_params.get("ai_goals", [])
-
-        return cls(ai_name, ai_role, ai_goals)
+            return None
 
     def save(self, config_file=SAVE_FILE):
         config = {
@@ -56,7 +57,7 @@ class AIConfig:
         for i, goal in enumerate(self.ai_goals):
             full_prompt += f"{i+1}. {goal}\n"
 
-        full_prompt += f"\n\n{data.load_prompt()}"
+        full_prompt += f"\n\n{load_prompt()}"
         return full_prompt
 
 

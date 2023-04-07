@@ -19,6 +19,7 @@ from file_operations import (
     search_files,
 )
 from execute_code import execute_python_file
+from data.response_prompt import Command, parse
 from json_parser import fix_and_parse_json
 from image_gen import generate_image
 from duckduckgo_search import ddg
@@ -26,7 +27,11 @@ from execute_code import execute_python_file
 from file_operations import append_to_file, delete_file, read_file, write_to_file
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+<<<<<<< HEAD
 from json_parser import fix_and_parse_json
+=======
+import traceback
+>>>>>>> 9cffcb4 (Improve modularity:)
 
 cfg = Config()
 
@@ -41,30 +46,10 @@ def is_valid_int(value):
 
 def get_command(response):
     try:
-        response_json = fix_and_parse_json(response)
-
-        if "command" not in response_json:
-            return "Error:", "Missing 'command' object in JSON"
-
-        command = response_json["command"]
-
-        if "name" not in command:
-            return "Error:", "Missing 'name' field in 'command' object"
-
-        command_name = command["name"]
-
-        # Use an empty dictionary if 'args' field is not present in 'command' object
-        arguments = command.get("args", {})
-
-        if not arguments:
-            arguments = {}
-
-        return command_name, arguments
-    except json.decoder.JSONDecodeError:
-        return "Error:", "Invalid JSON"
-    # All other errors, return "Error: + error message"
+        command = parse(response, Command)
+        return command.name, command.args
     except Exception as e:
-        return "Error:", str(e)
+        return "Error", e
 
 
 def get_status(response):
