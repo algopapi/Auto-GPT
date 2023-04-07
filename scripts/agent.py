@@ -53,7 +53,7 @@ def construct_prompt(founder, agent_id=None, agent_name=None, agent_role=None, a
             
             full_prompt = config.construct_full_prompt()
             return full_prompt
-        else: # Orginization coworker
+        else: # organization coworker
             print("Agent is a employee, constructiong full prompt automatically")
             full_prompt = auto_construct_full_prompt(
                 agent_id=agent_id,
@@ -73,10 +73,10 @@ class Agent():
         self.task = task                        # Task of the agent
         self.goals = goals                      # Goals of the agent
         self.status = "No Status Set"
-        self.organization = organization        # Orginization that the agent belongs to
+        self.organization = organization        # organization that the agent belongs to
         self.supervisor_id = supervisor_id      # ID of the supervisor
         self.supervisor_name = supervisor_name  # Name of the supervisor
-        self.founder = founder                  # Is the agent the founder of the orginization?
+        self.founder = founder                  # Is the agent the founder of the organization?
         self.cfg = Config()
         parse_arguments()
         self.ai_name = ""
@@ -96,24 +96,24 @@ class Agent():
         self.pending_messages = deque() # List of responses that the agent should deal with]
 
 
-    def set_everything(self, agent_id, agent_name, task, goals, orginization, supervisor_id, supervisor_name):
+    def set_everything(self, agent_id, agent_name, task, goals, organization, supervisor_id, supervisor_name):
         self.agent_id = agent_id                # Unique ID for the agent
         self.agent_name = agent_name            # Name of the agent
         self.task = task                        # Task of the agent
         self.goals = goals                      # Goals of the agent
-        self.orginization = orginization        # Orginization that the agent belongs to
+        self.organization = organization        # organization that the agent belongs to
         self.supervisor_id = supervisor_id      # ID of the supervisor
         self.supervisor_name = supervisor_name
 
 
     def create_coworker(self, name, task, prompt):
-        new_coworker = self.orginization.create_agent(name, task, prompt, self.agent_id, self.agent_name)
+        new_coworker = self.organization.create_agent(name, task, prompt, self.agent_id, self.agent_name)
         self.coworkers.append(new_coworker)
         return f'Succefully created coworker with agent_id:{new_coworker.agent_id}, task: {task}, and goals: {prompt}\n'
     
 
     def message_staff(self, recipient_id, message):
-        self.orginization.route_message(self, self.orginization.agents[int(recipient_id)], message)
+        self.organization.route_message(self, self.organization.agents[int(recipient_id)], message)
         return f'Succefully sent message to coworker {recipient_id}\n'
 
 
@@ -136,7 +136,7 @@ class Agent():
         """
             Auto routes a message from the staff member to the supervisor id
         """
-        self.orginization.route_message(self, self.orginization.agents[self.supervisor_id], message)
+        self.organization.route_message(self, self.organization.agents[self.supervisor_id], message)
         return f'Succesfully sent message to supervisor {self.supervisor_id}\n'
 
 
@@ -207,12 +207,6 @@ class Agent():
                 f"COMMAND = {Fore.CYAN}{command_name}{Style.RESET_ALL}  ARGUMENTS = {Fore.CYAN}{arguments}{Style.RESET_ALL}")
 
 
-        memory_to_add = f"Assistant Reply: {assistant_reply} " \
-                    f"\nResult: {result} " \
-                    f"\nHuman Feedback: {self.user_input} "
-
-        self.memory.add(memory_to_add)
-
         # Execute command
         if command_name.lower() == "error":
             result = f"Command {command_name} threw the following error: " + arguments
@@ -220,6 +214,13 @@ class Agent():
             result = f"Human feedback: {self.user_input}"
         else:
             result = f"Command {command_name} returned: {cmd.execute_command(self, command_name, arguments)}"
+
+
+        memory_to_add = f"Assistant Reply: {assistant_reply} " \
+                    f"\nResult: {result} " \
+                    f"\nHuman Feedback: {self.user_input} "
+
+        self.memory.add(memory_to_add)
 
         # Check if there's a result from the command append it to the message
         # history
@@ -398,8 +399,3 @@ class Agent():
             if self.step_counter % self.reflexion_frequency == 0:
                 self.reflect()
 
-
-# test agent
-# if __name__ == "__main__":
-#     agent = Agent()
-#     agent.run()

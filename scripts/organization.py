@@ -5,11 +5,11 @@ from colorama import Fore, Style
 from helper import print_to_console
 
 
-# An orginization conistis of multiple agent.
+# An organization conistis of multiple agent.
 class Organization():
     def __init__(self, name):
-        self.orginization_name = name # The name of the org
-        self.agents: List[Agent] = [] # All the active agents in the orginization
+        self.organization = name # The name of the org
+        self.agents: List[Agent] = [] # All the active agents in the organization
 
 
     def run(self):
@@ -51,7 +51,7 @@ class Organization():
 
 if __name__ == "__main__":
     org = Organization("A cool AGI organization")
-    org.create_agent(founder=True) # Founder of te orginization.
+    org.create_agent(founder=True) # Founder of te organization.
     org.run() # Run te org
 
 
