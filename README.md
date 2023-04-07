@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Auto-GPT: An Autonomous GPT-4 Experiment
 ![GitHub Repo stars](https://img.shields.io/github/stars/Torantulino/auto-gpt?style=social)
 ![Twitter Follow](https://img.shields.io/twitter/follow/siggravitas?style=social)
@@ -261,10 +260,10 @@ Stay up-to-date with the latest news, updates, and insights about Auto-GPT by fo
 
 We look forward to connecting with you and hearing your thoughts, ideas, and experiences with Auto-GPT. Join us on Twitter and let's explore the future of AI together!
 =======
-# AUTO-GPT Organization Experiment
->>>>>>> 47e25ac (Update README.md)
+# AUTO-Gpt Organization Experiment
+>>>>>>> 52f1479 (Update README.md)
 
-A cool AUTO-GPT experiment. Allowing it to form an orgnazation. Let Agents hire staff with one founder at the helm. 
+A cool AUTO-Gpt experiment. Allowing it to form an orgnazation. Let Agents hire staff with one founder at the helm. 
 Still very experimental.
 
 ![alt text](https://i.imgur.com/efaLR9n.jpg)
