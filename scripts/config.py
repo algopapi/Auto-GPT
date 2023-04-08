@@ -31,8 +31,9 @@ class Config(metaclass=Singleton):
     """
 
     def __init__(self):
-        self.continuous_mode = False
-        self.speak_mode = False
+        self.continuous_mode = os.getenv("CONTINUOUS", "False") == "True"
+        self.speak_mode = os.getenv("SPEAK_MODE", "False") == "True"
+        self.debug_mode = os.getenv("DEBUG_MODE", "False") == "True"
         # TODO - make these models be self-contained, using langchain, so we can configure them once and call it good
         self.fast_llm_model = os.getenv("FAST_LLM_MODEL", "gpt-3.5-turbo")
         self.smart_llm_model = os.getenv("SMART_LLM_MODEL", "gpt-4")
@@ -66,6 +67,7 @@ class Config(metaclass=Singleton):
         # User agent headers to use when browsing web
         # Some websites might just completely deny request with an error code if no user agent was found.
 <<<<<<< HEAD
+<<<<<<< HEAD
         self.user_agent_header = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"
         }
@@ -94,6 +96,18 @@ class Config(metaclass=Singleton):
 
         self.memory_backend = os.getenv("MEMORY_BACKEND", 'local')
 >>>>>>> e4689c7 (Implement local memory.)
+=======
+        self.user_agent_header = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"
+        }
+        self.redis_host = os.getenv("REDIS_HOST")
+        self.redis_port = os.getenv("REDIS_PORT")
+        self.redis_password = os.getenv("REDIS_PASSWORD")
+        self.wipe_redis_on_start = os.getenv("WIPE_REDIS_ON_START", "True") == "True"
+        self.memory_index = os.getenv("MEMORY_INDEX", "auto-gpt")
+        # Note that indexes must be created on db 0 in redis, this is not configureable.
+        self.memory_backend = os.getenv("MEMORY_BACKEND", "local")
+>>>>>>> 2478221 (Move args to env_vars and add debug_mode)
         # Initialize the OpenAI API client
         openai.api_key = self.openai_api_key
 
