@@ -48,14 +48,9 @@ class AIConfig:
     ):
         full_prompt = ""
 
-        prompt_start = """Your decisions must always be made independently without seeking user assistance. Play to your strengths as an LLM and pursue simple strategies with no legal complications."""
-
-        # Construct full prompt
-        full_prompt = (
-            f"You are {self.ai_name}, {self.ai_role}\n{prompt_start}\n\nGOALS:\n\n"
-        )
+        goals = "GOALS:\n"
         for i, goal in enumerate(self.ai_goals):
-            full_prompt += f"{i+1}. {goal}\n"
+            goals += f"{i+1}. {goal}\n"
 
         full_prompt += f"\n\n{load_prompt()}"
         return full_prompt
@@ -86,4 +81,12 @@ def auto_construct_full_prompt(
 
     full_prompt += f"\n\n{data.load_prompt()}"
 
+    # Fix this AI description values
+    # ai_description_dict = {
+    #    "ai_name": self.ai_name,
+    #    "ai_role": self.ai_role,
+    #    "ai_goals": goals,
+    # }
+    #
+    # return load_prompt(ai_description_dict)
     return full_prompt
