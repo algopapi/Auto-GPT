@@ -259,40 +259,8 @@ Stay up-to-date with the latest news, updates, and insights about Auto-GPT by fo
 - **Entrepreneur-GPT**: Join the conversation with the AI itself by following [@En_GPT](https://twitter.com/En_GPT). Share your experiences, discuss the AI's outputs, and engage with the growing community of users.
 
 We look forward to connecting with you and hearing your thoughts, ideas, and experiences with Auto-GPT. Join us on Twitter and let's explore the future of AI together!
-=======
-# AUTO-Gpt Organization Experiment
->>>>>>> 52f1479 (Update README.md)
-
-A cool AUTO-Gpt experiment. Allowing it to form an orgnazation. Let Agents hire staff with one founder at the helm. 
-Still very experimental.
-
-## Example
-
-Here i made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP500]. He proceeded to hire QUANT_A/B/C for each asset, and also a news reporter who kept him up to date with the latest news. 
-
-![alt text](https://i.imgur.com/efaLR9n.jpg)
-
-## Changelog
-
-### Latest Updates
-
-- Wrapped `main.py` in a class and made a `run` function.
-- Agents can now hire other instances of agents, who can then hire agents themselves.
-- Together they form an organization. Organization handles running all agents and routing messages between them.
-- The status of the staff all hired staff added in context and updated every run cycle
-- Also kinda added reflexion every N steps (not working yet)
 
 
-<<<<<<< HEAD
-## How to Use
-
-1. Clone the repository.
-2. Install dependencies.
-3. Run the organization.py script with appropriate parameters (iam still working on making this easy).
-4. Enjoy the power of AUTO-GPT Agent.
-
-## Current issues
-=======
 <h2 align="center"> 💖 Help Fund Auto-GPT's Development 💖</h2> 
 <p align="center">
 If you can spare a coffee, you can help to cover the API costs of developing Auto-GPT and help push the boundaries of fully autonomous AI!
@@ -309,7 +277,6 @@ Your support is greatly appreciated
 <a href="https://github.com/thepok"><img src="https://github.com/thepok.png" width="50px" alt="thepok" /></a>
 &nbsp;&nbsp;<a href="https://github.com/SpacingLily"><img src="https://github.com/SpacingLily.png" width="50px" alt="SpacingLily" /></a>&nbsp;&nbsp;<a href="https://github.com/merwanehamadi"><img src="https://github.com/merwanehamadi.png" width="50px" alt="merwanehamadi" /></a>&nbsp;&nbsp;<a href="https://github.com/m"><img src="https://github.com/m.png" width="50px" alt="m" /></a>&nbsp;&nbsp;<a href="https://github.com/zkonduit"><img src="https://github.com/zkonduit.png" width="50px" alt="zkonduit" /></a>&nbsp;&nbsp;<a href="https://github.com/maxxflyer"><img src="https://github.com/maxxflyer.png" width="50px" alt="maxxflyer" /></a>&nbsp;&nbsp;<a href="https://github.com/tekelsey"><img src="https://github.com/tekelsey.png" width="50px" alt="tekelsey" /></a>&nbsp;&nbsp;<a href="https://github.com/digisomni"><img src="https://github.com/digisomni.png" width="50px" alt="digisomni" /></a>&nbsp;&nbsp;<a href="https://github.com/nocodeclarity"><img src="https://github.com/nocodeclarity.png" width="50px" alt="nocodeclarity" /></a>&nbsp;&nbsp;<a href="https://github.com/tjarmain"><img src="https://github.com/tjarmain.png" width="50px" alt="tjarmain" /></a>
 </p>
->>>>>>> cc05139 (Update README.md)
 
 1. Fix the pinecone implementation
 2. The supervisor tends to keep "herassing" the staff. i.e., constantly asking them for updates. 

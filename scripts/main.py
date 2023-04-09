@@ -1,4 +1,4 @@
-from auto_gpt import AutoGPT
+from auto_gpt.auto_gpt import AutoGPT
 
 
 # For backwards compatibility with the old main.py
