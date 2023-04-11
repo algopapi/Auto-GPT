@@ -1,10 +1,11 @@
 import dataclasses
-import orjson
-from typing import Any, List, Optional
-import numpy as np
 import os
-from auto_gpt.memory.base import MemoryProviderSingleton, get_ada_embedding
+from typing import Any, List, Optional
 
+import numpy as np
+import orjson
+
+from auto_gpt.memory.base import MemoryProviderSingleton, get_ada_embedding
 
 EMBED_DIM = 1536
 SAVE_OPTIONS = orjson.OPT_SERIALIZE_NUMPY | orjson.OPT_SERIALIZE_DATACLASS
@@ -22,7 +23,7 @@ class CacheContent:
     )
 
 
-class LocalCache(MemoryProviderSingleton):
+class LocalCache():
     # on load, load our database
     def __init__(self, cfg) -> None:
         self.filename = f"{cfg.memory_index}.json"

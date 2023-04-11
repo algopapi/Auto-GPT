@@ -1,21 +1,17 @@
-from colorama import Fore, Style
 from collections import deque
 from typing import List
 
+from colorama import Fore, Style
 
-from auto_gpt.data.prompts.response_prompt import Thought, Command
 import auto_gpt.chat as chat
 import auto_gpt.commands as cmd
 from auto_gpt.config import Config
-from auto_gpt.utils.print_utils import (
-    print_to_console,
-    print_assistant_thoughts,
-)
-from auto_gpt.memory import get_memory
-from auto_gpt.data.prompts.response_prompt import load_prompt
 from auto_gpt.data.output_parsers.pydantic_parser import parse
+from auto_gpt.data.prompts.response_prompt import Command, Thought, load_prompt
+from auto_gpt.memory import get_memory
 from auto_gpt.spinner import Spinner
-
+from auto_gpt.utils.print_utils import (print_assistant_thoughts,
+                                        print_to_console)
 
 DEF_USER_INPUT = (
     "Determine which next command to use, and respond using the format specified above:"

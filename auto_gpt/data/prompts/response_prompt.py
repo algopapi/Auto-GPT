@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 
-from auto_gpt.data.output_parsers.pydantic_parser import get_format_instructions
+from auto_gpt.data.output_parsers.pydantic_parser import \
+    get_format_instructions
 
 DEF_CONSTRAINTS = """CONSTRAINTS:
 1. ~4000 word limit for short term memory. Your short term memory is short, so immediately save important information to files.
@@ -8,10 +9,10 @@ DEF_CONSTRAINTS = """CONSTRAINTS:
 3. No user assistance
 4. Exclusively use the commands listed in double quotes e.g. "command name" """
 
-DEF_RESOURCES = """RESOURCES:
-1. Internet access for searches and information gathering.
-2. Long Term memory management.
-3. GPT-3.5 powered Agents for delegation of simple tasks.
+DEF_RESOURCES = """RESOURCES ranked on priority:
+1. Important You are not alone. Devide tasks in subtasks and delegate them to staff. 
+2. Internet access for searches and information gathering.
+3. Long Term memory management.
 4. File output."""
 
 DEF_COMMANDS = """COMMANDS:

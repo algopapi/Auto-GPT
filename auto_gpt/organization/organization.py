@@ -1,12 +1,14 @@
-from typing import Dict, List
-from colorama import Fore, Style
-import importlib.resources
 import glob
+import importlib.resources
 import os
+from typing import Dict, List
+
+from colorama import Fore, Style
+
+import permanent_storage
+from auto_gpt.utils.print_utils import print_to_console
 
 from .agent import Agent, AgentConfig
-from auto_gpt.utils.print_utils import print_to_console
-import permanent_storage
 
 
 # An organization of multiple agent.
@@ -99,5 +101,5 @@ class Organization:
 if __name__ == "__main__":
     # TODO: Load from yaml or initialize it using AutoGPT
     org = Organization("A cool AGI organization")
-    org.create_agent(founder=True)  # Founder of te organization.
+    org.create_agent(name="founder", task="Setup an organization", goals="1. hire 1 arbitrary staff member\n 2. say hello \n 3. fire the staff member", founder=True)  # Founder of te organization.
     org.run()  # Run te org
