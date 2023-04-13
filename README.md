@@ -17,7 +17,7 @@ Here i made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP
 - Agents can now hire other instances of agents, who can then hire agents themselves.
 - Together they form an organization. Organization handles running all agents and routing messages between them.
 - The status of the staff all hired staff added in context and updated every run cycle
-- Also kinda added reflexion every N steps (not working yet)
+- Also kinda added reflexion every N steps (not quite working yet). This is very useful  - Reflections are implicitally referenced when fetching the right memories. 
 
 
 ## How to Use
