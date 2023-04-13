@@ -1,0 +1,8 @@
+agent_id: 1
+founder: false
+goals: Create and train staff to perform various tasks efficiently
+name: John
+status: null
+supervisor_id: 0
+supervisor_name: Elon The Pelon
+task: Hire more staff

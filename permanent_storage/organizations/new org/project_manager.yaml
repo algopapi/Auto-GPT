@@ -1,0 +1,8 @@
+agent_id: 1
+founder: false
+goals: oversee_project_progress,set_tasks,assign_roles,evaluate_performance
+name: project_manager
+status: null
+supervisor_id: 0
+supervisor_name: Elon Musk
+task: manage_project

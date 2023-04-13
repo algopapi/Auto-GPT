@@ -31,6 +31,7 @@ class Config(metaclass=Singleton):
     """
 
     def __init__(self):
+        self.temperature = 0.2
         self.continuous_mode = os.getenv("CONTINUOUS", "False") == "True"
         self.speak_mode = os.getenv("SPEAK_MODE", "False") == "True"
         self.debug_mode = os.getenv("DEBUG_MODE", "False") == "True"

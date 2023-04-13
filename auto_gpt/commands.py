@@ -1,21 +1,18 @@
-import json
 import datetime
+import json
+
+from duckduckgo_search import ddg
 
 import auto_gpt.ai_functions as ai
-from auto_gpt.memory import get_memory
-import auto_gpt.memory as mem
 import auto_gpt.browse as browse
+import auto_gpt.memory as mem
 from auto_gpt.config import Config
-from auto_gpt.file_operations import (
-    read_file,
-    write_to_file,
-    append_to_file,
-    delete_file,
-    search_files,
-)
 from auto_gpt.execute_code import execute_python_file
+from auto_gpt.file_operations import (append_to_file, delete_file, read_file,
+                                      search_files, write_to_file)
 from auto_gpt.image_gen import generate_image
-from duckduckgo_search import ddg
+from auto_gpt.json_parser import fix_and_parse_json
+from auto_gpt.memory import get_memory
 
 cfg = Config()
 
@@ -29,11 +26,29 @@ def is_valid_int(value):
 
 
 def get_command(response):
+    """Parse the response and return the command name and arguments"""
     try:
-        command = parse(response, Command)
-        return command.name, command.args
+        response_json = fix_and_parse_json(response)
+
+        if "command" not in response_json:
+            return "Error:" , "Missing 'command' object in JSON"
+
+        command = response_json["command"]
+
+        if "name" not in command:
+            return "Error:", "Missing 'name' field in 'command' object"
+
+        command_name = command["name"]
+
+        # Use an empty dictionary if 'args' field is not present in 'command' object
+        arguments = command.get("args", {})
+
+        return command_name, arguments
+    except json.decoder.JSONDecodeError:
+        return "Error:", "Invalid JSON"
+    # All other errors, return "Error: + error message"
     except Exception as e:
-        return "Error", e
+        return "Error:", str(e)
 
 
 def execute_command(agent, command_name, arguments):
@@ -58,7 +73,7 @@ def execute_command(agent, command_name, arguments):
                 arguments["name"], arguments["task"], arguments["goals"]
             )
         elif command_name == "message_staff":
-            return agent.message_staff(arguments["name"], arguments["message"])
+            return agent.message_staff(arguments["agent_id"], arguments["message"])
         elif command_name == "list_staff":
             return agent.list_staff()
         elif command_name == "fire_staff":

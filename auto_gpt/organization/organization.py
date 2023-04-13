@@ -39,11 +39,22 @@ class Organization:
                 if supervisor is not None:
                     supervisor.add_staff(agent)
         return org
+    
+    def find_agent_by_id(self, agent_id):
+        try:
+            return self.agents[agent_id]
+        except KeyError:
+            return None
 
     def run(self):
         while True:
             agents_list = list(self.agents.values())
-
+            print(
+                Fore.GREEN
+                + f" \nAgents in Org: {self.agents}\n"
+                + Style.RESET_ALL,
+                end="",
+            )
             for agent in agents_list:
                 print(
                     Fore.GREEN
@@ -59,6 +70,7 @@ class Organization:
         task,
         goals,
         supervisor_name=None,
+        supervisor_id=None,
         founder=False,
     ):
         organization_file = (
@@ -68,16 +80,18 @@ class Organization:
         agent_cfg = AgentConfig(
             file_path=organization_file,
             name=name,
+            agent_id=len(self.agents),
             task=task,
             goals=goals,
             supervisor_name=supervisor_name,
+            supervisor_id=supervisor_id,
             founder=founder,
         )
         return self.add_agent(agent_cfg)
 
     def add_agent(self, agent_cfg):
         new_agent = Agent(organization=self, agent_config=agent_cfg)
-        self.agents[new_agent.cfg.name] = new_agent
+        self.agents[new_agent.agent_id] = new_agent
         return new_agent
 
     def remove_agent(self, name):
@@ -93,7 +107,7 @@ class Organization:
         print_to_console(
             "ORG: Route message",
             Fore.RED,
-            f"ORG: Sender: {sender.name} \n ORG: Reciever: {reciever.name} \n ORG: Message: {message} \n",
+            f"ORG: Sender: {sender.agent_name} \n ORG: Reciever: {reciever.agent_name} \n ORG: Message: {message} \n",
         )
         reciever.recieve_message(sender, message)
 

@@ -1,0 +1,11 @@
+agent_id: 0
+founder: true
+goals:
+- hire staff
+- message them hello
+- fire them
+name: Drake
+status: null
+supervisor_id: null
+supervisor_name: null
+task: setup OVO

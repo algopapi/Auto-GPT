@@ -1,0 +1,8 @@
+agent_id: 3
+founder: false
+goals: gather information, support in decision making, resource allocation
+name: staff1
+status: null
+supervisor_id: 1
+supervisor_name: assistant01
+task: assist in setting up OVO

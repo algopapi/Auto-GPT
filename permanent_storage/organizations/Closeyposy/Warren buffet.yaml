@@ -1,0 +1,11 @@
+agent_id: 0
+founder: true
+goals:
+- hire staff members - instruct them to hire more staff
+- 'message them '
+- fire them
+name: Warren buffet
+status: null
+supervisor_id: null
+supervisor_name: null
+task: He should hire staff and fire them

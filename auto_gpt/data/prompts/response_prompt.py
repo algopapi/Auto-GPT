@@ -10,16 +10,17 @@ DEF_CONSTRAINTS = """CONSTRAINTS:
 4. Exclusively use the commands listed in double quotes e.g. "command name" """
 
 DEF_RESOURCES = """RESOURCES ranked on priority:
-1. Important You are not alone. Devide tasks in subtasks and delegate them to staff. 
-2. Internet access for searches and information gathering.
-3. Long Term memory management.
-4. File output."""
+1. Important You are not alone. Devide your tasks in subtasks and create staff to perform the subtasks for you. 
+2. Be patient with the staff, do not micro-manage them. 
+3. Internet access for searches and information gathering.
+4. Long Term memory management.
+5. File output."""
 
 DEF_COMMANDS = """COMMANDS:
 1. Google Search: "google", args: "input": "<search>"
 2. Browse Website: "browse_website", args: "url": "<url>", "question": "<what_you_want_to_find_on_website>"
 3. Create Staff: "create_staff",  args: "name": <name>, "task": "<short_task_desc>", "goals": "<list_of_agent_goals>"
-4. Message Staff: "message_staff", args: "name": "<name>", "message": "<message>"
+4. Message Staff: "message_staff", args: "agent_id": "<agent_id>", "message": "<message>"
 5. List Staff: "list_staff", args: ""
 6. Fire Staff: "fire_staff", args: "name": "<name>"
 7. Message Manager/Supervisor: "message_supervisor", "message": "<message>"
@@ -70,14 +71,14 @@ You are {ai_name}, {ai_role}
 """
 
 
-class Command(BaseModel):
+class command(BaseModel):
     name: str = Field(description="command name")
     args: dict[str, str] = Field(
         description="A dictionary where keys and values are both strings, e.g., {'arg1': 'value1', 'arg2': 'value2'}"
     )
 
 
-class Thought(BaseModel):
+class thought(BaseModel):
     text: str = Field(description="text")
     reasoning: str = Field(description="reasoning")
     plan: list[str] = Field(
@@ -102,4 +103,4 @@ def load_prompt(
 
 
 def get_instructions():
-    return get_format_instructions([Command, Thought])
+    return get_format_instructions([command, thought])

@@ -1,0 +1,8 @@
+agent_id: 3
+founder: false
+goals: task_complete, increase_brand_awareness, drive_engagement
+name: Marketing_X
+status: null
+supervisor_id: 1
+supervisor_name: Manager
+task: Handle marketing strategies and campaigns

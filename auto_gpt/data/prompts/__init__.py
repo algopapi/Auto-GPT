@@ -1,8 +1,4 @@
-from .response_prompt import (
-    Thought,
-    Command,
-    load_prompt,
-    get_format_instructions,
-)
+from .response_prompt import (command, get_format_instructions, load_prompt,
+                              thought)
 
-__all__ = ["Thought", "Command", "load_prompt", "get_format_instructions"]
+__all__ = ["thought", "command", "load_prompt", "get_format_instructions"]

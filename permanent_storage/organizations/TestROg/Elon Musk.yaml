@@ -1,0 +1,11 @@
+agent_id: 0
+founder: true
+goals:
+- hire 1 staff mamber
+- meessage him
+- fire him
+name: Elon Musk
+status: null
+supervisor_id: null
+supervisor_name: null
+task: 'Setup an org '

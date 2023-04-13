@@ -1,0 +1,11 @@
+agent_id: 0
+founder: true
+goals:
+- Hire 1 staff member
+- messag ehim
+- fire him
+name: ELon
+status: null
+supervisor_id: null
+supervisor_name: null
+task: Setup an org

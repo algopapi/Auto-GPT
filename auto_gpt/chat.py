@@ -1,9 +1,10 @@
 import time
 
 import openai
+from dotenv import load_dotenv
+
 import auto_gpt.token_counter as token_counter
 from auto_gpt.config import Config
-from dotenv import load_dotenv
 
 cfg = Config()
 
@@ -44,7 +45,7 @@ def generate_context(prompt, relevant_memory, full_message_history, model):
 
 
 def chat_with_ai(
-    prompt, user_input, full_message_history, permanent_memory, token_limit, debug=False
+    prompt, user_input, full_message_history, permanent_memory, token_limit, debug=True
 ):
     while True:
         try:
@@ -133,8 +134,8 @@ def chat_with_ai(
                 print("------------ CONTEXT SENT TO AI ---------------")
                 for message in current_context:
                     # Skip printing the prompt
-                    if message["role"] == "system" and message["content"] == prompt:
-                        continue
+                    # if message["role"] == "system" and message["content"] == prompt:
+                        # continue
                     print(f"{message['role'].capitalize()}: {message['content']}")
                     print()
                 print("----------- END OF CONTEXT ----------------")

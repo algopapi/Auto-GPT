@@ -1,0 +1,11 @@
+agent_id: 0
+founder: true
+goals:
+- create staff
+- message them
+- fire them
+name: Elon Musk
+status: null
+supervisor_id: null
+supervisor_name: null
+task: create, message, fire

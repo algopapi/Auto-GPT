@@ -1,4 +1,5 @@
 import json
+
 from auto_gpt.call_ai_function import call_ai_function
 from auto_gpt.config import Config
 

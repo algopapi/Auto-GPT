@@ -1,12 +1,11 @@
-from colorama import Fore, Style
 import importlib.resources
 import os
 
+from colorama import Fore, Style
+
 import permanent_storage as storage
-from auto_gpt.utils.print_utils import (
-    print_to_console,
-)
 from auto_gpt.organization.organization import Organization
+from auto_gpt.utils.print_utils import print_to_console
 
 
 def get_organization(should_speak=False):
@@ -44,18 +43,18 @@ def create_new_org(should_speak=False):
     print_to_console(
         "Enter a name for the organization: ",
         Fore.GREEN,
-        "For example, 'InnovativeTech'",
+        "For example, 'ClosedAI'",
     )
     org_name = input("Organization name: ")
     if org_name == "":
-        org_name = "InnovativeTech"
+        org_name = "ClosedAI"
 
     print_to_console(
-        "Name the org founder: ", Fore.GREEN, "For example, 'Entrepreneur-GPT'"
+        "Name the org founder: ", Fore.GREEN, "For example, 'Elon Musk'"
     )
     ai_name = input("Founder name: ")
     if ai_name == "":
-        ai_name = "Entrepreneur-GPT"
+        ai_name = "Elon Musk"
 
     print_to_console(
         f"{ai_name} here!",

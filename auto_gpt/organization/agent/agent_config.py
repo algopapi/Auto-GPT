@@ -8,18 +8,22 @@ class AgentConfig(object):
         self,
         file_path,
         name,
+        agent_id,
         task,
         goals,
         status=None,
         supervisor_name=None,
+        supervisor_id=None,
         founder=False,
     ):
         self.file = file_path
+        self.agent_id = agent_id
         self.name = name
         self.task = task
         self.goals = goals
         self.status = status
         self.supervisor_name = supervisor_name
+        self.supervisor_id = supervisor_id
         self.founder = founder
         self.save()
 
