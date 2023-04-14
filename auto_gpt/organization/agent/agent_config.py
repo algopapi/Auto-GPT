@@ -86,6 +86,5 @@ class AgentConfig(object):
         
 
         full_prompt += f"\n\n{get_prompt(self.budget, self.operating_cost)}"
-        print("\n\n" , full_prompt, "\n\n")
         return full_prompt
 
