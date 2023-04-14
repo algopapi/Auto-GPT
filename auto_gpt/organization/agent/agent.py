@@ -15,7 +15,7 @@ from auto_gpt.json_parser import fix_and_parse_json
 from auto_gpt.logger import logger
 from auto_gpt.memory import get_memory
 from auto_gpt.spinner import Spinner
-from auto_gpt.utils import clean_input
+from auto_gpt.utils.clean_input import clean_input
 from auto_gpt.utils.print_utils import (print_assistant_thoughts,
                                         print_to_console)
 
