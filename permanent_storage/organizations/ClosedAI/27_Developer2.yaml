@@ -1,0 +1,11 @@
+agent_id: 27
+founder: false
+goals: Understand Deep Q-Learning, Break down the task, Implement the algorithm, Test
+  the algorithm with the cartpole environment
+init_memory: true
+name: Developer2
+pending_messages: []
+status: null
+supervisor_id: 13
+supervisor_name: Developer1
+task: Implement Deep Q-Learning

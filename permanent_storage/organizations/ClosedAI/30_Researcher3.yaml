@@ -1,0 +1,11 @@
+agent_id: 30
+founder: false
+goals: 1. Understand the concept 2. Learn its application and benefits in DQN optimization
+  3. Provide a summary
+init_memory: true
+name: Researcher3
+pending_messages: []
+status: null
+supervisor_id: 20
+supervisor_name: Researcher2
+task: Research Prioritized Experience Replay

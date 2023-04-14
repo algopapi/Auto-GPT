@@ -15,10 +15,12 @@ from .agent import Agent, AgentConfig
 
 # An organization of multiple agent.
 class Organization:
-    def __init__(self, name):
+    def __init__(self, name, run_async=False):
         self.name = name
         self.agents: Dict[int, Agent] = {}
+        self.run_async = run_async # All hell will break loose if this is set to True. Don't do it. You have been warned. 
         self.print_lock = threading.Lock()  # Create a lock for print statements
+        self.operating_budget = 1000000
 
     @classmethod
     def load(cls, organization_name):
@@ -52,31 +54,39 @@ class Organization:
             return None
 
     def run(self):
-            # Create and start a new thread for each agent
-            threads = []
-            for agent in self.agents.values():
-                t = threading.Thread(target=self.run_agent, args=(agent,))
-                t.start()
-                threads.append(t)
+        if self.run_async:
+            self.run_agents_async()
+        else:
+            self.run_agents_sequential()
 
-            # Wait for all threads to finish
-            for t in threads:
-                t.join()
 
+    def run_agents_async(self):
+        # Create and start a new thread for each agent
+        threads = []
+        for agent in self.agents.values():
+            t = threading.Thread(target=self.run_agent, args=(agent,))
+            t.start()
+            threads.append(t)
+
+        # Wait for all threads to finish
+        for t in threads:
+            t.join()
+
+
+    def run_agents_sequential(self):
+        for agent in self.agents.values():
+            self.run_agent(agent)
+
+    
     def run_agent(self, agent):
         with self.print_lock:
-            # print(
-            #     Fore.GREEN
-            #     + f"\n ---------------- Running agent {agent.cfg.name} -----------------\n"
-            #     + Style.RESET_ALL,
-            #     end="",
-            # )
-
-            logger.typewriter_log(
-                f"\n ---------------- Running agent {agent.cfg.name} -----------------\n"
+            logger.typewriter_log( 
+                Fore.GREEN 
+                + f"\n ---------------- Running agent {agent.cfg.name} -----------------\n"
+                + Style.RESET_ALL,
             )
         agent.step()
-
+    
     def print_sync(self, *args, **kwargs):
         """Synchronized print function that ensures ordered output"""
         with self.print_lock:

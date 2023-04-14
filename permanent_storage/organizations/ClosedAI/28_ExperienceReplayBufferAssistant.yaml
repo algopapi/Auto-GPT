@@ -1,0 +1,10 @@
+agent_id: 28
+founder: false
+goals: Divide task into subtasks, implement each subtask efficiently, report progress
+init_memory: true
+name: ExperienceReplayBufferAssistant
+pending_messages: []
+status: null
+supervisor_id: 24
+supervisor_name: ExperienceReplayBufferBuilder
+task: Create a experience replay buffer class

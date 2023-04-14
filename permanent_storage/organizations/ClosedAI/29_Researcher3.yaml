@@ -1,0 +1,11 @@
+agent_id: 29
+founder: false
+goals: Learn about the optimization of hyperparameters such as learning rate, discount
+  factor, and exploration strategy
+init_memory: true
+name: Researcher3
+pending_messages: []
+status: null
+supervisor_id: 2
+supervisor_name: Researcher1
+task: Research optimizing hyperparameters for Deep Q Learning
