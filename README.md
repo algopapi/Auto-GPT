@@ -30,8 +30,10 @@ Here I made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP
 ## Current issues
 
 1. Only works with the local cache memory, 
-2. The supervisor tends to keep "herassing" the staff. i.e., constantly asking them for updates. (maybe try to add prompts "no micromanagement, etc..")
-3. Agents tend to overhire. It might be worth experimenting with prompt instructions. 
+2. The founder messages his supervisor... This should be fixed by removing the command from the prompt for founders
+3. The supervisor tends to keep "herassing" the staff. i.e., constantly asking them for updates. (maybe try to add prompts "no micromanagement, etc..")
+4. Agents tend to overhire. It might be worth experimenting with prompt instructions. 
+
 
 ## Future work...
 1. Give the agents context of the organization they are a part of. They are unaware of that at the moment. This might help align them a bit better. 
