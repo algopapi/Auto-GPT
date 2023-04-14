@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 from collections import deque
 from typing import List
 
@@ -10,7 +11,6 @@ import auto_gpt.commands as cmd
 import auto_gpt.speak as speak
 from auto_gpt import speak
 from auto_gpt.config import Config
-from auto_gpt.data.prompts.response_prompt import load_prompt
 from auto_gpt.json_parser import fix_and_parse_json
 from auto_gpt.logger import logger
 from auto_gpt.memory import get_memory
@@ -88,6 +88,7 @@ def print_assistant_thoughts(ai_name, assistant_reply):
             assistant_thoughts_reasoning = assistant_thoughts.get("reasoning")
             assistant_thoughts_plan = assistant_thoughts.get("plan")
             assistant_thoughts_criticism = assistant_thoughts.get("criticism")
+            assistant_thoughts_status = assistant_thoughts.get("status")
             assistant_thoughts_speak = assistant_thoughts.get("speak")
 
         logger.typewriter_log(f"{ai_name.upper()} THOUGHTS:", Fore.YELLOW, assistant_thoughts_text)
@@ -108,6 +109,7 @@ def print_assistant_thoughts(ai_name, assistant_reply):
                 logger.typewriter_log("- ", Fore.GREEN, line.strip())
 
         logger.typewriter_log("CRITICISM:", Fore.YELLOW, assistant_thoughts_criticism)
+        logger.typewriter_log("STATUS:", Fore.YELLOW, assistant_thoughts_status)
         # Speak the assistant's thoughts
 
         return assistant_reply_json
@@ -130,10 +132,10 @@ class Agent:
         self.supervisor_name = self.cfg.supervisor_name
         self.supervisor_id = self.cfg.supervisor_id
         self.status = self.cfg.status
+        self.task = self.cfg.task
         self.global_cfg = Config()
 
-        self.prompt = self.construct_prompt()
-
+        self.prompt = self.cfg.construct_full_prompt()
         self.memory = get_memory(self.global_cfg, self.organization.name, self.cfg, init=self.cfg.init_memory) # Dont Clear here
         self.full_message_history = []
 
@@ -142,24 +144,37 @@ class Agent:
             deque(self.cfg.pending_messages)
         )  # List of responses that the agent should deal with
 
-    def construct_prompt(self):
-        ai_description_dict = {
-            "ai_name": self.cfg.name,
-            "ai_goals": self.cfg.goals,
-        }
-        if self.cfg.founder:  # Head of the org
-            ai_description_dict["ai_role"] = self.cfg.task
-        else:  # organization coworker
-            ai_description_dict["ai_role"] = DEF_EMPLOYEE_DESCRIPTION.format(
-                agent_supervisor=self.cfg.supervisor_name, agent_task=self.cfg.task
-            )
-        return load_prompt(ai_description_dict)
+        self.budget = self.cfg.budget
+        self.operating_cost = self.calculate_operating_cost()
 
-    def create_employee(self, name, task, goals):
+
+    def calculate_operating_cost(self, cost_per_step=100):
+        running_cost = 0
+
+        # Calculate the running cost of each employee
+        for employee in self.staff:
+            running_cost += employee.calculate_operating_cost(cost_per_step)
+
+        # Add the agent's own cost
+        running_cost += cost_per_step
+
+        return running_cost
+
+    def update_agent_config(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self.cfg, key):
+                setattr(self.cfg, key, value)
+            else:
+                print(f"Unknown attribute '{key}' in AgentConfig.")
+        self.cfg.save()  # Save the updated configuration to the YAML file
+        
+
+    def create_employee(self, name, task, goals, budget):
         new_employee = self.organization.create_agent(
             name=name,
             task=task,
             goals=goals,
+            budget=budget,
             supervisor_name=self.agent_name,
             supervisor_id=self.agent_id,
             founder=False,
@@ -177,30 +192,17 @@ class Agent:
         except ValueError:
             return "You're likely entering the employee name as agent_id, please enter a valid integer agent_id"
         
-        print(" MESSAGIN STAFF", agent_id, message)
         agent_id = int(agent_id)
-        print(" agent id as int:", agent_id)
         agent = self.organization.find_agent_by_id(agent_id)
-        print(" AGENT FOUND")
         
         if agent:
-            print("agent exists")
             self.organization.route_message(self, agent, message)
             return f"Successfully sent message to employee {agent.agent_name}\n"
         else:
-            print(" DOOESNT EXIST")
             return f"Failed to send message to employee with Agent_id: {agent_id}\n"
        
     def list_staff(self):
-        employee_list = ""
-        for employee in self.staff:
-            employee_list += (
-                f"coworker name:{employee.cfg.name}, task:{employee.cfg.task}\n"
-            )
-
-        if not employee_list:
-            employee_list = "You currently have no staff in service\n"
-
+        employee_list = self.build_status_update()
         return employee_list
 
     def fire_staff(self, name):
@@ -226,6 +228,7 @@ class Agent:
             f"Agent {self.cfg.name} recieved message from {sender.agent_name}. Message = {message}"
         )
         self.pending_messages.append(((sender.agent_id, sender.agent_name), message))
+        self.update_agent_config(pending_messages=list(self.pending_messages))
         print(f"\nAgent {self.cfg.name} pending responses: {self.pending_messages}\n")
         pass
 
@@ -234,6 +237,7 @@ class Agent:
         status = None
         command_name = None
         arguments = None
+        self.operating_cost = self.calculate_operating_cost()
         # Append staff info to the prompt
         staff_info = self.build_status_update()
         self.prompt += "\n" + staff_info
@@ -259,7 +263,10 @@ class Agent:
        
         try:
             command_name, arguments, status = cmd.get_command(attempt_to_fix_json_by_finding_outermost_brackets(assistant_reply))
-        
+            print("COMMAND NAME: ", command_name)
+            print("ARGUMENTS: ", arguments)
+            print("STATUS: ", status)
+
             if global_config.speak_mode:
                 speak.say_text(f"I want to execute {command_name}")
         except Exception as e:
@@ -267,7 +274,8 @@ class Agent:
 
         # Update agent status
         self.status = status
-        print("  \n\nSTATUS : ", self.status)
+        self.update_agent_config(status=status)
+       
         
         if not global_config.continuous_mode:
             ### GET USER AUTHORIZATION TO EXECUTE COMMAND ###
@@ -333,6 +341,12 @@ class Agent:
         self.full_message_history.append(chat.create_chat_message("system", result))
         print_to_console("SYSTEM: ", Fore.YELLOW, result)
 
+        # Update the budget
+        
+        self.budget = int(self.budget) - int(self.operating_cost) # cast as int because it is saved as string in yaml file
+        self.update_agent_config(budget=self.budget, operating_cost=self.operating_cost)
+        self.prompt = self.cfg.construct_full_prompt()
+    
     def build_status_update(self):
         """
         Staff information screen
@@ -340,8 +354,30 @@ class Agent:
         staff_info = "STAFF STATUS: \n\n"
         if len(self.staff) == 0:
             staff_info += "You currently have no staff in service\n"
+        else:
+            staff_info += self.get_employee_hierarchy(self, 0)
 
-        for staff in self.staff:
-            staff_info += f"Agent_Id:{staff.agent_id}. Agent_Name: {staff.agent_name}, Task: {staff.cfg.task}, Status: {staff.cfg.status}\n"
+        staff_info += f"Your current leftover budget is: {self.budget}\n, your current operating cost is: {self.operating_cost}\n"
+
         print(staff_info)
         return staff_info
+
+    def get_employee_hierarchy(self, supervisor, level):
+        """
+        Recursive function to retrieve the employee hierarchy under a supervisor.
+
+        Args:
+        supervisor (Agent): The supervisor whose employees should be retrieved.
+        level (int): The current level in the employee hierarchy.
+
+        Returns:
+        str: A formatted string of the employee hierarchy.
+        """
+        hierarchy = ""
+        indent = "  " * level
+        for employee in supervisor.staff:
+            hierarchy += (
+                f"{indent}Agent_Id:{employee.agent_id}. Agent_Name: {employee.agent_name}, Task: {employee.task}, Status: {employee.status}, Operating Cost: {employee.operating_cost}, Supervisor: {supervisor.agent_name}\n"
+            )
+            hierarchy += self.get_employee_hierarchy(employee, level + 1)
+        return hierarchy

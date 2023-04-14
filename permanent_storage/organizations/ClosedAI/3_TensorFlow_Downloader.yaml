@@ -1,0 +1,17 @@
+agent_id: 3
+budget: 300
+founder: false
+goals: '[''Download TensorFlow'', ''Import TensorFlow'']'
+init_memory: true
+name: TensorFlow_Downloader
+operating_cost: 200
+pending_messages:
+- !!python/tuple
+  - !!python/tuple
+    - 2
+    - MNIST_Initializer
+  - What is the current progress on downloading and importing TensorFlow?
+status: Asking TensorFlow_Installer for progress on TensorFlow installation
+supervisor_id: 2
+supervisor_name: MNIST_Initializer
+task: Download and import TensorFlow

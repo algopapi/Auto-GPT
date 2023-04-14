@@ -5,7 +5,8 @@ from auto_gpt.utils.initialization_utils import get_organization
 class AutoGPT:
     def __init__(
         self,
-    ):
+    ):  
+        self.initial_budget = 10000
         self.global_cfg = Config()
         self.organization = get_organization()
 

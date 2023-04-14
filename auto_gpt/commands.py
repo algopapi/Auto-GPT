@@ -100,7 +100,7 @@ def execute_command(agent, command_name, arguments):
             return overwrite_memory(arguments["key"], arguments["string"])
         elif command_name == "create_staff":
             return agent.create_employee(
-                arguments["name"], arguments["task"], arguments["goals"]
+                arguments["name"], arguments["task"], arguments["goals"], arguments["budget"]
             )
         elif command_name == "message_staff":
             return agent.message_staff(arguments["agent_id"], arguments["message"])

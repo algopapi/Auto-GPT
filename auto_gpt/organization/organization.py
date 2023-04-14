@@ -15,12 +15,12 @@ from .agent import Agent, AgentConfig
 
 # An organization of multiple agent.
 class Organization:
-    def __init__(self, name, run_async=False):
+    def __init__(self, name, initial_budget, run_async=False):
         self.name = name
         self.agents: Dict[int, Agent] = {}
         self.run_async = run_async # All hell will break loose if this is set to True. Don't do it. You have been warned. 
         self.print_lock = threading.Lock()  # Create a lock for print statements
-        self.operating_budget = 1000000
+        self.initial_budget = initial_budget
 
     @classmethod
     def load(cls, organization_name):
@@ -29,7 +29,7 @@ class Organization:
             / f"organizations/{organization_name}"
         )
 
-        org = Organization(organization_name)
+        org = Organization(organization_name, 10000)
         agent_files = glob.glob(os.path.join(str(organization_folder), "*.yaml"))
 
         # Create all the agents
@@ -74,7 +74,7 @@ class Organization:
 
 
     def run_agents_sequential(self):
-        for agent in self.agents.values():
+        for agent in list(self.agents.values()):
             self.run_agent(agent)
 
     
@@ -99,6 +99,7 @@ class Organization:
         name,
         task,
         goals,
+        budget,
         supervisor_name=None,
         supervisor_id=None,
         founder=False,
@@ -114,6 +115,7 @@ class Organization:
             agent_id=agent_id,
             task=task,
             goals=goals,
+            budget=budget,
             supervisor_name=supervisor_name,
             supervisor_id=supervisor_id,
             founder=founder,
@@ -146,5 +148,5 @@ class Organization:
 if __name__ == "__main__":
     # TODO: Load from yaml or initialize it using AutoGPT
     org = Organization("A cool AGI organization")
-    org.create_agent(name="founder", task="Setup an organization", goals="1. hire 1 arbitrary staff member\n 2. say hello \n 3. fire the staff member", founder=True)  # Founder of te organization.
+    org.create_agent(name="founder", task="Setup an organization", goals="1. hire 1 arbitrary staff member\n 2. say hello \n 3. fire the staff member", founder=True, budget=1000)  # Founder of te organization.
     org.run()  # Run te org

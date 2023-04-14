@@ -1,16 +1,18 @@
 agent_id: 0
+budget: 46700
 founder: true
 goals:
-- Setup a organization whos sole goal it is to sole cartpole RL as efficiently as
-  possible
-- 'Hire the appropriate staff to do this. Do as little of the actual solving yourself.
-  Manage the org '
-- Dont micromanage your staff
-- Align all your staff members to a singular task
-init_memory: true
+- Hire the appropriate staff with the sole goal to solve MNIST in tensorflow
+- Align them . Make sure they stay on track. Think about the budget. Cut any employees
+  that are performing uncessecary tasks, or are underperformning in general
+- Think about your budget, Plan ahead
+- Report to me when you have solved Mnist. You will get additional funding when you
+  have some sufficeint intermediary progress
+init_memory: false
 name: Elon Musk
+operating_cost: 500
 pending_messages: []
-status: null
+status: re-engaged
 supervisor_id: null
 supervisor_name: null
-task: Setup an organizatoin that solves the cartpole environment
+task: Create an organization that solves MNIST in tensorflow

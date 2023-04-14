@@ -1,0 +1,15 @@
+agent_id: 0
+budget: 50000
+founder: true
+goals:
+- Hire an emplyee
+- message him
+- fire him
+init_memory: true
+name: elonthepelon
+operating_cost: 0
+pending_messages: []
+status: null
+supervisor_id: null
+supervisor_name: null
+task: Hire an emplyee

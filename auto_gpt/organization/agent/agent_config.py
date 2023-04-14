@@ -2,6 +2,9 @@ import os
 
 import yaml
 
+from auto_gpt.prompt import get_prompt
+
+DEF_EMPLOYEE_DESCRIPTION = """You are an employee of {agent_supervisor}. You are tasked with: {agent_task}."""
 
 class AgentConfig(object):
     def __init__(
@@ -11,6 +14,8 @@ class AgentConfig(object):
         agent_id,
         task,
         goals,
+        budget,
+        operating_cost=0,
         status=None,
         supervisor_name=None,
         supervisor_id=None,
@@ -24,6 +29,8 @@ class AgentConfig(object):
         self.task = task
         self.goals = goals
         self.status = status
+        self.budget = budget
+        self.operating_cost = operating_cost
         self.supervisor_name = supervisor_name
         self.supervisor_id = supervisor_id
         self.founder = founder
@@ -56,3 +63,29 @@ class AgentConfig(object):
         config.pop("file", None)  # Exclude file attribute
         with open(self.file, "w") as file:
             yaml.dump(config, file)
+
+
+    def construct_full_prompt(self) -> str:
+        """
+        Returns a prompt to the user with the class information in an organized fashion.
+        Parameters:
+            None
+        Returns:
+            full_prompt (str): A string containing the initial prompt for the user including the ai_name, ai_role and ai_goals.
+        """
+
+        prompt_start = """Your decisions must always be made independently without seeking user assistance. Play to your strengths as an LLM and pursue simple strategies with no legal complications."""
+ 
+        # Construct full prompt
+      
+        full_prompt = f""
+        if self.founder:
+            full_prompt += f"You are {self.name}, {self.task}\n{prompt_start}\n\nGOALS:{str(self.goals)}\n\n"
+        else:
+            full_prompt += f"You are an employee of {self.supervisor_name}. You are {self.name}, and tasked with {self.task}\n\nGOALS:{str(self.goals)}\n\n"
+        
+
+        full_prompt += f"\n\n{get_prompt(self.budget, self.operating_cost)}"
+        print("\n\n" , full_prompt, "\n\n")
+        return full_prompt
+
