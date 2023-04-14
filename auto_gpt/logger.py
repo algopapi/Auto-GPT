@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import re
+import threading
 import time
 from logging import LogRecord
 
@@ -21,6 +22,7 @@ For console handler: simulates typing
 
 class Logger(metaclass=Singleton):
     def __init__(self):
+        self.print_lock = threading.Lock()
         # create log directory if it doesn't exist
         log_dir = os.path.join('..', 'logs')
         if not os.path.exists(log_dir):
@@ -32,12 +34,12 @@ class Logger(metaclass=Singleton):
         console_formatter = AutoGptFormatter('%(title_color)s %(message)s')
 
         # Create a handler for console which simulate typing
-        self.typing_console_handler = TypingConsoleHandler()
+        self.typing_console_handler = TypingConsoleHandler(self.print_lock)
         self.typing_console_handler.setLevel(logging.INFO)
         self.typing_console_handler.setFormatter(console_formatter)
 
         # Create a handler for console without typing simulation
-        self.console_handler = ConsoleHandler()
+        self.console_handler = ConsoleHandler(self.print_lock)
         self.console_handler.setLevel(logging.DEBUG)
         self.console_handler.setFormatter(console_formatter)
 
@@ -135,7 +137,11 @@ Output stream to console using simulated typing
 
 
 class TypingConsoleHandler(logging.StreamHandler):
-    def emit(self, record):
+    def __init__(self, print_lock):
+        super().__init__()
+        self.print_lock = print_lock
+    
+    def emit(self, record,):
         min_typing_speed = 0.05
         max_typing_speed = 0.01
 
@@ -156,6 +162,10 @@ class TypingConsoleHandler(logging.StreamHandler):
             self.handleError(record)
 
 class ConsoleHandler(logging.StreamHandler):
+    def __init__(self, print_lock):
+        super().__init__()
+        self.print_lock = print_lock
+
     def emit(self, record):
         msg = self.format(record)
         try:

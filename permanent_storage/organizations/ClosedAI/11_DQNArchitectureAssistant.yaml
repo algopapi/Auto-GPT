@@ -1,0 +1,13 @@
+agent_id: 11
+founder: false
+goals:
+- understand input and output layers
+- learn about activation functions
+- find out about hidden layers
+init_memory: true
+name: DQNArchitectureAssistant
+pending_messages: []
+status: null
+supervisor_id: 10
+supervisor_name: DQNArchitectureResearcher
+task: research deep q network architecture

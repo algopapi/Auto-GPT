@@ -1,0 +1,11 @@
+agent_id: 16
+founder: false
+goals: Create experience replay buffer class which stores agent's experiences in memory
+  and samples for training purposes.
+init_memory: true
+name: ExperienceReplayBufferWorker
+pending_messages: []
+status: null
+supervisor_id: 7
+supervisor_name: DeepQlearningWorker
+task: Implement experience replay buffer class

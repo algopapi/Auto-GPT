@@ -87,7 +87,7 @@ class thought(BaseModel):
         description="A short bulleted list that conveys long-term plan, e.g: [step_1, step_2, step_3]"
     )
     status: str = Field(
-        description="idle, briefly outlining current engagement"
+        description="briefly outlining current engagement, idle if not engaged"
     )  # TODO: How can we use this to set a agent as idle waiting for an event?
     criticism: str = Field(description="constructive self-criticism")
     speak: str = Field(description="thoughts summary to say to user")

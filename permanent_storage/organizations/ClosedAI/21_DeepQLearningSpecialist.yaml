@@ -1,0 +1,13 @@
+agent_id: 21
+founder: false
+goals:
+- understand input and output layers
+- learn about activation functions
+- find out about hidden layers
+init_memory: true
+name: DeepQLearningSpecialist
+pending_messages: []
+status: null
+supervisor_id: 17
+supervisor_name: DeepQNetworkResearcher
+task: Research deep q networks

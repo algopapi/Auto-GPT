@@ -1,0 +1,10 @@
+agent_id: 8
+founder: false
+goals: Define input and output layers, activation functions, hidden layers
+init_memory: true
+name: DeepQNetworkArchitect
+pending_messages: []
+status: null
+supervisor_id: 7
+supervisor_name: DeepQlearningWorker
+task: Define deep Q network architecture

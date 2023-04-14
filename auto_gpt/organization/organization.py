@@ -1,11 +1,13 @@
 import glob
 import importlib.resources
 import os
+import threading
 from typing import Dict, List
 
 from colorama import Fore, Style
 
 import permanent_storage
+from auto_gpt.logger import logger
 from auto_gpt.utils.print_utils import print_to_console
 
 from .agent import Agent, AgentConfig
@@ -16,6 +18,7 @@ class Organization:
     def __init__(self, name):
         self.name = name
         self.agents: Dict[int, Agent] = {}
+        self.print_lock = threading.Lock()  # Create a lock for print statements
 
     @classmethod
     def load(cls, organization_name):
@@ -49,28 +52,37 @@ class Organization:
             return None
 
     def run(self):
-        while True:
-            agents_list = list(self.agents.values())
-            print(
-                Fore.LIGHTBLUE_EX
-                + f" \nAgents in Org:\n"
-                + Style.RESET_ALL,
-                end="",
+            # Create and start a new thread for each agent
+            threads = []
+            for agent in self.agents.values():
+                t = threading.Thread(target=self.run_agent, args=(agent,))
+                t.start()
+                threads.append(t)
+
+            # Wait for all threads to finish
+            for t in threads:
+                t.join()
+
+    def run_agent(self, agent):
+        with self.print_lock:
+            # print(
+            #     Fore.GREEN
+            #     + f"\n ---------------- Running agent {agent.cfg.name} -----------------\n"
+            #     + Style.RESET_ALL,
+            #     end="",
+            # )
+
+            logger.typewriter_log(
+                f"\n ---------------- Running agent {agent.cfg.name} -----------------\n"
             )
-            for agents in agents_list:
-                print(
-                    Fore.LIGHTBLUE_EX
-                    + f"{agents.cfg.agent_id}: {agents.cfg.name} Task: {agents.cfg.task}"
-                )
-                
-            for agent in agents_list:
-                print(
-                    Fore.GREEN
-                    + f"\n ---------------- Running agent {agent.cfg.name} -----------------\n"
-                    + Style.RESET_ALL,
-                    end="",
-                )
-                agent.step()
+        agent.step()
+
+    def print_sync(self, *args, **kwargs):
+        """Synchronized print function that ensures ordered output"""
+        with self.print_lock:
+            print(*args, **kwargs)
+
+
 
     def create_agent(
         self,
@@ -103,21 +115,21 @@ class Organization:
         self.agents[new_agent.agent_id] = new_agent
         return new_agent
 
-    def remove_agent(self, name):
-        if name in self.agents:
-            agent = self.agents[name]
+    def remove_agent(self, agent_id):
+        if agent_id in self.agents:
+            agent = self.agents[agent_id]
             agent.cfg.remove()
-            del self.agents[name]
+            del self.agents[agent_id]
             return True
         else:
             return False
 
     def route_message(self, sender, reciever, message):
-        print_to_console(
-            "ORG: Route message",
-            Fore.RED,
-            f"ORG: Sender: {sender.agent_name} \n ORG: Reciever: {reciever.agent_name} \n ORG: Message: {message} \n",
+
+        logger.typewriter_log(
+            f"ORG: Sender: {sender.agent_name} \n ORG: Reciever: {reciever.agent_name} \n ORG: Message: {message} \n"
         )
+
         reciever.recieve_message(sender, message)
 
 

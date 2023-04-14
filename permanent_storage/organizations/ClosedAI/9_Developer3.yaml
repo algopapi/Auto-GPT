@@ -1,0 +1,11 @@
+agent_id: 9
+founder: false
+goals: Create a basic cartpole environment using OpenAI Gym, Test the environment
+  with Deep Q Learning algorithm, Ensure environment works correctly
+init_memory: true
+name: Developer3
+pending_messages: []
+status: null
+supervisor_id: 6
+supervisor_name: Developer2
+task: implement cartpole environment

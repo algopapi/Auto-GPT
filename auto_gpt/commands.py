@@ -32,24 +32,54 @@ def get_command(response):
 
         if "command" not in response_json:
             return "Error:" , "Missing 'command' object in JSON"
+        
+        if "thought" not in response_json:
+            return " Error:", "Missing 'thought' object in JSON"
 
         command = response_json["command"]
+        thought = response_json["thought"]
 
         if "name" not in command:
             return "Error:", "Missing 'name' field in 'command' object"
-
+        
+        if "status" not in thought:
+            return "Error:", "Missing 'status' field in 'thought' object"
+    
         command_name = command["name"]
-
+        status = thought["status"]
         # Use an empty dictionary if 'args' field is not present in 'command' object
         arguments = command.get("args", {})
 
-        return command_name, arguments
+        return command_name, arguments, status
+    except json.decoder.JSONDecodeError:
+        return "Error:", "Invalid JSON"
+    # All other errors, return "Error: + error message"
+    except Exception as e:
+        return "Error:", str(e), None
+    
+def get_status(response):
+    """Parse the response and return the status of the agent"""
+    try:
+        response_json = fix_and_parse_json(response)
+
+        if "thought" not in response_json:
+            return "Error:" , "Missing 'thought' object in JSON"
+
+        thought = response_json["thought"]
+
+        if "status" not in thought:
+            return "Error:", "Missing 'status' field in 'command' object"
+
+        status = thought["status"]
+        return status
     except json.decoder.JSONDecodeError:
         return "Error:", "Invalid JSON"
     # All other errors, return "Error: + error message"
     except Exception as e:
         return "Error:", str(e)
 
+# Create a lock for file access
+#file_access_lock = threading.Lock()
 
 def execute_command(agent, command_name, arguments):
     try:
@@ -95,6 +125,7 @@ def execute_command(agent, command_name, arguments):
         elif command_name == "search_files":
             return search_files(arguments["directory"])
         elif command_name == "browse_website":
+            # with file_access_lock:
             return browse_website(arguments["url"], arguments["question"])
         # TODO: Change these to take in a file rather than pasted code, if
         # non-file is given, return instructions "Input should be a python
@@ -110,7 +141,9 @@ def execute_command(agent, command_name, arguments):
         elif command_name == "generate_image":
             return generate_image(arguments["prompt"])
         elif command_name == "task_complete":
-            shutdown()
+            # remove agent from org
+            agent.organization.remove_agent(agent)
+            #shutdown()
         else:
             return f"Unknown command {command_name}"
     # All errors, return "Error: + error message"

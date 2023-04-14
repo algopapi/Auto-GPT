@@ -23,7 +23,7 @@ JSON_SCHEMA = """
         "plan": "- short bulleted\n- list that conveys\n- long-term plan",
         "criticism": "constructive self-criticism",
         "speak": "thoughts summary to say to user"
-        "status": "either idle or briefly outlining current engagement"
+        "status": "briefly outlining current engagement, idle when not engaged"
     }
 }
 """

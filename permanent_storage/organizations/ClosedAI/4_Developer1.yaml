@@ -1,0 +1,10 @@
+agent_id: 4
+founder: false
+goals: Set up a basic cartpole environment suitable for applying Deep Q Learning
+init_memory: true
+name: Developer1
+pending_messages: []
+status: null
+supervisor_id: 1
+supervisor_name: ReinforcementLearningExpert
+task: Create a basic cartpole environment using OpenAI Gym

@@ -1,0 +1,11 @@
+agent_id: 7
+founder: false
+goals: Set up libraries, Define network architecture, Implement experience replay
+  buffer class, Define agent class, Train the agent, Optimize policy network
+init_memory: true
+name: DeepQlearningWorker
+pending_messages: []
+status: null
+supervisor_id: 5
+supervisor_name: ReinforcementLearningExpert
+task: Implement a deep Q learning solution

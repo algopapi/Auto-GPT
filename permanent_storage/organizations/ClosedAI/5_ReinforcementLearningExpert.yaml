@@ -1,0 +1,10 @@
+agent_id: 5
+founder: false
+goals: Research possible approaches, Test different strategies, Optimize performance
+init_memory: true
+name: ReinforcementLearningExpert
+pending_messages: []
+status: null
+supervisor_id: 0
+supervisor_name: Elon Musk
+task: Develop a Deep Q Learning solution for the cartpole environment

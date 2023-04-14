@@ -121,7 +121,6 @@ def print_assistant_thoughts(ai_name, assistant_reply):
         logger.error("Error: \n", call_stack)
 
 
-
 class Agent:
     def __init__(self, organization, agent_config):
         self.organization = organization
@@ -130,6 +129,7 @@ class Agent:
         self.agent_name = self.cfg.name
         self.supervisor_name = self.cfg.supervisor_name
         self.supervisor_id = self.cfg.supervisor_id
+        self.status = self.cfg.status
         self.global_cfg = Config()
 
         self.prompt = self.construct_prompt()
@@ -231,6 +231,9 @@ class Agent:
 
     def step(self):
         """ Performs a single step of the agent's thinking process."""
+        status = None
+        command_name = None
+        arguments = None
         # Append staff info to the prompt
         staff_info = self.build_status_update()
         self.prompt += "\n" + staff_info
@@ -251,15 +254,21 @@ class Agent:
                 self.global_cfg.fast_token_limit,
             )  # TODO: This hardcodes the model to use GPT3.5. Make this an argument
         # 1. Parse thought and get status
-        print_assistant_thoughts(self.agent_name, assistant_reply)     
+        print_assistant_thoughts(self.agent_name, assistant_reply)
         # Get command name and arguments
+       
         try:
-            command_name, arguments = cmd.get_command(attempt_to_fix_json_by_finding_outermost_brackets(assistant_reply))
+            command_name, arguments, status = cmd.get_command(attempt_to_fix_json_by_finding_outermost_brackets(assistant_reply))
+        
             if global_config.speak_mode:
                 speak.say_text(f"I want to execute {command_name}")
         except Exception as e:
             logger.error("Error: \n", str(e))
 
+        # Update agent status
+        self.status = status
+        print("  \n\nSTATUS : ", self.status)
+        
         if not global_config.continuous_mode:
             ### GET USER AUTHORIZATION TO EXECUTE COMMAND ###
             # Get key press: Prompt the user to press enter to continue or escape

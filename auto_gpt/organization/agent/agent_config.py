@@ -29,6 +29,7 @@ class AgentConfig(object):
         self.founder = founder
         self.pending_messages = pending_messages or []
         self.init_memory = init_memory
+
         self.save()
 
     @classmethod
