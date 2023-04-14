@@ -1,0 +1,13 @@
+agent_id: 0
+founder: true
+goals:
+- hire staff- tell them to hire more staff
+- message them something
+- fire them
+init_memory: true
+name: Elon
+pending_messages: []
+status: null
+supervisor_id: null
+supervisor_name: null
+task: Setup an AI research lab

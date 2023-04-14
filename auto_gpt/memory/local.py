@@ -28,12 +28,11 @@ class LocalCache():
     def __init__(self, cfg, organization_name, agent_config) -> None:
         agent_id = agent_config.agent_id
         agent_name = agent_config.name
-
         self.filename = f"permanent_storage/organizations/{organization_name}/{agent_id}_{agent_name}_memory.json"
-        print("memory filename", self.filename)
         if os.path.exists(self.filename):
             with open(self.filename, "rb") as f:
                 loaded = orjson.loads(f.read())
+                loaded["embeddings"] = np.array(loaded["embeddings"], dtype=np.float32)  # Convert loaded embeddings to a NumPy array
                 self.data = CacheContent(**loaded)
         else:
             self.data = CacheContent()

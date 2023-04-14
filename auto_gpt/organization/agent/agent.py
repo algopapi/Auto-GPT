@@ -171,6 +171,12 @@ class Agent:
         return f"Succefully created employee with name:{new_employee.cfg.name}, task: {new_employee.cfg.task}, and goals: {new_employee.cfg.goals}\n"
 
     def message_staff(self, agent_id, message):
+
+        try:
+            agent_id = int(agent_id)
+        except ValueError:
+            return "You're likely entering the employee name as agent_id, please enter a valid integer agent_id"
+        
         print(" MESSAGIN STAFF", agent_id, message)
         agent_id = int(agent_id)
         print(" agent id as int:", agent_id)
@@ -254,7 +260,7 @@ class Agent:
         except Exception as e:
             logger.error("Error: \n", str(e))
 
-        if not global_config.continuous_mode == 0:
+        if not global_config.continuous_mode:
             ### GET USER AUTHORIZATION TO EXECUTE COMMAND ###
             # Get key press: Prompt the user to press enter to continue or escape
             # to exit
