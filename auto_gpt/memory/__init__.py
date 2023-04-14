@@ -13,7 +13,7 @@ except ImportError:
     PineconeMemory = None
 
 
-def get_memory(cfg, init=False):
+def get_memory(cfg, organization_name, agent_config, init=False):
     memory = None
     if cfg.memory_backend == "pinecone":
         if not PineconeMemory:
@@ -35,8 +35,9 @@ def get_memory(cfg, init=False):
             memory = RedisMemory(cfg)
 
     if memory is None:
-        memory = LocalCache(cfg)
+        memory = LocalCache(cfg, organization_name, agent_config)
         if init:
+            print("Clearing Mem")
             memory.clear()
     return memory
 

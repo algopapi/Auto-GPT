@@ -1,8 +1,0 @@
-agent_id: 2
-founder: false
-goals: Find suitable candidates, conduct interviews, hire qualified staff
-name: Recruiter
-status: null
-supervisor_id: 1
-supervisor_name: John
-task: Hiring new staff

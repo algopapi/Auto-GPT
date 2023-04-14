@@ -1,0 +1,8 @@
+Key steps and facilities required for setting up an AI research company:
+1. Encourage a collaborative approach between fundamental AI researchers and those applying AI solutions to real-world problems.
+2. Provide a dynamic, comfortable, and unique workspace to attract talented AI researchers.
+3. Offer compelling datasets and interesting problems for researchers to work on.
+4. Ensure sufficient computational resources for the AI researchers.
+5. Build a strong team for research mentorship and support.
+6. Allow researchers to pursue curiosity-driven research and publish their results.
+7. Promote open collaboration and transparency to advance the research community.

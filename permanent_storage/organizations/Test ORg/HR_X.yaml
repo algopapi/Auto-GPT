@@ -1,8 +1,0 @@
-agent_id: 2
-founder: false
-goals: task_complete, build_strong_team, manage_employee_relations
-name: HR_X
-status: null
-supervisor_id: 1
-supervisor_name: Manager
-task: Handle recruitment and HR operations

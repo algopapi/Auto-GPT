@@ -15,6 +15,8 @@ class AgentConfig(object):
         supervisor_name=None,
         supervisor_id=None,
         founder=False,
+        pending_messages=None,
+        init_memory=True,
     ):
         self.file = file_path
         self.agent_id = agent_id
@@ -25,6 +27,8 @@ class AgentConfig(object):
         self.supervisor_name = supervisor_name
         self.supervisor_id = supervisor_id
         self.founder = founder
+        self.pending_messages = pending_messages or []
+        self.init_memory = init_memory
         self.save()
 
     @classmethod
@@ -48,6 +52,6 @@ class AgentConfig(object):
     def save(self):
         os.makedirs(os.path.dirname(self.file), exist_ok=True)
         config = {attr: getattr(self, attr) for attr in vars(self)}
-        config.pop("file", None)  # Exclue file attribute
+        config.pop("file", None)  # Exclude file attribute
         with open(self.file, "w") as file:
             yaml.dump(config, file)

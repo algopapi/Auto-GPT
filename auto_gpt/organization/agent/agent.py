@@ -134,12 +134,12 @@ class Agent:
 
         self.prompt = self.construct_prompt()
 
-        self.memory = get_memory(self.global_cfg, init=True)
+        self.memory = get_memory(self.global_cfg, self.organization.name, self.cfg, init=self.cfg.init_memory) # Dont Clear here
         self.full_message_history = []
 
         self.staff: List[Agent] = []  # List of workers that work for the agent
         self.pending_messages = (
-            deque()
+            deque(self.cfg.pending_messages)
         )  # List of responses that the agent should deal with
 
     def construct_prompt(self):
@@ -165,8 +165,6 @@ class Agent:
             founder=False,
         )
         return self.add_staff(new_employee)
-
-
 
     def add_staff(self, new_employee):
         self.staff.append(new_employee)
@@ -247,8 +245,6 @@ class Agent:
                 self.global_cfg.fast_token_limit,
             )  # TODO: This hardcodes the model to use GPT3.5. Make this an argument
         # 1. Parse thought and get status
-
-
         print_assistant_thoughts(self.agent_name, assistant_reply)        
         # Get command name and arguments
         try:

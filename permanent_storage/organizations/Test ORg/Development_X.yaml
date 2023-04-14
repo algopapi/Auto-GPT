@@ -1,8 +1,0 @@
-agent_id: 4
-founder: false
-goals: task_complete, build_robust_software, manage_project_progress
-name: Development_X
-status: null
-supervisor_id: 1
-supervisor_name: Manager
-task: Lead software development and manage developers

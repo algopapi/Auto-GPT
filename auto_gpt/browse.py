@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+
 from auto_gpt.config import Config
 from auto_gpt.utils.llm_utils import create_chat_completion
 

@@ -1,0 +1,11 @@
+agent_id: 1
+founder: false
+goals:
+- Recruit AI and machine learning specialists
+- Develop a team of researchers and engineers
+name: AI_Recruitment_Manager
+pending_messages: []
+status: null
+supervisor_id: 0
+supervisor_name: elon musk
+task: Hire AI and machine learning experts

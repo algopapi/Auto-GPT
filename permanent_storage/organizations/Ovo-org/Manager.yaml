@@ -1,8 +1,0 @@
-agent_id: 2
-founder: false
-goals: hire skilled staff, oversee progress, report updates
-name: Manager
-status: null
-supervisor_id: 0
-supervisor_name: Drake
-task: oversee OVO staff growth

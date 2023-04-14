@@ -1,0 +1,12 @@
+agent_id: 3
+founder: false
+goals:
+- identify key AI research areas
+- determine priority of research areas
+- relay priority list to assistant
+name: Research_Area_Definer
+pending_messages: []
+status: null
+supervisor_id: 2
+supervisor_name: Research_Infrastructure_Manager
+task: define and prioritize research areas

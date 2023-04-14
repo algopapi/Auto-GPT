@@ -25,8 +25,12 @@ class CacheContent:
 
 class LocalCache():
     # on load, load our database
-    def __init__(self, cfg) -> None:
-        self.filename = f"{cfg.memory_index}.json"
+    def __init__(self, cfg, organization_name, agent_config) -> None:
+        agent_id = agent_config.agent_id
+        agent_name = agent_config.name
+
+        self.filename = f"permanent_storage/organizations/{organization_name}/{agent_id}_{agent_name}_memory.json"
+        print("memory filename", self.filename)
         if os.path.exists(self.filename):
             with open(self.filename, "rb") as f:
                 loaded = orjson.loads(f.read())

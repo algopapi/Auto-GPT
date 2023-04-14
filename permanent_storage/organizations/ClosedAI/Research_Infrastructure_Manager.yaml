@@ -1,0 +1,12 @@
+agent_id: 2
+founder: false
+goals:
+- Define and establish necessary facilities for research
+- Prioritize both fundamental and applied research
+- Ensure resources for practical solutions and innovation
+name: Research_Infrastructure_Manager
+pending_messages: []
+status: null
+supervisor_id: 0
+supervisor_name: elon musk
+task: Set up research infrastructure for AI company

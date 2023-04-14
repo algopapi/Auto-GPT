@@ -31,11 +31,13 @@ class Organization:
         for file_path in agent_files:
             agent_config = AgentConfig.load(file_path)
             if agent_config is not None:
+                agent_config.init_memory = False
                 org.add_agent(agent_config)
+
         # Add staff to supervisor
         for _, agent in org.agents.items():
             if not agent.cfg.founder:
-                supervisor = org.agents[agent.cfg.supervisor_name]
+                supervisor = org.agents[agent.cfg.supervisor_id]
                 if supervisor is not None:
                     supervisor.add_staff(agent)
         return org
@@ -73,14 +75,15 @@ class Organization:
         supervisor_id=None,
         founder=False,
     ):
+        agent_id = len(self.agents)
         organization_file = (
             importlib.resources.files(permanent_storage)
-            / f"organizations/{self.name}/{name}.yaml"
+            / f"organizations/{self.name}/{agent_id}_{name}.yaml"
         )
         agent_cfg = AgentConfig(
             file_path=organization_file,
             name=name,
-            agent_id=len(self.agents),
+            agent_id=agent_id,
             task=task,
             goals=goals,
             supervisor_name=supervisor_name,
