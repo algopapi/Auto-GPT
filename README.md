@@ -12,7 +12,7 @@ Here I made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP
 # Main Features
 - Auto-gpt's can hire Auto-gpts. Effectively creating an Auto-gpt instance much like a human would. 
 - organizations - and the state of agents therein, are saved. This way you can start and stop without having do build the entire org from scratch
-- Agents can message there staff or their supervisor. The idea behind this scheme is to prevent to much management overhead. Allowing everyone to communicate with eachother would take up alot of thinking room. 
+- Agents can message either their staff or supervisor. The idea behind this scheme is to prevent to much management overhead. Allowing everyone to communicate with eachother would take up alot of thinking steps.
 
 ### Latest Updates
 - Added an initial budget to the organization. This prevents agents from overhiring and might give them am incentive to finish there task more efficiently. 
@@ -40,6 +40,7 @@ Here I made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP
 4. implement reflexion
 5. Concurrent Agent Execution (Right now everything runs sequentially)
 6. Staff member communications (Could get messy)
+
 
 ## License
 
