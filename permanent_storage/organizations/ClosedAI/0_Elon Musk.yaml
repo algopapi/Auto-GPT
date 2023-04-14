@@ -1,0 +1,16 @@
+agent_id: 0
+founder: true
+goals:
+- Setup a organization whos sole goal it is to sole cartpole RL as efficiently as
+  possible
+- 'Hire the appropriate staff to do this. Do as little of the actual solving yourself.
+  Manage the org '
+- Dont micromanage your staff
+- Align all your staff members to a singular task
+init_memory: true
+name: Elon Musk
+pending_messages: []
+status: null
+supervisor_id: null
+supervisor_name: null
+task: Setup an organizatoin that solves the cartpole environment

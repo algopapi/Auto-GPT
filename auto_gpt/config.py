@@ -32,7 +32,7 @@ class Config(metaclass=Singleton):
 
     def __init__(self):
         self.temperature = 0.2
-        self.continuous_mode = os.getenv("CONTINUOUS", "False") == "True"
+        self.continuous_mode = os.getenv("CONTINUOUS", "True") == "True"
         self.speak_mode = os.getenv("SPEAK_MODE", "False") == "True"
         self.debug_mode = os.getenv("DEBUG_MODE", "False") == "True"
         # TODO - make these models be self-contained, using langchain, so we can configure them once and call it good

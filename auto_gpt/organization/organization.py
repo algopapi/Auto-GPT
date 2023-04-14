@@ -52,11 +52,17 @@ class Organization:
         while True:
             agents_list = list(self.agents.values())
             print(
-                Fore.GREEN
-                + f" \nAgents in Org: {self.agents}\n"
+                Fore.LIGHTBLUE_EX
+                + f" \nAgents in Org:\n"
                 + Style.RESET_ALL,
                 end="",
             )
+            for agents in agents_list:
+                print(
+                    Fore.LIGHTBLUE_EX
+                    + f"{agents.cfg.agent_id}: {agents.cfg.name} Task: {agents.cfg.task}"
+                )
+                
             for agent in agents_list:
                 print(
                     Fore.GREEN

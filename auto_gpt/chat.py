@@ -45,7 +45,7 @@ def generate_context(prompt, relevant_memory, full_message_history, model):
 
 
 def chat_with_ai(
-    prompt, user_input, full_message_history, permanent_memory, token_limit, debug=True
+    prompt, user_input, full_message_history, permanent_memory, token_limit, debug=False
 ):
     while True:
         try:

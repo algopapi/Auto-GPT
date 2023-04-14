@@ -81,7 +81,7 @@ def print_assistant_thoughts(ai_name, assistant_reply):
         assistant_thoughts_plan = None
         assistant_thoughts_speak = None
         assistant_thoughts_criticism = None
-        assistant_thoughts = assistant_reply_json.get("thoughts", {})
+        assistant_thoughts = assistant_reply_json.get("thought", {})
         assistant_thoughts_text = assistant_thoughts.get("text")
 
         if assistant_thoughts:
@@ -225,7 +225,7 @@ class Agent:
         print(
             f"Agent {self.cfg.name} recieved message from {sender.agent_name}. Message = {message}"
         )
-        self.pending_messages.append((sender.agent_id, message))
+        self.pending_messages.append(((sender.agent_id, sender.agent_name), message))
         print(f"\nAgent {self.cfg.name} pending responses: {self.pending_messages}\n")
         pass
 
@@ -238,8 +238,8 @@ class Agent:
         # Append next pending messages to the agent context
         if self.pending_messages:
             message = self.pending_messages.popleft()
-            agent_name, agent_message = message
-            user_input = f"Incoming Message from {agent_name}:{agent_message}"
+            agent_info, agent_message = message
+            user_input = f"Incoming Message from {agent_info[0]}:{agent_info[1]}.Message: {agent_message}"
         else:
             user_input = DEF_USER_INPUT
         with Spinner("Thinking... "):
@@ -251,7 +251,7 @@ class Agent:
                 self.global_cfg.fast_token_limit,
             )  # TODO: This hardcodes the model to use GPT3.5. Make this an argument
         # 1. Parse thought and get status
-        print_assistant_thoughts(self.agent_name, assistant_reply)        
+        print_assistant_thoughts(self.agent_name, assistant_reply)     
         # Get command name and arguments
         try:
             command_name, arguments = cmd.get_command(attempt_to_fix_json_by_finding_outermost_brackets(assistant_reply))
