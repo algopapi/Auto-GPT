@@ -1,28 +1,11 @@
-[tool.poetry]
+[project]
 name = "auto-gpt"
 version = "0.1.0"
-description = "An autonomous system which runs a full organization."
-authors = ["Your Name <you@example.com>"]
+description = "A GPT based ai agent"
 readme = "README.md"
-packages = [{include = "auto_gpt"}]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-beautifulsoup4 = "^4.12.2"
-colorama = "^0.4.6"
-openai = "^0.27.4"
-python-dotenv = "^1.0.0"
-pyyaml = "^6.0"
-readability-lxml = "^0.8.1"
-requests = "^2.28.2"
-tiktoken = "^0.3.3"
-gtts = "^2.3.1"
-docker = "^6.0.1"
-duckduckgo-search = "^2.8.5"
-google-api-python-client = "^2.84.0"
-pinecone-client = "^2.2.1"
-orjson = "^3.8.9"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = ""
