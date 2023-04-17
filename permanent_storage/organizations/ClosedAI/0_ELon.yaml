@@ -1,5 +1,5 @@
 agent_id: 0
-budget: 48400
+budget: 47900
 founder: true
 goals:
 - hire staff
@@ -7,7 +7,7 @@ goals:
 - fire staff
 init_memory: false
 name: ELon
-operating_cost: 100
+operating_cost: 200
 pending_messages: []
 status: idle
 supervisor_id: null

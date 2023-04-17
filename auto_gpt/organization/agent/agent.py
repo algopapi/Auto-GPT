@@ -62,7 +62,6 @@ def print_assistant_thoughts(ai_name, assistant_reply):
     """Prints the assistant's thoughts to the console"""
     try:
         try:
-            print("\n\n assistnat reply: ", assistant_reply, "\n\n") 
             # Parse and print Assistant response
             assistant_reply_json = fix_and_parse_json(assistant_reply)
         except json.JSONDecodeError as e:
