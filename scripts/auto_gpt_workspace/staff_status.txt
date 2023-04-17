@@ -1,0 +1,3 @@
+1. Name: Agent2, Task: Analysis of successful trend-following trading strategies, Status: None
+2. Name: Agent1, Task: Research and analysis of high-return investment opportunities., Status: None
+3. Name: Investment Agent, Task: Research and analysis of low-risk investments, Status: None

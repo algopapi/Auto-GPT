@@ -1,0 +1,5 @@
+Double Deep Q Learning is an advanced reinforcement learning technique that utilizes two neural networks, the Q (online) network and the target network, to improve model training efficiency. The online network predicts the best action to take in a new state, while the target network reduces the overestimation of Q values and stabilizes the training process. Double Deep Q Learning helps in achieving more stable learning through better action evaluation.
+
+Soft Target Updates, on the other hand, provide a gradual update to the target network. This technique incrementally adjusts the target network's weights using a combination of the online network's weights and the existing target network's weights. The blend is controlled by the hyperparameter TAU (0 < TAU < 1).
+
+Utilizing both Double Deep Q Networks and Soft Target Updates can lead to more stable and improved learning results compared to the original Deep Q-Learning algorithm.
