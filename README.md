@@ -1,36 +1,35 @@
-# Auto-GPT: An Autonomous GPT-4 Experiment
-![GitHub Repo stars](https://img.shields.io/github/stars/Torantulino/auto-gpt?style=social)
-![Twitter Follow](https://img.shields.io/twitter/follow/siggravitas?style=social)
-[![](https://dcbadge.vercel.app/api/server/PQ7VX6TY4t?style=flat)](https://discord.gg/PQ7VX6TY4t)
+# AUTO-Gpt Organization Experiment
 
-Auto-GPT is an experimental open-source application showcasing the capabilities of the GPT-4 language model. This program, driven by GPT-4, autonomously develops and manages businesses to increase net worth. As one of the first examples of GPT-4 running fully autonomously, Auto-GPT pushes the boundaries of what is possible with AI.
+A cool Auto-GPT experiment. Allowing it to form an organization. Let Agents hire staff with one founder at the helm.
+This is a cool glimpse into the world of agent swarms. However, this scheme is still far from perfect and requires a lot of, either manual steering, or other general improvements.
 
-### Demo (30/03/2023):
-https://user-images.githubusercontent.com/22963551/228855501-2f5777cf-755b-4407-a643-c7299e5b6419.mp4
+## Example
 
+Here I made the founder a portfolio manager with portfolio X = [BTC, ETH, and SP500]. He proceeded to hire QUANT_A/B/C for each asset, and also a news reporter who kept him up to date with the latest news.
+![alt text](https://i.imgur.com/efaLR9n.jpg)
 
-<h2 align="center"> 💖 Help Fund Auto-GPT's Development 💖</h2> 
-<p align="center">
-If you can spare a coffee, you can help to cover the API costs of developing Auto-GPT and help push the boundaries of fully autonomous AI!
-A full day of development can easily cost as much as $20 in API costs, which for a free project is quite limiting.
-Your support is greatly appreciated
-</p>
+# Main Features
 
-<p align="center">
- Development of this free, open-source project is made possible by all the <a href="https://github.com/Torantulino/Auto-GPT/graphs/contributors">contributors</a> and <a href="https://github.com/sponsors/Torantulino">sponsors</a>. If you'd like to sponsor this project and have your avatar or company logo appear below <a href="https://github.com/sponsors/Torantulino">click here</a>.
+- Auto-gpt's can hire Auto-gpts. Effectively creating an Auto-gpt instance much like a human would.
+- organizations - and the state of agents therein, are saved. This way you can start and stop without having do build the entire org from scratch
+- Agents can message either their staff or supervisor. The idea behind this scheme is to prevent to much management overhead. Allowing everyone to communicate with eachother would take up alot of thinking steps.
 
-<h3 align="center">Individual Sponsors</h3>
-<p align="center">
-<a href="https://github.com/robinicus"><img src="https://github.com/robinicus.png" width="50px" alt="robinicus" /></a>&nbsp;&nbsp;<a href="https://github.com/prompthero"><img src="https://github.com/prompthero.png" width="50px" alt="prompthero" /></a>&nbsp;&nbsp;<a href="https://github.com/crizzler"><img src="https://github.com/crizzler.png" width="50px" alt="crizzler" /></a>&nbsp;&nbsp;<a href="https://github.com/tob-le-rone"><img src="https://github.com/tob-le-rone.png" width="50px" alt="tob-le-rone" /></a>&nbsp;&nbsp;<a href="https://github.com/FSTatSBS"><img src="https://github.com/FSTatSBS.png" width="50px" alt="FSTatSBS" /></a>&nbsp;&nbsp;<a href="https://github.com/toverly1"><img src="https://github.com/toverly1.png" width="50px" alt="toverly1" /></a>&nbsp;&nbsp;<a href="https://github.com/ddtarazona"><img src="https://github.com/ddtarazona.png" width="50px" alt="ddtarazona" /></a>&nbsp;&nbsp;<a href="https://github.com/Nalhos"><img src="https://github.com/Nalhos.png" width="50px" alt="Nalhos" /></a>&nbsp;&nbsp;<a href="https://github.com/Kazamario"><img src="https://github.com/Kazamario.png" width="50px" alt="Kazamario" /></a>&nbsp;&nbsp;<a href="https://github.com/pingbotan"><img src="https://github.com/pingbotan.png" width="50px" alt="pingbotan" /></a>&nbsp;&nbsp;<a href="https://github.com/indoor47"><img src="https://github.com/indoor47.png" width="50px" alt="indoor47" /></a>&nbsp;&nbsp;<a href="https://github.com/AuroraHolding"><img src="https://github.com/AuroraHolding.png" width="50px" alt="AuroraHolding" /></a>&nbsp;&nbsp;<a href="https://github.com/kreativai"><img src="https://github.com/kreativai.png" width="50px" alt="kreativai" /></a>&nbsp;&nbsp;<a href="https://github.com/hunteraraujo"><img src="https://github.com/hunteraraujo.png" width="50px" alt="hunteraraujo" /></a>&nbsp;&nbsp;<a href="https://github.com/Explorergt92"><img src="https://github.com/Explorergt92.png" width="50px" alt="Explorergt92" /></a>&nbsp;&nbsp;<a href="https://github.com/judegomila"><img src="https://github.com/judegomila.png" width="50px" alt="judegomila" /></a>&nbsp;&nbsp;
-<a href="https://github.com/thepok"><img src="https://github.com/thepok.png" width="50px" alt="thepok" /></a>
-&nbsp;&nbsp;<a href="https://github.com/SpacingLily"><img src="https://github.com/SpacingLily.png" width="50px" alt="SpacingLily" /></a>&nbsp;&nbsp;<a href="https://github.com/merwanehamadi"><img src="https://github.com/merwanehamadi.png" width="50px" alt="merwanehamadi" /></a>&nbsp;&nbsp;<a href="https://github.com/m"><img src="https://github.com/m.png" width="50px" alt="m" /></a>&nbsp;&nbsp;<a href="https://github.com/zkonduit"><img src="https://github.com/zkonduit.png" width="50px" alt="zkonduit" /></a>&nbsp;&nbsp;<a href="https://github.com/maxxflyer"><img src="https://github.com/maxxflyer.png" width="50px" alt="maxxflyer" /></a>&nbsp;&nbsp;<a href="https://github.com/tekelsey"><img src="https://github.com/tekelsey.png" width="50px" alt="tekelsey" /></a>&nbsp;&nbsp;<a href="https://github.com/digisomni"><img src="https://github.com/digisomni.png" width="50px" alt="digisomni" /></a>&nbsp;&nbsp;<a href="https://github.com/nocodeclarity"><img src="https://github.com/nocodeclarity.png" width="50px" alt="nocodeclarity" /></a>&nbsp;&nbsp;<a href="https://github.com/tjarmain"><img src="https://github.com/tjarmain.png" width="50px" alt="tjarmain" /></a>
-</p>
+### Latest Updates
 
+- Added an initial budget to the organization. This prevents agents from overhiring and might give them am incentive to finish there task more efficiently.
+- Hiring employees adds to the running costs, eating away budget faster.
+- The status of the hired staff is added in context and updated every run cycle.
+- Impelmented the new promptgenerator. This could be extended with putting agent specific information in the intial prompt.
 
-## Table of Contents
+## How to Use
+
+1. Clone the repository. (Stable branch)
+2. Install dependencies.
+3. Run main.py
+4. Enjoy the power of AUTO-GPT Agent.
 
 - [Auto-GPT: An Autonomous GPT-4 Experiment](#auto-gpt-an-autonomous-gpt-4-experiment)
-    - [Demo (30/03/2023):](#demo-30032023)
+  - [Demo (30/03/2023):](#demo-30032023)
   - [💖 Help Fund Auto-GPT's Development](#-help-fund-auto-gpts-development)
   - [Table of Contents](#table-of-contents)
   - [🚀 Features](#-features)
@@ -47,21 +46,23 @@ Your support is greatly appreciated
   - [🛡 Disclaimer](#-disclaimer)
   - [🐦 Connect with Us on Twitter](#-connect-with-us-on-twitter)
 
+## Future work...
 
-## 🚀 Features
-
-- 🌐 Internet access for searches and information gathering
-- 💾 Long-Term and Short-Term memory management
-- 🧠 GPT-4 instances for text generation
-- 🔗 Access to popular websites and platforms
-- 🗃️ File storage and summarization with GPT-3.5
+1. Give the agents context of the organization they are a part of. They are unaware of that at the moment. This might help align them a bit better.
+2. Fix staff quitting while their employees are still working (very bad)
+3. The Supervisor should be able to change the goals of the employees
+4. implement reflexion
+5. Concurrent Agent Execution (Right now everything runs sequentially)
+6. Staff member communications (Could get messy)
 
 ## 📋 Requirements
+
 - [Python 3.7 or later](https://www.tutorialspoint.com/how-to-install-python-in-windows)
 - OpenAI API key
 - PINECONE API key
 
 Optional:
+
 - ElevenLabs Key (If you want the AI to speak)
 
 ## 💾 Installation
@@ -70,43 +71,51 @@ To install Auto-GPT, follow these steps:
 
 0. Make sure you have all the **requirements** above, if not, install/get them.
 
-*The following commands should be executed in a CMD, Bash or Powershell window. To do this, go to a folder on your computer, click in the folder path at the top and type CMD, then press enter.*
+_The following commands should be executed in a CMD, Bash or Powershell window. To do this, go to a folder on your computer, click in the folder path at the top and type CMD, then press enter._
 
 1. Clone the repository:
-For this step you need Git installed, but you can just download the zip file instead by clicking the button at the top of this page ☝️
+   For this step you need Git installed, but you can just download the zip file instead by clicking the button at the top of this page ☝️
+
 ```
 git clone https://github.com/Torantulino/Auto-GPT.git
 ```
 
 2. Navigate to the project directory:
-*(Type this into your CMD window, you're aiming to navigate the CMD window to the repository you just downloaded)*
+   _(Type this into your CMD window, you're aiming to navigate the CMD window to the repository you just downloaded)_
+
 ```
 $ cd 'Auto-GPT'
 ```
 
 3. Install the required dependencies:
-*(Again, type this into your CMD window)*
+   _(Again, type this into your CMD window)_
+
 ```
 pip install -r requirements.txt
 ```
 
 4. Rename `.env.template` to `.env` and fill in your `OPENAI_API_KEY`. If you plan to use Speech Mode, fill in your `ELEVEN_LABS_API_KEY` as well.
-  - Obtain your OpenAI API key from: https://platform.openai.com/account/api-keys.
-  - Obtain your ElevenLabs API key from: https://elevenlabs.io. You can view your xi-api-key using the "Profile" tab on the website.
-  - If you want to use GPT on an Azure instance, set `USE_AZURE` to `True` and provide the `OPENAI_API_BASE`, `OPENAI_API_VERSION` and `OPENAI_DEPLOYMENT_ID` values as explained here: https://pypi.org/project/openai/ in the `Microsoft Azure Endpoints` section
+
+- Obtain your OpenAI API key from: https://platform.openai.com/account/api-keys.
+- Obtain your ElevenLabs API key from: https://elevenlabs.io. You can view your xi-api-key using the "Profile" tab on the website.
+- If you want to use GPT on an Azure instance, set `USE_AZURE` to `True` and provide the `OPENAI_API_BASE`, `OPENAI_API_VERSION` and `OPENAI_DEPLOYMENT_ID` values as explained here: https://pypi.org/project/openai/ in the `Microsoft Azure Endpoints` section
 
 ## 🔧 Usage
 
 1. Run the `main.py` Python script in your terminal:
-*(Type this into your CMD window)*
+   _(Type this into your CMD window)_
+
 ```
 python scripts/main.py
 ```
+
 2. After each of AUTO-GPT's actions, type "NEXT COMMAND" to authorise them to continue.
 3. To exit the program, type "exit" and press Enter.
 
 ## 🗣️ Speech Mode
+
 Use this to use TTS for Auto-GPT
+
 ```
 python scripts/main.py --speak
 
@@ -125,16 +134,20 @@ To use the `google_official_search` command, you need to set up your Google API 
 6. Copy the API key and set it as an environment variable named `GOOGLE_API_KEY` on your machine. See setting up environment variables below.
 7. Go to the [Custom Search Engine](https://cse.google.com/cse/all) page and click "Add".
 8. Set up your search engine by following the prompts. You can choose to search the entire web or specific sites.
-9.  Once you've created your search engine, click on "Control Panel" and then "Basics". Copy the "Search engine ID" and set it as an environment variable named `CUSTOM_SEARCH_ENGINE_ID` on your machine. See setting up environment variables below.
+9. Once you've created your search engine, click on "Control Panel" and then "Basics". Copy the "Search engine ID" and set it as an environment variable named `CUSTOM_SEARCH_ENGINE_ID` on your machine. See setting up environment variables below.
 
 ### Setting up environment variables
-   For Windows Users:
+
+For Windows Users:
+
 ```
 setx GOOGLE_API_KEY "YOUR_GOOGLE_API_KEY"
 setx CUSTOM_SEARCH_ENGINE_ID "YOUR_CUSTOM_SEARCH_ENGINE_ID"
 
 ```
+
 For macOS and Linux users:
+
 ```
 export GOOGLE_API_KEY="YOUR_GOOGLE_API_KEY"
 export CUSTOM_SEARCH_ENGINE_ID="YOUR_CUSTOM_SEARCH_ENGINE_ID"
@@ -146,11 +159,13 @@ export CUSTOM_SEARCH_ENGINE_ID="YOUR_CUSTOM_SEARCH_ENGINE_ID"
 Install docker desktop.
 
 Run:
+
 ```
 docker run -d --name redis-stack-server -p 6379:6379 redis/redis-stack-server:latest
 ```
 
 Set the following environment variables:
+
 ```
 MEMORY_BACKEND=redis
 REDIS_HOST=localhost
@@ -170,9 +185,9 @@ To persist memory stored in Redis.
 
 You can specify the memory index for redis using the following:
 
-````
+```
 MEMORY_INDEX=whatever
-````
+```
 
 ## 🌲 Pinecone API Key Setup
 
@@ -184,13 +199,17 @@ are loaded for the agent at any given time.
 3. Find your API key and region under the default project in the left sidebar.
 
 ### Setting up environment variables
-   For Windows Users:
+
+For Windows Users:
+
 ```
 setx PINECONE_API_KEY "YOUR_PINECONE_API_KEY"
 export PINECONE_ENV="Your pinecone region" # something like: us-east4-gcp
 
 ```
+
 For macOS and Linux users:
+
 ```
 export PINECONE_API_KEY="YOUR_PINECONE_API_KEY"
 export PINECONE_ENV="Your pinecone region" # something like: us-east4-gcp
@@ -203,35 +222,43 @@ Or you can set them in the `.env` file.
 
 1. View memory usage by using the `--debug` flag :)
 
-
 ## 💀 Continuous Mode ⚠️
+
 Run the AI **without** user authorisation, 100% automated.
-Continuous mode is not recommended. 
-It is potentially dangerous and may cause your AI to run forever or carry out actions you would not usually authorise. 
+Continuous mode is not recommended.
+It is potentially dangerous and may cause your AI to run forever or carry out actions you would not usually authorise.
 Use at your own risk.
+
 1. Run the `main.py` Python script in your terminal:
+
 ```
 python scripts/main.py --continuous
 
 ```
+
 2. To exit the program, press Ctrl + C
 
 ## GPT3.5 ONLY Mode
+
 If you don't have access to the GPT4 api, this mode will allow you to use Auto-GPT!
+
 ```
 python scripts/main.py --gpt3only
 ```
 
 ## 🖼 Image Generation
+
 By default, Auto-GPT uses DALL-e for image generation. To use Stable Diffusion, a [HuggingFace API Token](https://huggingface.co/settings/tokens) is required.
 
 Once you have a token, set these variables in your `.env`:
+
 ```
 IMAGE_PROVIDER=sd
 HUGGINGFACE_API_TOKEN="YOUR_HUGGINGFACE_API_TOKEN"
 ```
 
 ## ⚠️ Limitations
+
 This experiment aims to showcase the potential of GPT-4 but comes with some limitations:
 
 1. Not a polished application or product, just an experiment
@@ -251,7 +278,7 @@ As an autonomous experiment, Auto-GPT may generate content or take actions that 
 
 By using Auto-GPT, you agree to indemnify, defend, and hold harmless the developers, contributors, and any affiliated parties from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from your use of this software or your violation of these terms.
 
-## 🐦 Connect with Us on Twitter 
+## 🐦 Connect with Us on Twitter
 
 Stay up-to-date with the latest news, updates, and insights about Auto-GPT by following our Twitter accounts. Engage with the developer and the AI's own account for interesting discussions, project updates, and more.
 
@@ -259,7 +286,6 @@ Stay up-to-date with the latest news, updates, and insights about Auto-GPT by fo
 - **Entrepreneur-GPT**: Join the conversation with the AI itself by following [@En_GPT](https://twitter.com/En_GPT). Share your experiences, discuss the AI's outputs, and engage with the growing community of users.
 
 We look forward to connecting with you and hearing your thoughts, ideas, and experiences with Auto-GPT. Join us on Twitter and let's explore the future of AI together!
-
 
 <h2 align="center"> 💖 Help Fund Auto-GPT's Development 💖</h2> 
 <p align="center">
@@ -279,9 +305,10 @@ Your support is greatly appreciated
 </p>
 
 1. Fix the pinecone implementation
-2. The supervisor tends to keep "herassing" the staff. i.e., constantly asking them for updates. 
+2. The supervisor tends to keep "herassing" the staff. i.e., constantly asking them for updates.
 
 ## Future work...
+
 1. Firing agents
 2. Fix Staff quitting while their employees are still working (very bad)
 3. The Supervisor should be able to change the goals of the employees
@@ -290,7 +317,7 @@ Your support is greatly appreciated
 6. Staff member communications (Could get messy)
 
 - [Auto-GPT: An Autonomous GPT-4 Experiment](#auto-gpt-an-autonomous-gpt-4-experiment)
-    - [Demo (30/03/2023):](#demo-30032023)
+  - [Demo (30/03/2023):](#demo-30032023)
   - [💖 Help Fund Auto-GPT's Development](#-help-fund-auto-gpts-development)
   - [Table of Contents](#table-of-contents)
   - [🚀 Features](#-features)
@@ -307,7 +334,6 @@ Your support is greatly appreciated
   - [🛡 Disclaimer](#-disclaimer)
   - [🐦 Connect with Us on Twitter](#-connect-with-us-on-twitter)
 
-
 ## 🚀 Features
 
 - 🌐 Internet access for searches and information gathering
@@ -317,11 +343,13 @@ Your support is greatly appreciated
 - 🗃️ File storage and summarization with GPT-3.5
 
 ## 📋 Requirements
+
 - [Python 3.7 or later](https://www.tutorialspoint.com/how-to-install-python-in-windows)
 - OpenAI API key
 - PINECONE API key
 
 Optional:
+
 - ElevenLabs Key (If you want the AI to speak)
 
 ## 💾 Installation
@@ -330,43 +358,51 @@ To install Auto-GPT, follow these steps:
 
 0. Make sure you have all the **requirements** above, if not, install/get them.
 
-*The following commands should be executed in a CMD, Bash or Powershell window. To do this, go to a folder on your computer, click in the folder path at the top and type CMD, then press enter.*
+_The following commands should be executed in a CMD, Bash or Powershell window. To do this, go to a folder on your computer, click in the folder path at the top and type CMD, then press enter._
 
 1. Clone the repository:
-For this step you need Git installed, but you can just download the zip file instead by clicking the button at the top of this page ☝️
+   For this step you need Git installed, but you can just download the zip file instead by clicking the button at the top of this page ☝️
+
 ```
 git clone https://github.com/Torantulino/Auto-GPT.git
 ```
 
 2. Navigate to the project directory:
-*(Type this into your CMD window, you're aiming to navigate the CMD window to the repository you just downloaded)*
+   _(Type this into your CMD window, you're aiming to navigate the CMD window to the repository you just downloaded)_
+
 ```
 $ cd 'Auto-GPT'
 ```
 
 3. Install the required dependencies:
-*(Again, type this into your CMD window)*
+   _(Again, type this into your CMD window)_
+
 ```
 pip install -r requirements.txt
 ```
 
 4. Rename `.env.template` to `.env` and fill in your `OPENAI_API_KEY`. If you plan to use Speech Mode, fill in your `ELEVEN_LABS_API_KEY` as well.
-  - Obtain your OpenAI API key from: https://platform.openai.com/account/api-keys.
-  - Obtain your ElevenLabs API key from: https://elevenlabs.io. You can view your xi-api-key using the "Profile" tab on the website.
-  - If you want to use GPT on an Azure instance, set `USE_AZURE` to `True` and provide the `OPENAI_API_BASE`, `OPENAI_API_VERSION` and `OPENAI_DEPLOYMENT_ID` values as explained here: https://pypi.org/project/openai/ in the `Microsoft Azure Endpoints` section
+
+- Obtain your OpenAI API key from: https://platform.openai.com/account/api-keys.
+- Obtain your ElevenLabs API key from: https://elevenlabs.io. You can view your xi-api-key using the "Profile" tab on the website.
+- If you want to use GPT on an Azure instance, set `USE_AZURE` to `True` and provide the `OPENAI_API_BASE`, `OPENAI_API_VERSION` and `OPENAI_DEPLOYMENT_ID` values as explained here: https://pypi.org/project/openai/ in the `Microsoft Azure Endpoints` section
 
 ## 🔧 Usage
 
 1. Run the `main.py` Python script in your terminal:
-*(Type this into your CMD window)*
+   _(Type this into your CMD window)_
+
 ```
 python scripts/main.py
 ```
+
 2. After each of AUTO-GPT's actions, type "NEXT COMMAND" to authorise them to continue.
 3. To exit the program, type "exit" and press Enter.
 
 ## 🗣️ Speech Mode
+
 Use this to use TTS for Auto-GPT
+
 ```
 python scripts/main.py --speak
 
@@ -385,16 +421,20 @@ To use the `google_official_search` command, you need to set up your Google API 
 6. Copy the API key and set it as an environment variable named `GOOGLE_API_KEY` on your machine. See setting up environment variables below.
 7. Go to the [Custom Search Engine](https://cse.google.com/cse/all) page and click "Add".
 8. Set up your search engine by following the prompts. You can choose to search the entire web or specific sites.
-9.  Once you've created your search engine, click on "Control Panel" and then "Basics". Copy the "Search engine ID" and set it as an environment variable named `CUSTOM_SEARCH_ENGINE_ID` on your machine. See setting up environment variables below.
+9. Once you've created your search engine, click on "Control Panel" and then "Basics". Copy the "Search engine ID" and set it as an environment variable named `CUSTOM_SEARCH_ENGINE_ID` on your machine. See setting up environment variables below.
 
 ### Setting up environment variables
-   For Windows Users:
+
+For Windows Users:
+
 ```
 setx GOOGLE_API_KEY "YOUR_GOOGLE_API_KEY"
 setx CUSTOM_SEARCH_ENGINE_ID "YOUR_CUSTOM_SEARCH_ENGINE_ID"
 
 ```
+
 For macOS and Linux users:
+
 ```
 export GOOGLE_API_KEY="YOUR_GOOGLE_API_KEY"
 export CUSTOM_SEARCH_ENGINE_ID="YOUR_CUSTOM_SEARCH_ENGINE_ID"
@@ -410,17 +450,18 @@ are loaded for the agent at any given time.
 2. Choose the `Starter` plan to avoid being charged.
 3. Find your API key and region under the default project in the left sidebar.
 
-
 ## Redis Setup
 
 Install docker desktop.
 
 Run:
+
 ```
 docker run -d --name redis-stack-server -p 6379:6379 redis/redis-stack-server:latest
 ```
 
 Set the following environment variables:
+
 ```
 MEMORY_BACKEND=redis
 REDIS_HOST=localhost
@@ -430,15 +471,18 @@ REDIS_PASSWORD=
 
 Note that this is not intended to be run facing the internet and is not secure, do not expose redis to the internet without a password or at all really.
 
-
 ### Setting up environment variables
-   For Windows Users:
+
+For Windows Users:
+
 ```
 setx PINECONE_API_KEY "YOUR_PINECONE_API_KEY"
 export PINECONE_ENV="Your pinecone region" # something like: us-east4-gcp
 
 ```
+
 For macOS and Linux users:
+
 ```
 export PINECONE_API_KEY="YOUR_PINECONE_API_KEY"
 export PINECONE_ENV="Your pinecone region" # something like: us-east4-gcp
@@ -451,35 +495,43 @@ Or you can set them in the `.env` file.
 
 1. View memory usage by using the `--debug` flag :)
 
-
 ## 💀 Continuous Mode ⚠️
+
 Run the AI **without** user authorisation, 100% automated.
-Continuous mode is not recommended. 
-It is potentially dangerous and may cause your AI to run forever or carry out actions you would not usually authorise. 
+Continuous mode is not recommended.
+It is potentially dangerous and may cause your AI to run forever or carry out actions you would not usually authorise.
 Use at your own risk.
+
 1. Run the `main.py` Python script in your terminal:
+
 ```
 python scripts/main.py --continuous
 
 ```
+
 2. To exit the program, press Ctrl + C
 
 ## GPT3.5 ONLY Mode
+
 If you don't have access to the GPT4 api, this mode will allow you to use Auto-GPT!
+
 ```
 python scripts/main.py --gpt3only
 ```
 
 ## 🖼 Image Generation
+
 By default, Auto-GPT uses DALL-e for image generation. To use Stable Diffusion, a [HuggingFace API Token](https://huggingface.co/settings/tokens) is required.
 
 Once you have a token, set these variables in your `.env`:
+
 ```
 IMAGE_PROVIDER=sd
 HUGGINGFACE_API_TOKEN="YOUR_HUGGINGFACE_API_TOKEN"
 ```
 
 ## ⚠️ Limitations
+
 This experiment aims to showcase the potential of GPT-4 but comes with some limitations:
 
 1. Not a polished application or product, just an experiment
@@ -499,7 +551,7 @@ As an autonomous experiment, Auto-GPT may generate content or take actions that 
 
 By using Auto-GPT, you agree to indemnify, defend, and hold harmless the developers, contributors, and any affiliated parties from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from your use of this software or your violation of these terms.
 
-## 🐦 Connect with Us on Twitter 
+## 🐦 Connect with Us on Twitter
 
 Stay up-to-date with the latest news, updates, and insights about Auto-GPT by following our Twitter accounts. Engage with the developer and the AI's own account for interesting discussions, project updates, and more.
 

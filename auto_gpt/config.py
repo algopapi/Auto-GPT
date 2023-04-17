@@ -58,6 +58,8 @@ class Config(metaclass=Singleton):
         self.google_api_key = os.getenv("GOOGLE_API_KEY")
         self.custom_search_engine_id = os.getenv("CUSTOM_SEARCH_ENGINE_ID")
 
+        self.reflexion_llm_model = os.getenv("FAST_LLM_MODEL", "gpt-3.5-turbo")
+        self.reflexion_llm_token_limit = int(os.getenv("SMART_TOKEN_LIMIT", 8000))
         self.pinecone_api_key = os.getenv("PINECONE_API_KEY")
         self.pinecone_region = os.getenv("PINECONE_ENV")
 
