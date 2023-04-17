@@ -28,56 +28,41 @@ def is_valid_int(value):
 def get_command(response):
     """Parse the response and return the command name and arguments"""
     try:
+        print(" GETTING COMMAND\n")
         response_json = fix_and_parse_json(response)
 
+        print(" RESPONSE JSON:", response_json, "\n")
+
         if "command" not in response_json:
-            return "Error:" , "Missing 'command' object in JSON"
+            return "Error:" , "Missing 'command' object in JSON", None
         
-        if "thought" not in response_json:
-            return " Error:", "Missing 'thought' object in JSON"
+        if "thoughts" not in response_json:
+            return " Error:", "Missing 'thought' object in JSON", None
 
         command = response_json["command"]
-        thought = response_json["thought"]
+        thought = response_json["thoughts"]
 
         if "name" not in command:
-            return "Error:", "Missing 'name' field in 'command' object"
+            return "Error:", "Missing 'name' field in 'command' object", None
         
         if "status" not in thought:
-            return "Error:", "Missing 'status' field in 'thought' object"
+            return "Error:", "Missing 'status' field in 'thought' object", None
     
         command_name = command["name"]
         status = thought["status"]
         # Use an empty dictionary if 'args' field is not present in 'command' object
         arguments = command.get("args", {})
 
+        print(" \nCommand name:", command_name, "\n")
+        print ("\n Arguments:", arguments, "\n")
+        print ("\n Status:", status, "\n")
         return command_name, arguments, status
     except json.decoder.JSONDecodeError:
-        return "Error:", "Invalid JSON"
+        return "Error:", "Invalid JSON", None
     # All other errors, return "Error: + error message"
     except Exception as e:
         return "Error:", str(e), None
     
-def get_status(response):
-    """Parse the response and return the status of the agent"""
-    try:
-        response_json = fix_and_parse_json(response)
-
-        if "thought" not in response_json:
-            return "Error:" , "Missing 'thought' object in JSON"
-
-        thought = response_json["thought"]
-
-        if "status" not in thought:
-            return "Error:", "Missing 'status' field in 'command' object"
-
-        status = thought["status"]
-        return status
-    except json.decoder.JSONDecodeError:
-        return "Error:", "Invalid JSON"
-    # All other errors, return "Error: + error message"
-    except Exception as e:
-        return "Error:", str(e)
-
 # Create a lock for file access
 #file_access_lock = threading.Lock()
 
@@ -98,7 +83,7 @@ def execute_command(agent, command_name, arguments):
             return delete_memory(arguments["key"])
         elif command_name == "memory_ovr":
             return overwrite_memory(arguments["key"], arguments["string"])
-        elif command_name == "create_staff":
+        elif command_name == "hire_staff":
             return agent.create_employee(
                 arguments["name"], arguments["task"], arguments["goals"], arguments["budget"]
             )

@@ -62,6 +62,7 @@ def print_assistant_thoughts(ai_name, assistant_reply):
     """Prints the assistant's thoughts to the console"""
     try:
         try:
+            print("\n\n assistnat reply: ", assistant_reply, "\n\n") 
             # Parse and print Assistant response
             assistant_reply_json = fix_and_parse_json(assistant_reply)
         except json.JSONDecodeError as e:
@@ -81,7 +82,8 @@ def print_assistant_thoughts(ai_name, assistant_reply):
         assistant_thoughts_plan = None
         assistant_thoughts_speak = None
         assistant_thoughts_criticism = None
-        assistant_thoughts = assistant_reply_json.get("thought", {})
+        assistant_thoughts_status = None
+        assistant_thoughts = assistant_reply_json.get("thoughts", {})
         assistant_thoughts_text = assistant_thoughts.get("text")
 
         if assistant_thoughts:
@@ -270,7 +272,7 @@ class Agent:
             if global_config.speak_mode:
                 speak.say_text(f"I want to execute {command_name}")
         except Exception as e:
-            logger.error("Error: \n", str(e))
+            logger.error("Errory: \n", str(e))
 
         # Update agent status
         self.status = status

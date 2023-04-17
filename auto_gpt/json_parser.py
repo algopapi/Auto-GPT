@@ -28,7 +28,6 @@ JSON_SCHEMA = """
 }
 """
 
-
 def fix_and_parse_json(
     json_str: str,
     try_to_fix_with_gpt: bool = True

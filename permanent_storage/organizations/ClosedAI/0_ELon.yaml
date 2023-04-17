@@ -1,0 +1,15 @@
+agent_id: 0
+budget: 48400
+founder: true
+goals:
+- hire staff
+- message staff
+- fire staff
+init_memory: false
+name: ELon
+operating_cost: 100
+pending_messages: []
+status: idle
+supervisor_id: null
+supervisor_name: null
+task: Tst Org
