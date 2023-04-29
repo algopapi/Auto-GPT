@@ -1,4 +1,5 @@
-<<<<<<<< HEAD:auto_gpt/memory/local.py
+from __future__ import annotations
+
 import dataclasses
 import os
 from typing import Any, List, Optional
@@ -6,20 +7,8 @@ from typing import Any, List, Optional
 import numpy as np
 import orjson
 
-from auto_gpt.memory.base import MemoryProviderSingleton, get_ada_embedding
-========
-from __future__ import annotations
-
-import dataclasses
-import os
-from typing import Any
-
-import numpy as np
-import orjson
-
-from autogpt.memory.base import MemoryProviderSingleton
 from autogpt.llm_utils import create_embedding_with_ada
->>>>>>>> upstream/master:autogpt/memory/local.py
+from autogpt.memory.base import MemoryProviderSingleton
 
 EMBED_DIM = 1536
 SAVE_OPTIONS = orjson.OPT_SERIALIZE_NUMPY | orjson.OPT_SERIALIZE_DATACLASS
@@ -37,46 +26,17 @@ class CacheContent:
     )
 
 
-<<<<<<<< HEAD:auto_gpt/memory/local.py
 class LocalCache():
     # on load, load our database
-    def __init__(self, cfg, organization_name, agent_config) -> None:
-        agent_id = agent_config.agent_id
-        agent_name = agent_config.name
-        self.filename = f"permanent_storage/organizations/{organization_name}/{agent_id}_{agent_name}_memory.json"
+    def __init__(self, organization_name, agent_id) -> None:
+
+        self.filename = f"permanent_storage/organizations/{organization_name}/agents/{agent_id}_memory.json"
         if os.path.exists(self.filename):
             with open(self.filename, "rb") as f:
                 loaded = orjson.loads(f.read())
                 loaded["embeddings"] = np.array(loaded["embeddings"], dtype=np.float32)  # Convert loaded embeddings to a NumPy array
                 self.data = CacheContent(**loaded)
-========
-class LocalCache(MemoryProviderSingleton):
-    """A class that stores the memory in a local file"""
 
-    def __init__(self, cfg) -> None:
-        """Initialize a class instance
-
-        Args:
-            cfg: Config object
-
-        Returns:
-            None
-        """
-        self.filename = f"{cfg.memory_index}.json"
-        if os.path.exists(self.filename):
-            try:
-                with open(self.filename, "w+b") as f:
-                    file_content = f.read()
-                    if not file_content.strip():
-                        file_content = b"{}"
-                        f.write(file_content)
-
-                    loaded = orjson.loads(file_content)
-                    self.data = CacheContent(**loaded)
-            except orjson.JSONDecodeError:
-                print(f"Error: The file '{self.filename}' is not in JSON format.")
-                self.data = CacheContent()
->>>>>>>> upstream/master:autogpt/memory/local.py
         else:
             print(
                 f"Warning: The file '{self.filename}' does not exist. "
@@ -135,11 +95,8 @@ class LocalCache(MemoryProviderSingleton):
         """
         return self.get_relevant(data, 1)
 
-<<<<<<<< HEAD:auto_gpt/memory/local.py
-    def get_relevant(self, text: str, k: int) -> List[Any]:
-========
+
     def get_relevant(self, text: str, k: int) -> list[Any]:
->>>>>>>> upstream/master:autogpt/memory/local.py
         """ "
         matrix-vector mult to find score-for-each-row-of-matrix
          get indices for top-k winning scores

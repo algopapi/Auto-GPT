@@ -10,14 +10,9 @@ from redis.commands.search.field import TextField, VectorField
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.query import Query
 
-<<<<<<<< HEAD:auto_gpt/memory/redismem.py
-from auto_gpt.memory.base import MemoryProviderSingleton, get_ada_embedding
-
-========
+from autogpt.llm_utils import create_embedding_with_ada
 from autogpt.logs import logger
 from autogpt.memory.base import MemoryProviderSingleton
-from autogpt.llm_utils import create_embedding_with_ada
->>>>>>>> upstream/master:autogpt/memory/redismem.py
 
 SCHEMA = [
     TextField("data"),
@@ -126,11 +121,7 @@ class RedisMemory(MemoryProviderSingleton):
         self.redis.flushall()
         return "Obliviated"
 
-<<<<<<<< HEAD:auto_gpt/memory/redismem.py
-    def get_relevant(self, data: str, num_relevant: int = 5) -> Optional[List[Any]]:
-========
     def get_relevant(self, data: str, num_relevant: int = 5) -> list[Any] | None:
->>>>>>>> upstream/master:autogpt/memory/redismem.py
         """
         Returns all the data in the memory that is relevant to the given data.
         Args:

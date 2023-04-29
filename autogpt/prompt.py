@@ -1,9 +1,10 @@
 from colorama import Fore
+
+from autogpt.config import Config
 from autogpt.config.ai_config import AIConfig
 from autogpt.config.config import Config
 from autogpt.logs import logger
 from autogpt.promptgenerator import PromptGenerator
-from autogpt.config import Config
 from autogpt.setup import prompt_user
 from autogpt.utils import clean_input
 
@@ -47,23 +48,39 @@ def get_prompt() -> str:
             "browse_website",
             {"url": "<url>", "question": "<what_you_want_to_find_on_website>"},
         ),
+        # (
+        #     "Start GPT Agent",
+        #     "start_agent",
+        #     {"name": "<name>", "task": "<short_task_desc>", "prompt": "<prompt>",},
+        # ),
+        # (
+        #     "Message GPT Agent",
+        #     "message_agent",
+        #     {"key": "<key>", "message": "<message>"},
+        # ),
+        # ("List GPT Agents", "list_agents", {}),
+        # ("Delete GPT Agent", "delete_agent", {"key": "<key>"}),
+        # (
+        #     "Clone Repository",
+        #     "clone_repository",
+        #     {"repository_url": "<url>", "clone_path": "<directory>"},
+        # ),
+        ("Message staff", "message_staff", {"agent_id": "<agent_id>", "message": "<message>"}),
+        ("List staff", "list_staff", {}),
         (
-            "Start GPT Agent",
-            "start_agent",
-            {"name": "<name>", "task": "<short_task_desc>", "prompt": "<prompt>"},
+            "Hire staff", 
+            "hire_staff", 
+            {"name": "<name>",
+             "role": "<role within the organization>",
+             "goals": "<employee goals>", 
+             "budget" : "<assign budget to employee (the max amount budget the employee is allowed to spend))>"
+             }
         ),
-        (
-            "Message GPT Agent",
-            "message_agent",
-            {"key": "<key>", "message": "<message>"},
-        ),
-        ("List GPT Agents", "list_agents", {}),
-        ("Delete GPT Agent", "delete_agent", {"key": "<key>"}),
-        (
-            "Clone Repository",
-            "clone_repository",
-            {"repository_url": "<url>", "clone_path": "<directory>"},
-        ),
+
+        ("Fire staff", "fire_staff", {"agent_id": "<agent_id>"}),
+        ("Message supervisor", "message_supervisor", {"message": "<message>"}),
+
+
         ("Write to file", "write_to_file", {"file": "<file>", "text": "<text>"}),
         ("Read file", "read_file", {"file": "<file>"}),
         ("Append to file", "append_to_file", {"file": "<file>", "text": "<text>"}),

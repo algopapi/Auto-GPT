@@ -1,7 +1,6 @@
 import os
 
 import yaml
-
 from auto_gpt.prompt import get_prompt
 
 DEF_EMPLOYEE_DESCRIPTION = """You are an employee of {agent_supervisor}. You are tasked with: {agent_task}."""
@@ -41,6 +40,11 @@ class AgentConfig(object):
 
     @classmethod
     def load(cls, file_path):
+        path = os.path.join(
+            os.path.dirname(file_path), "agents"
+        )
+        file_path = os.path.join(path, os.path.basename(file_path))
+
         try:
             with open(file_path) as file:
                 config_params = yaml.load(file, Loader=yaml.FullLoader)
@@ -50,18 +54,27 @@ class AgentConfig(object):
             return None
 
     def remove(self):
-        if os.path.exists(self.file):
-            os.remove(self.file)
+        # Update the path to include the organization_name and agents subdirectory
+        path = os.path.join(os.path.dirname(self.file), "agents")
+        file_path = os.path.join(path, os.path.basename(self.file))
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
         else:
             print(
-                f"Can't remove agent: {self.name} as couldn't find file: {self.file}."
+                f"Can't remove agent: {self.name} as couldn't find file: {file_path}."
             )
 
     def save(self):
-        os.makedirs(os.path.dirname(self.file), exist_ok=True)
+        path = os.path.join(
+            os.path.dirname(self.file), "agents"
+        )
+        os.makedirs(path, exist_ok=True)
+        file_path = os.path.join(path, os.path.basename(self.file))
+        
         config = {attr: getattr(self, attr) for attr in vars(self)}
         config.pop("file", None)  # Exclude file attribute
-        with open(self.file, "w") as file:
+        with open(file_path, "w") as file:
             yaml.dump(config, file)
 
 

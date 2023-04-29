@@ -1,26 +1,15 @@
 """Base class for memory providers."""
 import abc
-<<<<<<<< HEAD:auto_gpt/memory/base.py
-import openai
-
-from auto_gpt.config import AbstractSingleton
-========
 
 import openai
 
 from autogpt.config import AbstractSingleton, Config
 
 cfg = Config()
->>>>>>>> upstream/master:autogpt/memory/base.py
 
 
 def get_ada_embedding(text):
     text = text.replace("\n", " ")
-<<<<<<<< HEAD:auto_gpt/memory/base.py
-    return openai.Embedding.create(input=[text], model="text-embedding-ada-002")[
-        "data"
-    ][0]["embedding"]
-========
     if cfg.use_azure:
         return openai.Embedding.create(
             input=[text],
@@ -30,7 +19,6 @@ def get_ada_embedding(text):
         return openai.Embedding.create(input=[text], model="text-embedding-ada-002")[
             "data"
         ][0]["embedding"]
->>>>>>>> upstream/master:autogpt/memory/base.py
 
 
 class MemoryProviderSingleton(AbstractSingleton):

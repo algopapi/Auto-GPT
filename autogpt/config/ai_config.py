@@ -4,9 +4,13 @@ A module that contains the AIConfig class object that contains the configuration
 """
 from __future__ import annotations
 
+import importlib
 import os
 from typing import Type
+
 import yaml
+
+import permanent_storage
 
 
 class AIConfig:
@@ -20,7 +24,14 @@ class AIConfig:
     """
 
     def __init__(
-        self, ai_name: str = "", ai_role: str = "", ai_goals: list | None = None
+        self,
+        ai_name: str = "",
+        ai_id: int = 0,
+        ai_role: str = "",
+        ai_goals: list | None = None,
+        founder: bool = False,
+        init_memory: bool = False,
+        file_path: str = "",
     ) -> None:
         """
         Initialize a class instance
@@ -34,59 +45,62 @@ class AIConfig:
         """
         if ai_goals is None:
             ai_goals = []
+        self.ai_id = ai_id
         self.ai_name = ai_name
         self.ai_role = ai_role
         self.ai_goals = ai_goals
+        self.founder = founder
+        
+        # Implementation Specific
+        self.init_memory = init_memory
+        self.file = file_path
+        self.save()
+       
 
     # Soon this will go in a folder where it remembers more stuff about the run(s)
-    SAVE_FILE = os.path.join(os.path.dirname(__file__), "..", "ai_settings.yaml")
+    # SAVE_FILE = os.path.join(os.path.dirname(__file__), "..", "ai_settings.yaml")
 
-    @staticmethod
-    def load(config_file: str = SAVE_FILE) -> "AIConfig":
-        """
-        Returns class object with parameters (ai_name, ai_role, ai_goals) loaded from
-          yaml file if yaml file exists,
-        else returns class with no parameters.
+    # @staticmethod
+    # def load(config_file: str = SAVE_FILE) -> "AIConfig":
 
-        Parameters:
-           config_file (int): The path to the config yaml file.
-             DEFAULT: "../ai_settings.yaml"
-
-        Returns:
-            cls (object): An instance of given cls object
-        """
+    @classmethod
+ 
+    def load(cls, file_path):
+        # Construct the file path using importlib.resources.files
+        # agent_folder = importlib.resources.files(permanent_storage) / "agents"
+        # file_path = agent_folder / os.path.basename(file_path)
 
         try:
-            with open(config_file, encoding="utf-8") as file:
+            with open(file_path) as file:
                 config_params = yaml.load(file, Loader=yaml.FullLoader)
+                instance = cls(file_path=str(file_path), **config_params)
+                return instance
         except FileNotFoundError:
-            config_params = {}
+            return None
 
-        ai_name = config_params.get("ai_name", "")
-        ai_role = config_params.get("ai_role", "")
-        ai_goals = config_params.get("ai_goals", [])
-        # type: Type[AIConfig]
-        return AIConfig(ai_name, ai_role, ai_goals)
+    def remove(self):
+        # Update the path to include the organization_name and agents subdirectory
+        path = os.path.join(os.path.dirname(self.file), "agents")
+        file_path = os.path.join(path, os.path.basename(self.file))
 
-    def save(self, config_file: str = SAVE_FILE) -> None:
-        """
-        Saves the class parameters to the specified file yaml file path as a yaml file.
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        else:
+            print(
+                f"Can't remove agent: {self.ai_name} as couldn't find file: {file_path}."
+            )
 
-        Parameters:
-            config_file(str): The path to the config yaml file.
-              DEFAULT: "../ai_settings.yaml"
-
-        Returns:
-            None
-        """
-
-        config = {
-            "ai_name": self.ai_name,
-            "ai_role": self.ai_role,
-            "ai_goals": self.ai_goals,
-        }
-        with open(config_file, "w", encoding="utf-8") as file:
-            yaml.dump(config, file, allow_unicode=True)
+    def save(self):
+        path = os.path.join(
+            os.path.dirname(self.file), "agents"
+        )
+        os.makedirs(path, exist_ok=True)
+        file_path = os.path.join(path, os.path.basename(self.file))
+        
+        config = {attr: getattr(self, attr) for attr in vars(self)}
+        config.pop("file", None)  # Exclude file attribute
+        with open(file_path, "w") as file:
+            yaml.dump(config, file)
 
     def construct_full_prompt(self) -> str:
         """

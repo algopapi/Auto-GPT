@@ -4,8 +4,10 @@ from __future__ import annotations
 import contextlib
 import json
 from typing import Any, Dict, Union
+
 from colorama import Fore
 from regex import regex
+
 from autogpt.config import Config
 from autogpt.json_fixes.auto_fix import fix_json
 from autogpt.json_fixes.bracket_termination import balance_braces
@@ -70,7 +72,7 @@ def correct_json(json_to_load: str) -> str:
     return json_to_load
 
 
-def fix_and_parse_json(
+async def fix_and_parse_json(
     json_to_load: str, try_to_fix_with_gpt: bool = True
 ) -> Dict[Any, Any]:
     """Fix and parse JSON string
@@ -105,10 +107,10 @@ def fix_and_parse_json(
         maybe_fixed_json = maybe_fixed_json[: last_brace_index + 1]
         return json.loads(maybe_fixed_json)
     except (json.JSONDecodeError, ValueError) as e:
-        return try_ai_fix(try_to_fix_with_gpt, e, json_to_load)
+        return await try_ai_fix(try_to_fix_with_gpt, e, json_to_load)
 
 
-def try_ai_fix(
+async def try_ai_fix(
     try_to_fix_with_gpt: bool, exception: Exception, json_to_load: str
 ) -> Dict[Any, Any]:
     """Try to fix the JSON with the AI
@@ -134,7 +136,7 @@ def try_ai_fix(
             " slightly."
         )
     # Now try to fix this up using the ai_functions
-    ai_fixed_json = fix_json(json_to_load, JSON_SCHEMA)
+    ai_fixed_json = await fix_json(json_to_load, JSON_SCHEMA)
 
     if ai_fixed_json != "failed":
         return json.loads(ai_fixed_json)

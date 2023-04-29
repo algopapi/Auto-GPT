@@ -4,8 +4,6 @@ import traceback
 from collections import deque
 from typing import List
 
-from colorama import Fore, Style
-
 import auto_gpt.chat as chat
 import auto_gpt.commands as cmd
 import auto_gpt.speak as speak
@@ -16,8 +14,8 @@ from auto_gpt.logger import logger
 from auto_gpt.memory import get_memory
 from auto_gpt.spinner import Spinner
 from auto_gpt.utils.clean_input import clean_input
-from auto_gpt.utils.print_utils import (print_assistant_thoughts,
-                                        print_to_console)
+from auto_gpt.utils.print_utils import print_assistant_thoughts, print_to_console
+from colorama import Fore, Style
 
 global_config = Config()
 
@@ -175,7 +173,6 @@ class Agent:
             name=name,
             task=task,
             goals=goals,
-            budget=budget,
             supervisor_name=self.agent_name,
             supervisor_id=self.agent_id,
             founder=False,

@@ -1,13 +1,9 @@
 import pinecone
 from colorama import Fore, Style
 
-<<<<<<<< HEAD:auto_gpt/memory/pinecone.py
-from auto_gpt.memory.base import MemoryProviderSingleton, get_ada_embedding
-========
+from autogpt.llm_utils import create_embedding_with_ada
 from autogpt.logs import logger
 from autogpt.memory.base import MemoryProviderSingleton
-from autogpt.llm_utils import create_embedding_with_ada
->>>>>>>> upstream/master:autogpt/memory/pinecone.py
 
 
 class PineconeMemory(MemoryProviderSingleton):
@@ -68,11 +64,7 @@ class PineconeMemory(MemoryProviderSingleton):
         :param data: The data to compare to.
         :param num_relevant: The number of relevant data to return. Defaults to 5
         """
-<<<<<<<< HEAD:auto_gpt/memory/pinecone.py
-        query_embedding = get_ada_embedding(data)
-========
         query_embedding = create_embedding_with_ada(data)
->>>>>>>> upstream/master:autogpt/memory/pinecone.py
         results = self.index.query(
             query_embedding, top_k=num_relevant, include_metadata=True
         )
@@ -81,3 +73,4 @@ class PineconeMemory(MemoryProviderSingleton):
 
     def get_stats(self):
         return self.index.describe_index_stats()
+    

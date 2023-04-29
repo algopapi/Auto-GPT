@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from ast import List
 import time
+from ast import List
 
 import openai
-from openai.error import APIError, RateLimitError
 from colorama import Fore
+from openai.error import APIError, RateLimitError
 
 from autogpt.config import Config
 
@@ -14,7 +14,7 @@ CFG = Config()
 openai.api_key = CFG.openai_api_key
 
 
-def call_ai_function(
+async def call_ai_function(
     function: str, args: list, description: str, model: str | None = None
 ) -> str:
     """Call an AI function
@@ -46,12 +46,12 @@ def call_ai_function(
         {"role": "user", "content": args},
     ]
 
-    return create_chat_completion(model=model, messages=messages, temperature=0)
+    return await create_chat_completion(model=model, messages=messages, temperature=0)
 
 
 # Overly simple abstraction until we create something better
 # simple retry mechanism when getting a rate error or a bad gateway
-def create_chat_completion(
+async def create_chat_completion(
     messages: list,  # type: ignore
     model: str | None = None,
     temperature: float = CFG.temperature,

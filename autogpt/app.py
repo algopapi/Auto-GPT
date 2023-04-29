@@ -1,35 +1,36 @@
 """ Command and Control """
 import json
-from typing import List, NoReturn, Union, Dict
+from typing import Dict, List, NoReturn, Union
+
 from autogpt.agent.agent_manager import AgentManager
-from autogpt.commands.evaluate_code import evaluate_code
-from autogpt.commands.google_search import google_official_search, google_search
-from autogpt.commands.improve_code import improve_code
-from autogpt.commands.write_tests import write_tests
-from autogpt.config import Config
-from autogpt.commands.image_gen import generate_image
 from autogpt.commands.audio_text import read_audio_from_file
-from autogpt.commands.web_requests import scrape_links, scrape_text
+from autogpt.commands.evaluate_code import evaluate_code
 from autogpt.commands.execute_code import execute_python_file, execute_shell
 from autogpt.commands.file_operations import (
     append_to_file,
     delete_file,
+    download_file,
     read_file,
     search_files,
     write_to_file,
-    download_file
 )
+from autogpt.commands.git_operations import clone_repository
+from autogpt.commands.google_search import google_official_search, google_search
+from autogpt.commands.image_gen import generate_image
+from autogpt.commands.improve_code import improve_code
+from autogpt.commands.twitter import send_tweet
+from autogpt.commands.web_requests import scrape_links, scrape_text
+from autogpt.commands.web_selenium import browse_website
+from autogpt.commands.write_tests import write_tests
+from autogpt.config import Config
 from autogpt.json_fixes.parsing import fix_and_parse_json
 from autogpt.memory import get_memory
 from autogpt.processing.text import summarize_text
 from autogpt.speech import say_text
-from autogpt.commands.web_selenium import browse_website
-from autogpt.commands.git_operations import clone_repository
-from autogpt.commands.twitter import send_tweet
-
 
 CFG = Config()
 AGENT_MANAGER = AgentManager()
+
 
 
 def is_valid_int(value: str) -> bool:
@@ -104,7 +105,7 @@ def map_command_synonyms(command_name: str):
     return command_name
 
 
-def execute_command(command_name: str, arguments):
+async def execute_command(agent, command_name: str, arguments):
     """Execute the command and return the result
 
     Args:
@@ -113,7 +114,6 @@ def execute_command(command_name: str, arguments):
 
     Returns:
         str: The result of the command"""
-    memory = get_memory(CFG)
 
     try:
         command_name = map_command_synonyms(command_name)
@@ -136,19 +136,40 @@ def execute_command(command_name: str, arguments):
 
             return str(safe_message)
         elif command_name == "memory_add":
-            return memory.add(arguments["string"])
-        elif command_name == "start_agent":
-            return start_agent(
-                arguments["name"], arguments["task"], arguments["prompt"]
+            return agent.memory.add(arguments["string"])
+        
+        # Deactrivate these for now to avoid confusion. 
+        # elif command_name == "start_agent":
+        #     return start_agent(
+        #         arguments["name"], arguments["task"], arguments["prompt"]
+        #     )
+        # elif command_name == "message_agent":
+        #     return message_agent(arguments["key"], arguments["message"])
+        # elif command_name == "list_agents":
+        #     return list_agents()
+        # elif command_name == "delete_agent":
+        #     return delete_agent(arguments["key"])
+
+        # Implementation specific
+        elif command_name == "hire_staff":
+            #return agent.hire_staff(
+            #     arguments["name"], arguments["role"], arguments["goals"], arguments["budget"]
+            #)
+            return await agent.organization.hire_staff(
+                arguments["name"], arguments["role"], arguments["goals"], arguments["budget"], agent.ai_name, agent.ai_id
             )
-        elif command_name == "message_agent":
-            return message_agent(arguments["key"], arguments["message"])
-        elif command_name == "list_agents":
-            return list_agents()
-        elif command_name == "delete_agent":
-            return delete_agent(arguments["key"])
+        elif command_name == "message_staff":
+            return agent.message_staff(arguments["agent_id"], arguments["message"])
+        elif command_name == "list_staff":
+            return agent.organization.build_status_update(agent.ai_id)
+        elif command_name == "fire_staff":
+            return await agent.organization.fire_staff(arguments["agent_id"])
+        elif command_name == "message_supervisor":
+            return agent.organization.message_supervisor(agent.ai_id, arguments["message"])
+
+
         elif command_name == "get_text_summary":
-            return get_text_summary(arguments["url"], arguments["question"])
+            return get_text_summary(agent.memory, arguments["url"], arguments["question"])
         elif command_name == "get_hyperlinks":
             return get_hyperlinks(arguments["url"])
         elif command_name == "clone_repository":
@@ -211,7 +232,7 @@ def execute_command(command_name: str, arguments):
         return f"Error: {str(e)}"
 
 
-def get_text_summary(url: str, question: str) -> str:
+def get_text_summary(memory, url: str, question: str) -> str:
     """Return the results of a google search
 
     Args:
@@ -222,7 +243,7 @@ def get_text_summary(url: str, question: str) -> str:
         str: The summary of the text
     """
     text = scrape_text(url)
-    summary = summarize_text(url, text, question)
+    summary = summarize_text(memory, url, text, question)
     return f""" "Result" : {summary}"""
 
 

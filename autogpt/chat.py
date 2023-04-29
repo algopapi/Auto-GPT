@@ -1,3 +1,5 @@
+import asyncio
+import random
 import time
 
 from openai.error import RateLimitError
@@ -8,7 +10,6 @@ from autogpt.llm_utils import create_chat_completion
 from autogpt.logs import logger
 
 cfg = Config()
-
 
 def create_chat_message(role, content):
     """
@@ -49,9 +50,21 @@ def generate_context(prompt, relevant_memory, full_message_history, model):
     )
 
 
+async def random_sleep():
+
+    sleep_duration = random.choice([1, 10, 5])
+    await asyncio.sleep(sleep_duration)
+
+async def controlled_sleep(ai_id):
+    if ai_id == 0:
+        await asyncio.sleep(1)
+    elif ai_id == 1:
+        await asyncio.sleep(10)
+
+
 # TODO: Change debug from hardcode to argument
-def chat_with_ai(
-    prompt, user_input, full_message_history, permanent_memory, token_limit
+async def chat_with_ai(
+    prompt, user_input, full_message_history, permanent_memory, token_limit, ai_id
 ):
     """Interact with the OpenAI API, sending the prompt, user input, message history,
     and permanent memory."""
@@ -102,7 +115,7 @@ def chat_with_ai(
                     current_tokens_used,
                     insertion_index,
                     current_context,
-                ) = generate_context(
+                ) =  generate_context(
                     prompt, relevant_memory, full_message_history, model
                 )
 
@@ -156,20 +169,19 @@ def chat_with_ai(
 
             # TODO: use a model defined elsewhere, so that model can contain
             # temperature and other settings we care about
-            assistant_reply = create_chat_completion(
+            assistant_reply = await create_chat_completion(
                 model=model,
                 messages=current_context,
                 max_tokens=tokens_remaining,
             )
-
+            
             # Update full message history
             full_message_history.append(create_chat_message("user", user_input))
             full_message_history.append(
                 create_chat_message("assistant", assistant_reply)
             )
-
             return assistant_reply
         except RateLimitError:
             # TODO: When we switch to langchain, this is built in
             print("Error: ", "API Rate Limit Reached. Waiting 10 seconds...")
-            time.sleep(10)
+            asyncio.sleep(10)

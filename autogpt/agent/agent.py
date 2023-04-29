@@ -1,11 +1,16 @@
-from colorama import Fore, Style
-from autogpt.app import execute_command, get_command
+import asyncio
+import random
+import string
 
+from colorama import Fore, Style
+
+from autogpt.app import execute_command, get_command
 from autogpt.chat import chat_with_ai, create_chat_message
 from autogpt.config import Config
 from autogpt.json_fixes.master_json_fix_method import fix_json_using_multiple_techniques
 from autogpt.json_validation.validate_json import validate_json
 from autogpt.logs import logger, print_assistant_thoughts
+from autogpt.prompt import construct_prompt
 from autogpt.speech import say_text
 from autogpt.spinner import Spinner
 from autogpt.utils import clean_input
@@ -35,21 +40,34 @@ class Agent:
 
     def __init__(
         self,
-        ai_name,
+        ai_config,
+        organization,
         memory,
-        full_message_history,
-        next_action_count,
-        system_prompt,
-        triggering_prompt,
-    ):
-        self.ai_name = ai_name
+        next_action_count=0
+    ):  
+        self.ai_config = ai_config
+        self.ai_name = ai_config.ai_name
+        self.ai_id = ai_config.ai_id
+        self.role = ai_config.ai_role
+        self.goals = ai_config.ai_goals
+        
+        self.founder = ai_config.founder
+        self.organization = organization
         self.memory = memory
-        self.full_message_history = full_message_history
+        
+        # We might want to define those here
+        self.system_prompt = ai_config.construct_full_prompt()
+        self.triggering_prompt = (
+             "Determine which next command to use, and respond using the"
+             " format specified above:"
+         )
+        
         self.next_action_count = next_action_count
-        self.system_prompt = system_prompt
-        self.triggering_prompt = triggering_prompt
+        # You might want to save this in this case
+        self.full_message_history = []
 
-    def start_interaction_loop(self):
+    async def start_interaction_loop(self):
+        print(f"\nstarting interaction loop of agent: {self.ai_name}\n")
         # Interaction Loop
         cfg = Config()
         loop_count = 0
@@ -58,6 +76,11 @@ class Agent:
         user_input = ""
 
         while True:
+            message = self.organization.receive_message(self.ai_id)
+            staff_update = self.organization.build_status_update(self.ai_id)
+            print(f"Incoming message: {self.ai_name}:, \n{message}\n" )
+            print(f"stafff update of agent: {self.ai_name}:, \n{staff_update}\n" )
+            print(f"\n Running interaction loop {loop_count} of agent: {self.ai_name}\n")
             # Discontinue if continuous limit is reached
             loop_count += 1
             if (
@@ -71,16 +94,17 @@ class Agent:
                 break
 
             # Send message to AI, get response
-            with Spinner("Thinking... "):
-                assistant_reply = chat_with_ai(
-                    self.system_prompt,
-                    self.triggering_prompt,
-                    self.full_message_history,
-                    self.memory,
-                    cfg.fast_token_limit,
-                )  # TODO: This hardcodes the model to use GPT3.5. Make this an argument
-
-            assistant_reply_json = fix_json_using_multiple_techniques(assistant_reply)
+            # with Spinner("Thinking... "):
+            assistant_reply = await chat_with_ai(
+                self.system_prompt,
+                self.triggering_prompt,
+                self.full_message_history,
+                self.memory,
+                cfg.fast_token_limit,
+                self.ai_id
+            )  # TODO: This hardcodes the model to use GPT3.5. Make this an argument
+           
+            assistant_reply_json = await fix_json_using_multiple_techniques(assistant_reply)
 
             # Print Assistant thoughts
             if assistant_reply_json != {}:
@@ -95,7 +119,7 @@ class Agent:
                 except Exception as e:
                     logger.error("Error: \n", str(e))
 
-            if not cfg.continuous_mode and self.next_action_count == 0:
+            if 1 == 0:
                 ### GET USER AUTHORIZATION TO EXECUTE COMMAND ###
                 # Get key press: Prompt the user to press enter to continue or escape
                 # to exit
@@ -150,7 +174,7 @@ class Agent:
                     break
             else:
                 # Print command
-                logger.typewriter_log(
+                logger.typewriter_log (
                     "NEXT ACTION: ",
                     Fore.CYAN,
                     f"COMMAND = {Fore.CYAN}{command_name}{Style.RESET_ALL}"
@@ -167,7 +191,7 @@ class Agent:
             else:
                 result = (
                     f"Command {command_name} returned: "
-                    f"{execute_command(command_name, arguments)}"
+                    f"{await execute_command(self, command_name, arguments)}"
                 )
                 if self.next_action_count > 0:
                     self.next_action_count -= 1
@@ -192,3 +216,113 @@ class Agent:
                 logger.typewriter_log(
                     "SYSTEM: ", Fore.YELLOW, "Unable to execute command"
                 )
+
+            self.organization.update_status(self.ai_id, "working on loop " + str(loop_count))
+            await asyncio.sleep(1)
+
+
+    async def dice_roll(self):
+        """Rolls a dice and returns the result"""
+        return random.randint(1, 5)
+    
+    async def random_budget(self):
+        """ Creates an abitrary budget to give to an agent"""
+        return random.randint(1000, 100000)
+
+
+    async def start_test_loop(self):
+        print(f"\033[31m\n ******************** Starting interaction loop of agent: {self.ai_name} ******************\033[0m")
+        # Interaction Loop
+        loop_count = 0
+
+        # initialize the agents status
+        self.organization.update_agent_status(self.ai_id, "starting interaction loop")
+
+        while True:
+            print(f"\033[32m\n\n ****** Starting agent {self.ai_name} loop {loop_count} ******\033[0m")
+            dice_result = await self.dice_roll()
+            agent_operating_costs = self.organization.calculate_operating_cost_of_agent(self.ai_id)
+            print(f"agent operating costs: {agent_operating_costs}")
+
+            message = self.organization.receive_message(self.ai_id)
+            agent_status = self.organization.build_status_update(self.ai_id)
+            status = f"agent {self.ai_name} is in loop {loop_count} rolled {dice_result}"
+            
+            # Update the agent status
+            self.organization.update_agent_status(self.ai_id, status)
+
+            print(f"agent {self.ai_name} status update: {agent_status}")
+            print(f"agent {self.ai_name} received message: {message}")
+            print(f"agent dice results {dice_result}")
+
+            if dice_result == 1:
+                next_free_id = len(self.organization.agents)
+                name = f"staff_{next_free_id}"
+
+                # Create arbitrary goals and roles
+                goals = ''.join(random.choices(string.ascii_lowercase, k=10))
+                role = ''.join(random.choices(string.ascii_lowercase, k=10))
+
+                # Create an arbitrary budget
+                my_budget = self.organization.agent_budgets.get(self.ai_id)
+                staff_budget = my_budget * random.uniform(0, 1)
+
+                response = self.organization.hire_staff(
+                    name, role, goals, staff_budget, self.ai_name, self.ai_id
+                )
+
+                print(f"agent {self.ai_name} hired staff member {name} in loop {loop_count}")
+                print(f"response: {response}")
+
+            elif dice_result == 2:
+                # Message a random staff member
+                staff_members = self.organization.get_staff(self.ai_id)
+
+                if len(staff_members) == 0:
+                    print(f"agent {self.ai_name} has no staff members to message in loop {loop_count}")
+                    continue
+                
+                random_staff_member = random.choice(staff_members)
+                print("random staff members", random_staff_member.ai_id)
+                response = self.organization.message_staff(self.ai_id, random_staff_member.ai_id, f"test message from agent {self.ai_name} to agent {random_staff_member} in loop {loop_count}")
+                print(f"agent {self.ai_name} messaged staff member {random_staff_member} in loop {loop_count}")
+                print(f"response: {response}")
+
+            elif dice_result == 3:
+                # Message a superviso
+                response = self.organization.message_supervisor(self.ai_id, f"i am { self.ai_name} and iam messaging you in loop {loop_count}")
+                print(f"agent {self.ai_name} messaged supervisor in loop {loop_count}")
+                print(f"response: {response}")
+
+            elif dice_result == 4:
+                # Change agent status to arbitrary letter of the alphabet
+                # Get arbitrary letter of the alphabet
+                await asyncio.sleep(5)
+                print (f"agent {self.ai_name} did a random action in loop {loop_count}")
+
+            elif dice_result == 5:
+               # Get random staff member
+               staff_members = self.organization.get_staff(self.ai_id)
+               if len(staff_members) == 0:
+                   print(f"agent {self.ai_name} has no staff members to fire in loop {loop_count}")
+                   continue
+               # pick random one
+               random_staff_member = random.choice(staff_members)
+               response = self.organization.fire_staff(random_staff_member.ai_id)        
+               print(f"agent {self.ai_name} fired staff member {random_staff_member} in loop {loop_count}")
+               print(f"response: {response}")
+
+            loop_count += 1
+            await asyncio.sleep(5)
+
+        
+    def update_agent_config(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self.ai_config, key):
+                setattr(self.ai_config, key, value)
+            else:
+                print(f"Unknown attribute '{key}' in AgentConfig.")
+        self.ai_config.save()  # Save the updated configuration to the YAML file
+        
+
+    

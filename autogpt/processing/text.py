@@ -1,12 +1,14 @@
 """Text processing functions"""
-from typing import Generator, Optional, Dict
+from typing import Dict, Generator, Optional
+
 from selenium.webdriver.remote.webdriver import WebDriver
-from autogpt.memory import get_memory
+
 from autogpt.config import Config
 from autogpt.llm_utils import create_chat_completion
+from autogpt.memory import get_memory
 
 CFG = Config()
-MEMORY = get_memory(CFG)
+#MEMORY = get_memory(CFG)
 
 
 def split_text(text: str, max_length: int = 8192) -> Generator[str, None, None]:
@@ -40,7 +42,7 @@ def split_text(text: str, max_length: int = 8192) -> Generator[str, None, None]:
 
 
 def summarize_text(
-    url: str, text: str, question: str, driver: Optional[WebDriver] = None
+    memory, url: str, text: str, question: str, driver: Optional[WebDriver] = None
 ) -> str:
     """Summarize text using the OpenAI API
 
@@ -70,7 +72,7 @@ def summarize_text(
 
         memory_to_add = f"Source: {url}\n" f"Raw content part#{i + 1}: {chunk}"
 
-        MEMORY.add(memory_to_add)
+        memory.add(memory_to_add)
 
         print(f"Summarizing chunk {i + 1} / {len(chunks)}")
         messages = [create_message(chunk, question)]
@@ -85,7 +87,7 @@ def summarize_text(
 
         memory_to_add = f"Source: {url}\n" f"Content summary part#{i + 1}: {summary}"
 
-        MEMORY.add(memory_to_add)
+        memory.add(memory_to_add)
 
     print(f"Summarized {len(chunks)} chunks.")
 
