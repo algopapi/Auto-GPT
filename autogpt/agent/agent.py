@@ -10,6 +10,7 @@ from autogpt.config import Config
 from autogpt.json_fixes.master_json_fix_method import fix_json_using_multiple_techniques
 from autogpt.json_validation.validate_json import validate_json
 from autogpt.logs import logger, print_assistant_thoughts
+from autogpt.organization.org_events import Event, EventType
 from autogpt.prompt import construct_prompt
 from autogpt.speech import say_text
 from autogpt.spinner import Spinner
@@ -50,8 +51,12 @@ class Agent:
         self.ai_id = ai_config.ai_id
         self.role = ai_config.ai_role
         self.goals = ai_config.ai_goals
-        
+
+        self.terminated = ai_config.terminated
+        self.loop_count = ai_config.loop_count
         self.founder = ai_config.founder
+
+        self.respone_queue = asyncio.Queue()
         self.organization = organization
         self.memory = memory
         
@@ -233,40 +238,50 @@ class Agent:
     async def dice_roll(self):
         """Rolls a dice and returns the result"""
         return random.randint(1, 5)
-    
+
+
     async def random_budget(self):
         """ Creates an abitrary budget to give to an agent"""
         return random.randint(1000, 100000)
+
+
+    async def send_event(self, action, *args, **kwargs):
+        event = Event(self, action, *args, **kwargs)
+        await self.organization.event_queue.put(event)
+        result = await self.response_queue.get()
+        return result
 
 
     async def start_test_loop(self):
         print(f"\033[31m\n ******************** Starting interaction loop of agent: {self.ai_name} ******************\033[0m")
         # Interaction Loop
         
-
-        loop_count = self.ai_config.loop_count
         # initialize the agents status
         await self.organization.update_agent_status(self.ai_id, "starting interaction loop")
+        
 
-        while True:
-            loop_count += 1
-            await self.update_agent_config(loop_count=loop_count)
-            print(f"\033[32m\n\n ****** Starting agent {self.ai_name} loop {loop_count} ******\033[0m")
+        while not self.terminated:
+            self.loop_count += 1
+            await self.update_agent_config(loop_count=self.loop_count)
+            print(f"\033[32m\n\n ****** Starting agent {self.ai_name} loop {self.loop_count} ******\033[0m")
 
             # Get a random dice result
             dice_result = await self.dice_roll()
-
+            
             # Calculate the current agent operating costs
             agent_operating_costs = await self.organization.calculate_operating_cost_of_agent(self.ai_id)
             print(f"agent operating costs: {agent_operating_costs}")
-       
+
+            # Update the runnning costs in the yaml
+            await self.organization.update_agent_running_cost(self.ai_id, agent_operating_costs)
+
             # Update the agent budget
             await self.organization.update_agent_budget(self.ai_id, agent_operating_costs)
 
             # Recieve message and build status update
             message = await self.organization.receive_message(self.ai_id)
             agent_status = await self.organization.build_status_update(self.ai_id)
-            status = f"agent {self.ai_name} is in loop {loop_count} rolled {dice_result}"
+            status = f"agent {self.ai_name} is in loop {self.loop_count} rolled {dice_result}"
 
 
             # Update the agent status
@@ -292,7 +307,7 @@ class Agent:
                     name, role, goals, staff_budget, self.ai_name, self.ai_id
                 )
 
-                print(f"agent {self.ai_name} hired staff member {name} in loop {loop_count}")
+                print(f"agent {self.ai_name} hired staff member {name} in loop {self.loop_count}")
                 print(f"response: {response}")
                 await asyncio.sleep(1)
 
@@ -301,41 +316,43 @@ class Agent:
                 staff_members = await self.organization.get_staff(self.ai_id)
 
                 if len(staff_members) == 0:
-                    print(f"agent {self.ai_name} has no staff members to message in loop {loop_count}")
+                    print(f"agent {self.ai_name} has no staff members to message in loop {self.loop_count}")
                     continue
                 
                 random_staff_member = random.choice(staff_members)
                 print("random staff members", random_staff_member.ai_id)
-                response = await self.organization.message_staff(self.ai_id, random_staff_member.ai_id, f"test message from agent {self.ai_name} to agent {random_staff_member} in loop {loop_count}")
-                print(f"agent {self.ai_name} messaged staff member {random_staff_member} in loop {loop_count}")
+                response = await self.organization.message_staff(self.ai_id, random_staff_member.ai_id, f"test message from agent {self.ai_name} to agent {random_staff_member} in loop {self.loop_count}")
+                print(f"agent {self.ai_name} messaged staff member {random_staff_member} in loop {self.loop_count}")
                 print(f"response: {response}")
                 await asyncio.sleep(2)
 
             elif dice_result == 3:
                 # Message a superviso
-                response = await self.organization.message_supervisor(self.ai_id, f"i am { self.ai_name} and iam messaging you in loop {loop_count}")
-                print(f"agent {self.ai_name} messaged supervisor in loop {loop_count}")
+                response = await self.organization.message_supervisor(self.ai_id, f"i am { self.ai_name} and iam messaging you in loop {self.loop_count}")
+                print(f"agent {self.ai_name} messaged supervisor in loop {self.loop_count}")
                 print(f"response: {response}")
                 await asyncio.sleep(3)
 
             elif dice_result == 4:
                 # Change agent status to arbitrary letter of the alphabet
                 # Get arbitrary letter of the alphabet
-                await asyncio.sleep(4)
-                print (f"agent {self.ai_name} did a random action in loop {loop_count}")
+                # await asyncio.sleep(4)
+                print (f"agent {self.ai_name} did a random action in loop {self.loop_count}")
 
             elif dice_result == 5:
                # Get random staff member
                staff_members = await self.organization.get_staff(self.ai_id)
                if len(staff_members) == 0:
-                   print(f"agent {self.ai_name} has no staff members to fire in loop {loop_count}")
+                   print(f"agent {self.ai_name} has no staff members to fire in loop {self.loop_count}")
                    continue
                # pick random one
                random_staff_member = random.choice(staff_members)
                response = await self.organization.fire_staff(random_staff_member.ai_id)        
-               print(f"agent {self.ai_name} fired staff member {random_staff_member} in loop {loop_count}")
+               print(f"agent {self.ai_name} fired staff member {random_staff_member} in loop {self.loop_count}")
                print(f"response: {response}")
                await asyncio.sleep(5)
+        
+        print(f"\033[31m\n ******************** Agent {self.ai_name} loop terminated ******************\033[0m")
 
 
             
