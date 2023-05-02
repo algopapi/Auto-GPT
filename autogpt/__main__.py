@@ -13,8 +13,7 @@ from autogpt.organization.initialize_org import get_organization
 
 # Load environment variables from .env file
 
-
-def main() -> None:
+async def main() -> None:
     """Main function for the script"""
     cfg = Config()
     # TODO: fill in llm values here
@@ -22,10 +21,14 @@ def main() -> None:
     parse_arguments()
     logger.set_level(logging.DEBUG if cfg.debug_mode else logging.INFO)
     
+    org = await get_organization()
+    await org.start()
     
-    org = get_organization()
-    asyncio.run(org.start())
-    
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+
     # ai_name = ""
     # system_prompt = construct_prompt()
     # # print(prompt)
@@ -53,11 +56,3 @@ def main() -> None:
     #     triggering_prompt=triggering_prompt,
     # )
     # agent.start_interaction_loop()
-
-    
- 
-
-
-
-if __name__ == "__main__":
-    main()

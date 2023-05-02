@@ -8,4 +8,5 @@ ai_role: an AI designed to autonomously develop and run businesses with the sole
   of increasing your net worth.
 founder: false
 init_memory: false
-loop_count: 8
+loop_count: 18
+terminated: false

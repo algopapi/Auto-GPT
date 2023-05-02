@@ -9,7 +9,7 @@ from autogpt.organization.organization import Organization
 
 logger = Logger()
 
-def get_organization(should_speak=False):
+async def get_organization(should_speak=False):
     organizations_folder = importlib.resources.files(storage) / "organizations"
     organizations = os.listdir(organizations_folder)
     if organizations:
@@ -25,15 +25,15 @@ def get_organization(should_speak=False):
         if should_continue.lower() == "y":
             name = input("Please specify the name of the existing organization: ")
             if name in organizations:
-                return Organization.load(name)
+                return await Organization.load(name)
             else:
                 print(
                     f"Organization with name: {name} doesn't exist, stopping execution..."
                 )
-    return create_new_org(should_speak)
+    return await create_new_org(should_speak)
 
 
-def create_new_org(should_speak=False):
+async def create_new_org(should_speak=False):
     ai_name = ""
     logger.typewriter_log(
         "Welcome to Auto-GPT.",
@@ -97,8 +97,8 @@ def create_new_org(should_speak=False):
             "Develop and manage multiple businesses autonomously",
         ]
     initial_budget = 50000
-    new_organization = Organization(org_name, initial_budget)
-    new_organization.create_agent(
+    new_organization = await Organization.create(org_name, initial_budget)
+    await new_organization.create_agent(
         name=ai_name, role=ai_role, goals=ai_goals, founder=True, budget=initial_budget
     )
     return new_organization

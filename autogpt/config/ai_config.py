@@ -31,8 +31,9 @@ class AIConfig:
         ai_goals: list | None = None,
         founder: bool = False,
         init_memory: bool = False,
-        file_path: str = "",
+        terminated: bool = False,
         loop_count: int = 0,
+        file_path: str = "",
     ) -> None:
         """
         Initialize a class instance
@@ -51,6 +52,7 @@ class AIConfig:
         self.ai_role = ai_role
         self.ai_goals = ai_goals
         self.founder = founder
+        self.terminated = terminated
         self.loop_count = loop_count
         
         # Implementation Specific

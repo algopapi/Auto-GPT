@@ -1,0 +1,18 @@
+agent_budgets:
+  0: 47200
+agent_running_costs:
+  0: 300
+  2: 100
+agent_statuses:
+  0: agent Elon Musk is in loop 18 rolled 5
+agent_termination_events: {}
+initial_budget: 50000
+name: ClosedAI
+pending_messages:
+  0:
+  - !!python/tuple
+    - 2
+    - i am staff_2 and iam messaging you in loop 2
+supervisor_to_staff:
+  0:
+  - 2
