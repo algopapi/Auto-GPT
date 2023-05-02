@@ -6,6 +6,8 @@ import threading
 from functools import wraps
 from typing import Dict, List
 
+import matplotlib.pyplot as plt
+import networkx as nx
 import yaml
 from yaml.constructor import ConstructorError
 
@@ -34,12 +36,22 @@ def update_yaml_after(func):
 
     return wrapper
 
+
+def update_and_visualize(func):
+    @wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        result = await func(self, *args, **kwargs)
+        await self.visualize_organization()
+        return result
+
+    return wrapper
+
 cfg = Config()
 # An organization of multiple agents.
 class Organization(metaclass=Singleton):
     def __init__(self, name, initial_budget):
         self.name = name
-        self.hire_fire_lock = asyncio.Lock()
+       
         self.agents: Dict[int, Agent] = {}
         self.print_lock = threading.Lock()  # Create a lock for print statements
         self.initial_budget = initial_budget
@@ -48,8 +60,47 @@ class Organization(metaclass=Singleton):
         self.pending_messages = {}
         self.agent_statuses = {}
         self.supervisor_to_staff: Dict[int, List[int]] = {}  # Maps supervisor ID to staff IDs
+        self.agent_termination_events = {}
+
         self.file_path = f'{self.name}_organization.yaml'
+
+        # Some locks
+        self.hire_fire_lock = asyncio.Lock()
+        self.yaml_lock = asyncio.Lock()
+
+
         self.save()
+
+
+    async def visualize_organization(self):
+        G = nx.DiGraph()
+        # Add nodes and edges
+        for supervisor_id, staff_ids in self.supervisor_to_staff.items():
+            supervisor = self.agents.get(supervisor_id)
+            if supervisor is not None:
+                G.add_node(supervisor_id, label=supervisor.name)
+
+                for staff_id in staff_ids:
+                    staff_agent = self.agents.get(staff_id)
+                    if staff_agent is not None:
+                        G.add_node(staff_id, label=staff_agent.name)
+                        G.add_edge(supervisor_id, staff_id)
+
+        # Set node labels
+        labels = {node: f"{data['label']} ({node})\nCost: {self.agent_running_costs[node]}\nBudget: {self.agent_budgets[node]}"
+                  for node, data in G.nodes(data=True)}
+
+        # Plot the graph
+        def plot_graph():
+            pos = nx.spring_layout(G)
+            nx.draw(G, pos, with_labels=False, node_size=3000, node_color="skyblue")
+            nx.draw_networkx_labels(G, pos, labels)
+            plt.show()
+
+        # Schedule the graph plotting on the default event loop
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, plot_graph)
+
 
     @classmethod
     def load(cls, organization_name):
@@ -85,9 +136,9 @@ class Organization(metaclass=Singleton):
 
         # Create all the agents
         for file_path in agent_files:
-            print(" file path ", file_path)
-            agent_config = AIConfig.load(file_path) # This should be the 
-            print(" agent_config", agent_config)
+            print("file path", file_path)
+            agent_config = AIConfig.load(file_path) # This should be the
+            print("agent_config", agent_config)
             if agent_config is not None:
                 agent_config.init_memory = False
                 print(" adding  agent", agent_config)
@@ -108,31 +159,32 @@ class Organization(metaclass=Singleton):
         return org
         
 
-    def save(self):
-        # Create a dictionary to store the relevant attributes
-        data = {
-            'name': self.name,
-            'initial_budget': self.initial_budget,
-            'agent_budgets': self.agent_budgets,
-            'agent_running_costs': self.agent_running_costs,
-            'pending_messages': self.pending_messages,
-            'agent_statuses': self.agent_statuses,
-            'supervisor_to_staff': self.supervisor_to_staff,
-        }
+    async def save(self):
+        async with self.yaml_lock:
+            # Create a dictionary to store the relevant attributes
+            data = {
+                'name': self.name,
+                'initial_budget': self.initial_budget,
+                'agent_budgets': self.agent_budgets,
+                'agent_running_costs': self.agent_running_costs,
+                'pending_messages': self.pending_messages,
+                'agent_statuses': self.agent_statuses,
+                'supervisor_to_staff': self.supervisor_to_staff,
+            }
 
-        # Update the file path to include the organization_name
-        org_directory = (
-            importlib.resources.files(permanent_storage) / f"organizations/{self.name}"
-        )
-        self.file_path = str(org_directory / f"{self.name}_organization.yaml")
+            # Update the file path to include the organization_name
+            org_directory = (
+                importlib.resources.files(permanent_storage) / f"organizations/{self.name}"
+            )
+            self.file_path = str(org_directory / f"{self.name}_organization.yaml")
 
-        # Ensure the directory exists
-        if not os.path.exists(org_directory):
-            os.makedirs(org_directory)
+            # Ensure the directory exists
+            if not os.path.exists(org_directory):
+                os.makedirs(org_directory)
 
-        # Write the data to the YAML file
-        with open(self.file_path, 'w') as file:
-            yaml.dump(data, file)
+            # Write the data to the YAML file
+            with open(self.file_path, 'w') as file:
+                yaml.dump(data, file)
 
 
     def find_agent_by_id(self, agent_id):
@@ -143,21 +195,30 @@ class Organization(metaclass=Singleton):
 
 
     async def start_agent_loop(self, agent):
+        print(" STARTING AGENT LOOP")
         #await agent.start_interaction_loop()
         await agent.start_test_loop()
 
 
     async def start_all_agent_loops(self):
         # Create tasks for each agent loop
-        for agent in self.agents.values():
-            asyncio.ensure_future(self.start_agent_loop(agent))
 
-        while True:
-            await asyncio.sleep(10)  # Adjust the sleep time as needed
+        tasks = [self.start_agent_loop(agent) for agent in self.agents.values()]
+        await asyncio.gather(*tasks)
+
+
+    async def start_all_agent_loops_2(self):
+        # Create tasks for each agent loop
+        tasks = []
+        for agent in self.agents.values():
+            termination_event = asyncio.Event()
+            self.agent_termination_events[agent.ai_id] = termination_event
+            tasks.append(self.start_agent_loop(agent, termination_event))
+        await asyncio.gather(*tasks)
 
 
     async def start(self):
-        await self.start_all_agent_loops()
+        await self.start_all_agent_loops_2()
     
 
     def print_sync(self, *args, **kwargs):
@@ -178,11 +239,13 @@ class Organization(metaclass=Singleton):
             new_employee_id = new_employee.ai_id  # Retrieve the ai_id of the new employee
             
             # Start the interection loop of the newly hired agent
-            asyncio.create_task(self.start_agent_loop(new_employee))
-            
+           
+            asyncio.ensure_future(self.start_agent_loop(new_employee))
+
+
             return self.add_staff(supervisor_id, new_employee_id)
     
-
+    
     def create_agent(
         self,
         name,
@@ -192,11 +255,11 @@ class Organization(metaclass=Singleton):
         founder=False,
     ):
         agent_id = len(self.agents)
-        organization_file = (
+        agent_file = (
             importlib.resources.files(permanent_storage)
-            / f"organizations/{self.name}/{agent_id}_{name}.yaml"
+            / f"organizations/{self.name}/agents/{agent_id}_{name}.yaml"
         )
-        print(" Organization file: ", organization_file)
+        print(" Agent file: ", agent_file)
         
 
         agent_cfg = AIConfig(
@@ -204,7 +267,7 @@ class Organization(metaclass=Singleton):
             ai_id=agent_id,
             ai_role=role,
             ai_goals=goals,
-            file_path=organization_file,
+            file_path=agent_file,
         )
 
         self.agent_budgets[agent_id] = budget
@@ -230,30 +293,33 @@ class Organization(metaclass=Singleton):
 
     @update_yaml_after
     def add_agent(self, agent_cfg):
+        
+        print("adding agent with ")
+        print("agent_cfg ", agent_cfg)
+        print("agent_id", agent_cfg.ai_id)
+        print ("organization ", self.name)
+
+
         memory = get_memory(cfg=cfg, organization_name=self.name, agent_config=agent_cfg)
         new_agent = Agent(agent_cfg, self, memory)
+        
+        print("new_agent_id", new_agent.ai_id)
         self.agents[new_agent.ai_id] = new_agent
+
+        print(f"\n {self.agents} \n")
         return new_agent
 
 
+
     @update_yaml_after
-    def remove_agent(self, agent_id):
-        if agent_id in self.agents:
-            agent = self.agents[agent_id]
-            agent.ai_config.remove()
-            del self.agents[agent_id]
-            return True
-        else:
-            return False
-
-
     def route_message(self, sender_id, reciever_id, message):
         logger.typewriter_log(
             f"ORG: Sender Id: {sender_id} \n ORG: Reciever Id: {reciever_id} \n ORG: Message: {message} \n"
         )
         
-        
-    def message_staff(self, sender_id, receiver_id, message):
+    
+    @update_yaml_after
+    async def message_staff(self, sender_id, receiver_id, message):
         try:
             sender_id = int(sender_id)
         except ValueError:
@@ -271,7 +337,7 @@ class Organization(metaclass=Singleton):
             return f"Failed to send message to employee with Agent_id: {receiver_id}\n"
        
        
-    def list_staff(self):
+    async def list_staff(self):
         employee_list = self.build_status_update()
         return employee_list
 
@@ -280,7 +346,14 @@ class Organization(metaclass=Singleton):
     async def fire_staff(self, agent_id):
         async with self.hire_fire_lock:
             # Check if the agent ID exists in the agents dictionary
+            
             if agent_id in self.agents:
+
+                # Set the termination event for the fired agent
+                termination_event = self.agent_termination_events.get(agent_id)
+                if termination_event:
+                    termination_event.set()
+                
                 agent = self.agents[agent_id]
                 agent_name = agent.ai_name
 
@@ -310,16 +383,24 @@ class Organization(metaclass=Singleton):
                     del self.agent_statuses[agent_id]
 
                 # Remove the agent from the organization
-                self.remove_agent(agent_id)
+                await self.remove_agent(agent_id)
 
                 return f"Successfully removed employee with name: {agent_name}\n"
             else:
                 return f"Failed to remove employee with Agent_id: {agent_id}\n"
+            
+    @update_yaml_after
+    async def remove_agent(self, agent_id):
+        if agent_id in self.agents:
+            agent = self.agents[agent_id]
+            agent.ai_config.remove()
+            del self.agents[agent_id]
+            return True
+        else:
+            return False
 
-
-
-
-    def message_supervisor(self, sender_id, message):
+    
+    async def message_supervisor(self, sender_id, message):
         """
         Auto routes a message from the staff member to the supervisor
         """
@@ -340,7 +421,8 @@ class Organization(metaclass=Singleton):
             return f"You are the founder and therefore don't have a supervisor!\n"
 
 
-    def receive_message(self, agent_id):
+    @update_yaml_after
+    async def receive_message(self, agent_id):
         # Check if the agent ID exists in the pending_messages dictionary
         if agent_id in self.pending_messages:
             # Pop the first message from the agent's pending message list
@@ -358,21 +440,21 @@ class Organization(metaclass=Singleton):
         return self.pending_messages.get(agent_id, [])
     
 
-    def calculate_operating_cost(self, cost_per_step=100):
+    async def calculate_operating_cost(self, cost_per_step=100):
         total_running_cost = 0
         for agent_id, agent in self.agents.items():
-            agent_running_cost = self.calculate_operating_cost_of_agent(agent_id, cost_per_step)
+            agent_running_cost = await self.calculate_operating_cost_of_agent(agent_id, cost_per_step)
             total_running_cost += agent_running_cost
         return total_running_cost
 
 
     @update_yaml_after
-    def calculate_operating_cost_of_agent(self, agent_id, cost_per_step = 100):
+    async def calculate_operating_cost_of_agent(self, agent_id, cost_per_step = 100):
         # Base cost for the agent
         agent_running_cost = cost_per_step
         # Add the operating cost of each employee under this agent
         for employee_id in self.supervisor_to_staff.get(agent_id, []):
-            agent_running_cost += self.calculate_operating_cost_of_agent(employee_id, cost_per_step)
+            agent_running_cost += await self.calculate_operating_cost_of_agent(employee_id, cost_per_step)
         
         # Save the calculated running cost in the agent_running_costs dictionary
         self.agent_running_costs[agent_id] = agent_running_cost
@@ -391,13 +473,13 @@ class Organization(metaclass=Singleton):
         return None
 
 
-    def get_staff(self, agent_id):
+    async def get_staff(self, agent_id):
         staff_ids = self.supervisor_to_staff.get(agent_id, [])
         staff_list = [self.agents[staff_id] for staff_id in staff_ids]
         return staff_list
     
 
-    def build_status_update(self, agent_id):
+    async def build_status_update(self, agent_id):
         staff_info = f"Your Staff Status:\n\n"
         if not self.has_staff(agent_id):
             staff_info += f"Agent {agent_id} currently has no staff in service\n"
@@ -424,12 +506,14 @@ class Organization(metaclass=Singleton):
 
 
     @update_yaml_after
-    def update_agent_status(self, agent_id, status):
+    async def update_agent_status(self, agent_id, status):
         self.agent_statuses[agent_id] = status
-
+    
 
     def get_agent_status(self, agent_id):
         return self.agent_statuses.get(agent_id, "Unknown")
     
 
-   
+    @update_yaml_after
+    async def update_agent_budget(self, agent_id, running_cost):
+        self.agent_budgets[agent_id] -= running_cost

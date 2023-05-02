@@ -32,6 +32,7 @@ class AIConfig:
         founder: bool = False,
         init_memory: bool = False,
         file_path: str = "",
+        loop_count: int = 0,
     ) -> None:
         """
         Initialize a class instance
@@ -50,10 +51,12 @@ class AIConfig:
         self.ai_role = ai_role
         self.ai_goals = ai_goals
         self.founder = founder
+        self.loop_count = loop_count
         
         # Implementation Specific
         self.init_memory = init_memory
         self.file = file_path
+        print("init file path: ", file_path)
         self.save()
        
 
@@ -64,12 +67,7 @@ class AIConfig:
     # def load(config_file: str = SAVE_FILE) -> "AIConfig":
 
     @classmethod
- 
     def load(cls, file_path):
-        # Construct the file path using importlib.resources.files
-        # agent_folder = importlib.resources.files(permanent_storage) / "agents"
-        # file_path = agent_folder / os.path.basename(file_path)
-
         try:
             with open(file_path) as file:
                 config_params = yaml.load(file, Loader=yaml.FullLoader)
@@ -79,9 +77,7 @@ class AIConfig:
             return None
 
     def remove(self):
-        # Update the path to include the organization_name and agents subdirectory
-        path = os.path.join(os.path.dirname(self.file), "agents")
-        file_path = os.path.join(path, os.path.basename(self.file))
+        file_path = self.file
 
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -91,11 +87,9 @@ class AIConfig:
             )
 
     def save(self):
-        path = os.path.join(
-            os.path.dirname(self.file), "agents"
-        )
-        os.makedirs(path, exist_ok=True)
-        file_path = os.path.join(path, os.path.basename(self.file))
+        file_path = self.file
+        
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         
         config = {attr: getattr(self, attr) for attr in vars(self)}
         config.pop("file", None)  # Exclude file attribute

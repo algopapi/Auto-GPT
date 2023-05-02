@@ -152,12 +152,10 @@ async def execute_command(agent, command_name: str, arguments):
 
         # Implementation specific
         elif command_name == "hire_staff":
-            #return agent.hire_staff(
-            #     arguments["name"], arguments["role"], arguments["goals"], arguments["budget"]
-            #)
-            return await agent.organization.hire_staff(
+            response = await agent.organization.hire_staff(
                 arguments["name"], arguments["role"], arguments["goals"], arguments["budget"], agent.ai_name, agent.ai_id
             )
+            return response
         elif command_name == "message_staff":
             return agent.message_staff(arguments["agent_id"], arguments["message"])
         elif command_name == "list_staff":

@@ -25,6 +25,7 @@ def main() -> None:
     
     org = get_organization()
     asyncio.run(org.start())
+    
     # ai_name = ""
     # system_prompt = construct_prompt()
     # # print(prompt)
