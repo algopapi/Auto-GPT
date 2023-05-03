@@ -1,5 +1,7 @@
+
 class Event:
-    def __init__(self, agent, action, *args, **kwargs):
+    def __init__(self, event_id, agent, action, *args, **kwargs):
+        self.event_id = event_id
         self.agent = agent
         self.action = action
         self.args = args
@@ -7,4 +9,4 @@ class Event:
 
     async def process(self):
         result = await self.agent.organization.perform_action(self.action, *self.args, **self.kwargs)
-        return result
+        self.agent.organization.event_results[self.event_id] = result

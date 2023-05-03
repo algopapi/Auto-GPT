@@ -2,7 +2,7 @@ import asyncio
 import glob
 import importlib.resources
 import os
-import threading
+import signal
 from functools import wraps
 from typing import Dict, List
 
@@ -12,7 +12,15 @@ import networkx as nx
 import yaml
 from yaml.constructor import ConstructorError
 
-from autogpt.organization.org_events import Event, EventType
+
+class DebuggableQueue(asyncio.Queue):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def print_contents(self):
+        # Access the internal queue (_queue) and print the action and agent attributes
+        for event in list(self._queue):
+            print(f"Event action: {event.action}, Agent: {event.agent}")
 
 
 def construct_python_tuple(constructor, node):
@@ -63,9 +71,17 @@ def update_yaml_after_async(func):
         res = await func(*args, **kwargs)
 
         obj = args[0]
-        yaml_path = obj.file_path
+        name = obj.name
+
+        # Update the file path to include the organization_name
+        org_directory = (
+            importlib.resources.files(permanent_storage)/f"organizations/{name}"
+        )
+
+        file_path = str(org_directory / f"{name}_organization.yaml")
+      
         async with obj.file_lock:  # Use the file lock here
-            await async_update_yaml(obj, yaml_path)
+            await async_update_yaml(obj, file_path)
         return res
     return wrapper
 
@@ -96,41 +112,108 @@ class Organization(metaclass=Singleton):
         self.agent_termination_events = {}
         self.file_path = f'{self.name}_organization.yaml'
 
-        # Organization event que
-        self.event_queue = asyncio.Queue()
+        # Organization event queue
+        self.event_queue = DebuggableQueue()
+        self.event_results = {}
+
+        # Handles termination 
+        self.termination_event = asyncio.Event()
 
         # Some locks
         self.org_lock = asyncio.Lock()  # Create a lock for the organization
         self.hire_fire_lock = asyncio.Lock()
         self.file_lock = asyncio.Lock()
 
+    def handle_termination_signal(self, signum, frame):
+        print("Termination signal received. Stopping agents...")
+        # Get the current running event loop
+        loop = asyncio.get_running_loop()
+        # Set the termination event using the event loop
+        loop.call_soon_threadsafe(self.termination_event.set)
+
 
     async def process_events(self):
+        iteration_count = 0
         while True:
             event = await self.event_queue.get()
-            result = await event.process()
-            await event.agent.response_queue.put(result)
+            await event.process()  # Call the process method for each event
+            self.event_queue.task_done()
 
-    async def perform_action(self, action, *args, **kwargs):
-        action_map = {
-            'get_staff': self.get_staff,
-            'hire_staff': self.hire_staff,
-            'fire_staff': self.fire_staff,
-            'message_staff': self.message_staff,
-            'message_supervisor': self.message_supervisor,
-            'recieve_message': self.recieve_message,
-            'build_status_update': self.build_status_update,
-            'update_agent_status': self.update_agent_status,
-            'calculate_operating_cost_of_agent': self.calculate_operating_cost_of_agent,
-            'update_agent_running_cost': self.update_agent_running_cost,
-            'update_agent_budget': self.update_agent_budget,
-        }
-        if action in action_map:
-            return await action_map[action](*args, **kwargs)
-        else:
-            raise ValueError(f"Unknown action: {action}")
+            # Print the contents of the queue every other iteration
+            iteration_count += 1
+            if iteration_count % 50 == 0:
+                print("Contents of the event queue:")
+                self.event_queue.print_contents()
+
+
+    async def get_event_result(self, event_id):
+        while event_id not in self.event_results:
+            await asyncio.sleep(0.1)
+        result = self.event_results[event_id]
+        del self.event_results[event_id]
+        return result
+
+
+    async def perform_action(self, event_type, *args, **kwargs):
+        # Determine the action to perform based on the event_type
+        if event_type == 'get_staff':
+            # Perform the 'get_staff' action and return the result
+            ai_id = args[0]
+            return self.get_staff(ai_id)
+
+        elif event_type == 'hire_staff':
+            # Perform the 'hire_staff' action and return the result
+            name, role, goals, budget, supervisor_name, supervisor_id = args
+            return await self.hire_staff(name, role, goals, budget, supervisor_name, supervisor_id)
+
+        elif event_type == 'fire_staff':
+            # Perform the 'fire_staff' action and return the result
+            ai_id = args[0]
+            return await self.fire_staff(ai_id)
+
+        elif event_type == 'message_staff':
+            # Perform the 'message_staff' action and return the result
+            sender_id, receiver_id, message = args
+            return await self.message_staff(sender_id, receiver_id, message)
+
+        elif event_type == 'message_supervisor':
+            # Perform the 'message_supervisor' action and return the result
+            sender_id, message = args
+            return await self.message_supervisor(sender_id, message)
+    
+        elif event_type == 'receive_message':
+            agent_id = args[0]
+            return await self.receive_message(agent_id)
+
+        elif event_type == 'calculate_operating_cost_of_agent':
+            # Perform the 'calculate_operating_cost_of_agent' action and return the result
+            ai_id = args[0]
+            return await self.calculate_operating_cost_of_agent(ai_id)
         
+        elif event_type == 'update_agent_running_cost':
+            # Perform the 'calculate_operating_cost_of_agent' action and return the result
+            ai_id, running_cost= args
+            return await self.update_agent_running_cost(ai_id, running_cost)
+        
+        elif event_type == 'update_agent_budget':
+            ai_id, running_cost = args
+            return await self.update_agent_budget(ai_id, running_cost)
 
+        elif event_type == 'update_agent_status':
+            ai_id, status = args
+            return await self.update_agent_status(ai_id, status)
+        
+        elif event_type == 'build_status_update':
+            ai_id = args[0]
+            return await self.build_status_update(ai_id)
+        
+        # ... (additional event types and corresponding actions)
+
+        else:
+            # Raise an error if the event_type is not recognized
+            raise ValueError(f"Unknown event type: {event_type}")
+        
+    
     @classmethod
     async def create(cls, name, initial_budget):
         org = cls(name, initial_budget)
@@ -251,6 +334,30 @@ class Organization(metaclass=Singleton):
             with open(self.file_path, 'w') as file:
                 yaml.dump(data, file)
 
+    
+    async def start_agent_loop(self, agent):
+        #await agent.start_interaction_loop()
+        await agent.start_test_loop(self.termination_event)
+
+    
+    async def start_event_processing_loop(self):
+        await self.process_events()
+
+    
+    async def start_all_agent_loops(self):
+        # Create tasks for each agent loop
+        tasks = [self.start_agent_loop(agent) for agent in self.agents.values()]
+        
+        # Create a seperate task for the event processing loop
+        tasks.append(self.start_event_processing_loop())
+
+        # Gather all tasks and run them concurrently
+        await asyncio.gather(*tasks)
+
+    
+    async def start(self):
+        await self.start_all_agent_loops()
+    
 
     def find_agent_by_id(self, agent_id):
         try:
@@ -258,32 +365,6 @@ class Organization(metaclass=Singleton):
         except KeyError:
             return None
 
-
-    async def start_all_agent_loops_2(self):
-        # Create tasks for each agent loop
-        tasks = []
-        for agent in self.agents.values():
-            termination_event = asyncio.Event()
-            self.agent_termination_events[agent.ai_id] = termination_event
-            tasks.append(self.start_agent_loop(agent, termination_event))
-        await asyncio.gather(*tasks)
-
-
-    async def start_agent_loop(self, agent):
-        print(" STARTING AGENT LOOP")
-        #await agent.start_interaction_loop()
-        await agent.start_test_loop()
-
-
-    async def start(self):
-        await self.start_all_agent_loops()
-    
-
-    async def start_all_agent_loops(self):
-        # Create tasks for each agent loop
-
-        tasks = [self.start_agent_loop(agent) for agent in self.agents.values()]
-        await asyncio.gather(*tasks)
 
     
     async def hire_staff(self, name, role, goals, budget, supervisor_name, supervisor_id):
@@ -436,10 +517,11 @@ class Organization(metaclass=Singleton):
     async def update_agent_status(self, agent_id, status):
         async with self.org_lock:
             self.agent_statuses[agent_id] = status
+            return f"Successfully updated employee with Agent_id: {agent_id} status to {status}\n"
 
 
     @update_yaml_after_async
-    async def _update_agent_budget(self, agent_id, running_cost):
+    async def update_agent_budget(self, agent_id, running_cost):
         async with self.org_lock:
             self.agent_budgets[agent_id] -= running_cost
 
@@ -466,6 +548,7 @@ class Organization(metaclass=Singleton):
         return new_agent
 
 
+    @update_yaml_after_async
     async def create_agent(
         self,
         name,
