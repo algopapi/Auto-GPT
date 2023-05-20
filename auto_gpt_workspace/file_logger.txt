@@ -1,3 +1,4 @@
 File Operation Logger write: resumes.txt
 write: employee_roles_goals_budget.txt
 write: budget.txt
+write: job_listing.txt
