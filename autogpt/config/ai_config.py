@@ -98,7 +98,7 @@ class AIConfig:
         with open(file_path, "w") as file:
             yaml.dump(config, file)
 
-    def construct_full_prompt(self) -> str:
+    def construct_full_prompt(self, organization) -> str:
         """
         Returns a prompt to the user with the class information in an organized fashion.
 
@@ -119,11 +119,22 @@ class AIConfig:
 
         from autogpt.prompt import get_prompt
 
-        # Construct full prompt
-        full_prompt = (
-            f"You are {self.ai_name}, {self.ai_role}\n{prompt_start}\n\nGOALS:\n\n"
-        )
+
+        if self.founder:
+            print('founder')
+            full_prompt = (
+                f"You are {self.ai_name}, founder of organization {organization.name}. your role is: {self.ai_role}\n{prompt_start}.\n\nGOALS:\n\n"
+            )
+        else:
+            print('not founder')
+            s_id, s_name = organization.get_supervisor_info(self.ai_id)
+            full_prompt = (
+                f"you are {self.ai_name}, member of organization {organization.name}. Your supervisor is Id:{s_id} Name:{s_name}.\n" + 
+                f"Your role is: {self.ai_role}\n{prompt_start}.\n\nGOALS:\n\n"   
+            )
+
         for i, goal in enumerate(self.ai_goals):
+            print(self.ai_goals)
             full_prompt += f"{i+1}. {goal}\n"
 
         full_prompt += f"\n\n{get_prompt()}"

@@ -64,7 +64,7 @@ async def controlled_sleep(ai_id):
 
 # TODO: Change debug from hardcode to argument
 async def chat_with_ai(
-    prompt, user_input, full_message_history, permanent_memory, token_limit, ai_id
+    prompt, user_input, full_message_history, permanent_memory, token_limit,
 ):
     """Interact with the OpenAI API, sending the prompt, user input, message history,
     and permanent memory."""
@@ -147,6 +147,7 @@ async def chat_with_ai(
 
             # Append user input, the length of this is accounted for above
             current_context.extend([create_chat_message("user", user_input)])
+
 
             # Calculate remaining tokens
             tokens_remaining = token_limit - current_tokens_used

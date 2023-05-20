@@ -62,7 +62,7 @@ class Agent:
         self.memory = memory
         
         # We might want to define those here
-        self.system_prompt = ai_config.construct_full_prompt()
+        self.system_prompt = ai_config.construct_full_prompt(self.organization)
         self.triggering_prompt = (
              "Determine which next command to use, and respond using the"
              " format specified above:"
@@ -247,10 +247,12 @@ class Agent:
 
             # Build the status udpate of the agent to add to prompt
             status_event_id = await self.send_event("build_status_update", self.ai_id)
-            agent_status = await self.organization.get_event_result(status_event_id)
-            print("agent status: ", agent_status)
+            org_status = await self.organization.get_event_result(status_event_id)
+            print("agent status: ", org_status)
             print("agent message: ", message)
-            
+
+            # Update the current system prompt
+            self.system_prompt = self.ai_config.construct_full_prompt(self.organization)
            
             if (
                 cfg.continuous_mode
@@ -261,16 +263,18 @@ class Agent:
                     "Continuous Limit Reached: ", Fore.YELLOW, f"{cfg.continuous_limit}"
                 )
                 break
+                
+            current_prompt = self.system_prompt + org_status + message
+            print("current prompt: \n\n", current_prompt + "\n\n")
 
             # Send message to AI, get response
             # with Spinner("Thinking... "):
             assistant_reply = await chat_with_ai(
-                self.system_prompt,
+                current_prompt,
                 self.triggering_prompt,
                 self.full_message_history,
                 self.memory,
                 cfg.fast_token_limit,
-                self.ai_id
             )  # TODO: This hardcodes the model to use GPT3.5. Make this an argument
            
             assistant_reply_json = await fix_json_using_multiple_techniques(assistant_reply)

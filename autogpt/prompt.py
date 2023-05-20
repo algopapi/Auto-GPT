@@ -26,15 +26,23 @@ def get_prompt() -> str:
     # Initialize the PromptGenerator object
     prompt_generator = PromptGenerator()
 
+    prompt_generator.add_constraint(
+        "You have a total spending budget (given below) you can use yourself or use to hire staff. "
+        "Each staff member has a running cost of 100$ per step. Hiring staff will result in "
+        "Faster budget depletion. Complete your task before you run out of budget."
+    )
+    
     # Add constraints to the PromptGenerator object
     prompt_generator.add_constraint(
         "~4000 word limit for short term memory. Your short term memory is short, so"
         " immediately save important information to files."
     )
+
     prompt_generator.add_constraint(
         "If you are unsure how you previously did something or want to recall past"
         " events, thinking about similar events will help you remember."
     )
+
     prompt_generator.add_constraint("No user assistance")
     prompt_generator.add_constraint(
         'Exclusively use the commands listed in double quotes e.g. "command name"'
@@ -65,7 +73,7 @@ def get_prompt() -> str:
         #     "clone_repository",
         #     {"repository_url": "<url>", "clone_path": "<directory>"},
         # ),
-        
+
         ("Message staff", "message_staff", {"agent_id": "<agent_id>", "message": "<message>"}),
         ("Message supervisor", "message_supervisor", {"message": "<message>"}),
         (
@@ -73,15 +81,12 @@ def get_prompt() -> str:
             "hire_staff", 
             {"name": "<name>",
              "role": "<role within the organization>",
-             "goals": "<employee goals>", 
+             "goals": "<list of employee goals (comma seperated)>", 
              "budget" : "<assign budget to employee (the max amount budget the employee is allowed to spend))>"
              }
         ),
 
         ("Fire staff", "fire_staff", {"agent_id": "<agent_id>"}),
-       
-
-
         ("Write to file", "write_to_file", {"file": "<file>", "text": "<text>"}),
         ("Read file", "read_file", {"file": "<file>"}),
         ("Append to file", "append_to_file", {"file": "<file>", "text": "<text>"}),
@@ -151,7 +156,8 @@ def get_prompt() -> str:
     )
     prompt_generator.add_resource("Long Term memory management.")
     prompt_generator.add_resource(
-        "GPT-3.5 powered Agents for delegation of simple tasks."
+        "Ability to hire/fire agents. Agents increase your running costs, causing faster budget depletion. "
+        "Assume that simple tasks will take a minimum of 20 steps to complete, keep this in mind budgeting for hiring agents."
     )
     prompt_generator.add_resource("File output.")
 
@@ -167,8 +173,8 @@ def get_prompt() -> str:
         "Reflect on past decisions and strategies to refine your approach."
     )
     prompt_generator.add_performance_evaluation(
-        "Every command has a cost, so be smart and efficient. Aim to complete tasks in"
-        " the least number of steps."
+        "Every step you take has a running cost, so be smart and efficient. Aim to complete tasks"
+        "before you run out of budget."
     )
 
     # Generate the prompt string
@@ -194,12 +200,12 @@ def construct_prompt() -> str:
             speak_text=True,
         )
         should_continue = clean_input(
-            f"""Continue with the last settings?
-Name:  {config.ai_name}
-Role:  {config.ai_role}
-Goals: {config.ai_goals}
-Continue (y/n): """
-        )
+                    f"""Continue with the last settings?
+                    Name:  {config.ai_name}
+                    Role:  {config.ai_role}
+                    Goals: {config.ai_goals}
+                    Continue (y/n): """
+                )
         if should_continue.lower() == "n":
             config = AIConfig()
 

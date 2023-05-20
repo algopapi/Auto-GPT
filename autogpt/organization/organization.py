@@ -172,6 +172,10 @@ class Organization(metaclass=Singleton):
         return result
 
 
+    def convert_string_to_list(self, comma_separated_string):
+        return comma_separated_string.split(',')
+
+
     async def perform_action(self, event_type, agent_id, *args, **kwargs):
         # Determine the action to perform based on the event_type
       
@@ -189,7 +193,9 @@ class Organization(metaclass=Singleton):
                 # Perform the 'hire_staff' action and return the result
                 print(f"free agent ids:", self.free_agent_ids)
                 name, role, goals, budget, supervisor_name, supervisor_id = args
-                res = await self.hire_staff(name, role, goals, budget, supervisor_name, supervisor_id)
+                goals_list = self.convert_string_to_list(goals)
+                print("goals list", goals_list)
+                res = await self.hire_staff(name, role, goals_list, budget, supervisor_name, supervisor_id)
                 print(f"Agent {name} response to hiring staff: {res}")
                 return res
 
@@ -286,6 +292,12 @@ class Organization(metaclass=Singleton):
 
     @update_yaml_after_async
     async def hire_staff(self, name, role, goals, budget, supervisor_name, supervisor_id):
+        try:
+            # Validate and convert budget to integer
+            budget = int(budget)
+        except ValueError:
+            raise ValueError(f"Budget value '{budget}' is not a valid integer.")
+        
         new_employee = await self.create_agent(
             name=name,
             role=role,
@@ -406,6 +418,7 @@ class Organization(metaclass=Singleton):
             ai_role=role,
             ai_goals=goals,
             file_path=agent_file,
+            founder=founder,
         )
 
         # If it is the founder we set the budget here
@@ -488,7 +501,7 @@ class Organization(metaclass=Singleton):
             else:
                 return "You have no pending messages"  # No pending messages for the agent
         else:
-            return None  # Agent ID not found in the pending_messages dictionary
+            return "You have no pending messages"  # Agent ID not found in the pending_messages dictionary
 
 
     @update_yaml_after_async
@@ -542,13 +555,31 @@ class Organization(metaclass=Singleton):
     async def has_staff(self, agent_id):
         return bool(self.supervisor_to_staff.get(agent_id, []))
 
-
+    # Asynchornous function that returns supervisode ID. 
     async def get_supervisor_id(self, agent_id):
         for supervisor, staff in self.supervisor_to_staff.items():
             if agent_id in staff:
                 return supervisor
         return None
-
+    
+    def _get_supervisor_id(self, agent_id):
+        for supervisor, staff in self.supervisor_to_staff.items():
+            if agent_id in staff:
+                return supervisor
+        return None
+        
+    # Asynchronous method to get the supervisor's id and name
+    def get_supervisor_info(self, agent_id: int):
+        # Get the supervisor ID
+        supervisor_id = self._get_supervisor_id(agent_id)
+        # If there is a supervisor, return their ID and name
+        if supervisor_id is not None:
+            supervisor = self.agents.get(supervisor_id)
+            if supervisor is not None:
+                return supervisor_id, supervisor.ai_name
+        # If there is no supervisor or the supervisor is not in the agents dictionary, return None
+        print("cannot find supervisor for agent id ", agent_id)
+        return None, None
 
     async def get_staff(self, agent_id):
         staff_ids = self.supervisor_to_staff.get(agent_id, [])
@@ -556,7 +587,7 @@ class Organization(metaclass=Singleton):
         return staff_list
 
 
-    def get_employee_hierarchy(self, supervisor_id, level): 
+    def get_employee_hierarchy(self, supervisor_id, level):
         hierarchy = ""
         indent = "  " * level
         if supervisor_id is None:
@@ -660,7 +691,8 @@ class Organization(metaclass=Singleton):
                 for staff_id in staff_ids:
                     staff_agent = org.agents.get(staff_id)
                     if staff_agent is not None:
-                        supervisor.organization.add_staff(supervisor_id, staff_id, skip_update_yaml=True)
+                        staff_budget = org.agent_budgets.get(staff_id)
+                        supervisor.organization.add_staff(supervisor_id, staff_id, staff_budget, skip_update_yaml=True)
 
         return org
         

@@ -138,37 +138,21 @@ async def execute_command(agent, command_name: str, arguments):
         elif command_name == "memory_add":
             return agent.memory.add(arguments["string"])
         
-        # Deactrivate these for now to avoid confusion. 
-        # elif command_name == "start_agent":
-        #     return start_agent(
-        #         arguments["name"], arguments["task"], arguments["prompt"]
-        #     )
-        # elif command_name == "message_agent":
-        #     return message_agent(arguments["key"], arguments["message"])
-        # elif command_name == "list_agents":
-        #     return list_agents()
-        # elif command_name == "delete_agent":
-        #     return delete_agent(arguments["key"])
-
-        # Implementation specific
-        # elif command_name == "list_staff":
-        #     return agent.organization.build_status_update(agent.ai_id)
-
         elif command_name == "hire_staff":
             event_id = await agent.send_event("hire_staff", arguments["name"], arguments["role"], arguments["goals"], arguments["budget"], agent.ai_name, agent.ai_id)
-            response = await agent.organization.wait_for_response(event_id)
+            response = await agent.organization.get_event_result(event_id)
             return response
         elif command_name == "fire_staff":
             event_id = await agent.send_event("fire_staff", arguments["agent_id"])
-            response = await agent.organization.wait_for_response(event_id)
+            response = await agent.organization.get_event_result(event_id)
             return response
         elif command_name == "message_staff":
-            event_id = agent.send_event("message_staff", agent.ai_id, arguments["agent_id"], arguments["message"])
-            response = agent.organization.wait_for_response(event_id)
+            event_id = await agent.send_event("message_staff", agent.ai_id, arguments["agent_id"], arguments["message"])
+            response = await agent.organization.get_event_result(event_id)
             return response
         elif command_name == "message_supervisor":
             event_id = await agent.send_event("message_supervisor",agent.ai_id, arguments["message"])
-            response = await agent.organization.wait_for_response(event_id)
+            response = await agent.organization.get_event_result(event_id)
             return response
         
 
