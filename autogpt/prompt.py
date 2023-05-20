@@ -65,8 +65,9 @@ def get_prompt() -> str:
         #     "clone_repository",
         #     {"repository_url": "<url>", "clone_path": "<directory>"},
         # ),
+        
         ("Message staff", "message_staff", {"agent_id": "<agent_id>", "message": "<message>"}),
-        ("List staff", "list_staff", {}),
+        ("Message supervisor", "message_supervisor", {"message": "<message>"}),
         (
             "Hire staff", 
             "hire_staff", 
@@ -78,7 +79,7 @@ def get_prompt() -> str:
         ),
 
         ("Fire staff", "fire_staff", {"agent_id": "<agent_id>"}),
-        ("Message supervisor", "message_supervisor", {"message": "<message>"}),
+       
 
 
         ("Write to file", "write_to_file", {"file": "<file>", "text": "<text>"}),

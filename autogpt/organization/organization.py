@@ -110,8 +110,6 @@ def update_yaml_after_async(func):
     return wrapper
 
 
-
-
 cfg = Config()
 # An organization of multiple agents.
 class Organization(metaclass=Singleton):
@@ -263,8 +261,8 @@ class Organization(metaclass=Singleton):
 
 
     async def start_agent_loop(self, agent):
-        #await agent.start_interaction_loop()
-        await agent.start_test_loop(self.termination_event)
+        await agent.start_interaction_loop(self.termination_event)
+        #await agent.start_test_loop(self.termination_event)
 
     
     async def start_event_processing_loop(self):
@@ -303,7 +301,6 @@ class Organization(metaclass=Singleton):
 
     @update_yaml_after_async
     async def fire_staff(self, agent_id):
-       
         # Check if the agent ID exists in the agents dictionary
         if agent_id in self.agents:
             agent = self.agents[agent_id]
@@ -345,9 +342,6 @@ class Organization(metaclass=Singleton):
 
             # Remove the agent from the organization
             await self.remove_agent(agent_id)
-
-           
-
             return f"Successfully removed employee with name: {agent_name}\n"
         else:
             return f"Failed to remove employee with Agent_id: {agent_id}\n"
@@ -417,6 +411,7 @@ class Organization(metaclass=Singleton):
         # If it is the founder we set the budget here
         if founder:
             self.agent_budgets[agent_id] = initial_budget
+
 
         return await self.add_agent(agent_cfg)
 

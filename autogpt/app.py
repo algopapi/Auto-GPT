@@ -151,20 +151,26 @@ async def execute_command(agent, command_name: str, arguments):
         #     return delete_agent(arguments["key"])
 
         # Implementation specific
+        # elif command_name == "list_staff":
+        #     return agent.organization.build_status_update(agent.ai_id)
+
         elif command_name == "hire_staff":
-            response = await agent.organization.hire_staff(
-                arguments["name"], arguments["role"], arguments["goals"], arguments["budget"], agent.ai_name, agent.ai_id
-            )
+            event_id = await agent.send_event("hire_staff", arguments["name"], arguments["role"], arguments["goals"], arguments["budget"], agent.ai_name, agent.ai_id)
+            response = await agent.organization.wait_for_response(event_id)
+            return response
+        elif command_name == "fire_staff":
+            event_id = await agent.send_event("fire_staff", arguments["agent_id"])
+            response = await agent.organization.wait_for_response(event_id)
             return response
         elif command_name == "message_staff":
-            return agent.message_staff(arguments["agent_id"], arguments["message"])
-        elif command_name == "list_staff":
-            return agent.organization.build_status_update(agent.ai_id)
-        elif command_name == "fire_staff":
-            return await agent.organization.fire_staff(arguments["agent_id"])
+            event_id = agent.send_event("message_staff", agent.ai_id, arguments["agent_id"], arguments["message"])
+            response = agent.organization.wait_for_response(event_id)
+            return response
         elif command_name == "message_supervisor":
-            return agent.organization.message_supervisor(agent.ai_id, arguments["message"])
-
+            event_id = await agent.send_event("message_supervisor",agent.ai_id, arguments["message"])
+            response = await agent.organization.wait_for_response(event_id)
+            return response
+        
 
         elif command_name == "get_text_summary":
             return get_text_summary(agent.memory, arguments["url"], arguments["question"])
