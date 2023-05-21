@@ -5,7 +5,7 @@ import uuid
 
 from colorama import Fore, Style
 
-from autogpt.app import execute_command, get_command
+from autogpt.app import execute_command, get_command, get_status
 from autogpt.chat import chat_with_ai, create_chat_message
 from autogpt.config import Config
 from autogpt.json_fixes.master_json_fix_method import fix_json_using_multiple_techniques
@@ -286,6 +286,8 @@ class Agent:
                 try:
                     print_assistant_thoughts(self.ai_name, assistant_reply_json)
                     command_name, arguments = get_command(assistant_reply_json)
+                    status = get_status(assistant_reply_json)
+                    await self.send_event("update_agent_status", self.ai_id, status)
                     # command_name, arguments = assistant_reply_json_valid["command"]["name"], assistant_reply_json_valid["command"]["args"]
                     if cfg.speak_mode:
                         say_text(f"I want to execute {command_name}")

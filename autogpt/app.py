@@ -76,6 +76,7 @@ def get_command(response_json: Dict):
 
         if "name" not in command:
             return "Error:", "Missing 'name' field in 'command' object"
+    
 
         command_name = command["name"]
 
@@ -88,7 +89,43 @@ def get_command(response_json: Dict):
     # All other errors, return "Error: + error message"
     except Exception as e:
         return "Error:", str(e)
+        
 
+def get_status(response_json: Dict):
+    """Parse the response and return the command name and arguments
+
+    Args:
+        response_json (json): The response from the AI
+
+    Returns:
+        tuple: The command name and arguments
+
+    Raises:
+        json.decoder.JSONDecodeError: If the response is not valid JSON
+
+        Exception: If any other error occurs
+    """
+    try:
+        if "thoughts" not in response_json:
+            return "Error:", "Missing 'thoughts' object in JSON"
+
+        if not isinstance(response_json, dict):
+            return "Error:", f"'response_json' object is not dictionary {response_json}"
+
+        thoughts = response_json["thoughts"]
+        if not isinstance(thoughts, dict):
+            return "Error:", "'thoughts' object is not a dictionary"
+
+        if "status" not in thoughts:
+            return "Error:", "Missing 'status' field in 'command' object"
+
+        status = thoughts["status"]
+        return status
+    except json.decoder.JSONDecodeError:
+        return "Error:", "Invalid JSON"
+    # All other errors, return "Error: + error message"
+    except Exception as e:
+        return "Error:", str(e)
 
 def map_command_synonyms(command_name: str):
     """Takes the original command name given by the AI, and checks if the

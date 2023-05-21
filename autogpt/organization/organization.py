@@ -257,7 +257,6 @@ class Organization(metaclass=Singleton):
                 # Raise an error if the event_type is not recognized
                 raise ValueError(f"Unknown event type: {event_type}")
             
-        
     
     @classmethod
     async def create(cls, name, initial_budget):
@@ -497,7 +496,8 @@ class Organization(metaclass=Singleton):
             message_list = self.pending_messages[agent_id]
             if message_list:
                 message = message_list.pop(0)
-                return message
+                send = f"agent id: {message[0]} sent you the following message: {message[1]}"
+                return send
             else:
                 return "You have no pending messages"  # No pending messages for the agent
         else:
@@ -545,6 +545,16 @@ class Organization(metaclass=Singleton):
             staff_info += f"Agent {agent_id} currently has no staff in service\n"
         else:
             staff_info += self.get_employee_hierarchy(agent_id, 0)
+        
+        # Build organization info context for agent
+        running_costs = await self.calculate_operating_cost_of_agent(agent_id)
+        budget = self.agent_budgets[agent_id]
+        runaway_time = self.agent_budgets[agent_id] / running_costs
+        staff_info += f"Your current budget is ${budget}\n"
+        staff_info += f"Your current running costs are ${running_costs} per step\n"
+   
+        staff_info += f"With your current running costs you will run out in {runaway_time} steps.\n"
+        staff_info += f"A simple task will typically take 15 steps."
         return staff_info
 
         
