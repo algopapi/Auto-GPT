@@ -143,14 +143,15 @@ class Agent:
             # Build the status udpate of the agent to add to prompt 
             status_event_id = await self.send_event("build_status_update", self.ai_id)
             agent_status = await self.organization.get_event_result(status_event_id)
-            # print("agent status: ", agent_status)
+            print("agent status: ", agent_status)
+            
             # print("agent message: ", message)
 
             # Build an arbitrary status
             status = f"agent {self.ai_name} is in loop {self.loop_count} rolled {dice_result}"
 
             # Update the agent status
-            await self.send_event("update_agent_status", self.ai_id, status)
+            await self.send_event("update_agent_status", self.ai_id, agent_status)
 
             if dice_result == 1:
                 next_free_id = len(self.organization.agents)
@@ -166,7 +167,8 @@ class Agent:
 
                 event_id = await self.send_event("hire_staff", name, role, goals, staff_budget, self.ai_name, self.ai_id)
                 response = await self.organization.get_event_result(event_id)
-                #print(f"response: {response}")
+                
+                # print(f"response: {response}")
                 await asyncio.sleep(2)
 
             elif dice_result == 2:
@@ -223,7 +225,6 @@ class Agent:
 
         await self.send_event("update_agent_status", self.ai_id, "starting interaction loop")
 
-
         while not self.terminated:
 
             if termination_event.is_set():
@@ -244,12 +245,9 @@ class Agent:
             message_event_id = await self.send_event("receive_message", self.ai_id)
             message = await self.organization.get_event_result(message_event_id)
 
-
             # Build the status udpate of the agent to add to prompt
             status_event_id = await self.send_event("build_status_update", self.ai_id)
             org_status = await self.organization.get_event_result(status_event_id)
-            print("agent status: ", org_status)
-            print("agent message: ", message)
 
             # Update the current system prompt
             self.system_prompt = self.ai_config.construct_full_prompt(self.organization)
@@ -264,7 +262,7 @@ class Agent:
                 )
                 break
                 
-            current_prompt = self.system_prompt + org_status + message
+            current_prompt = self.system_prompt + "\n" + org_status + "\n" + message
             print("current prompt: \n\n", current_prompt + "\n\n")
 
             # Send message to AI, get response
@@ -287,6 +285,7 @@ class Agent:
                     print_assistant_thoughts(self.ai_name, assistant_reply_json)
                     command_name, arguments = get_command(assistant_reply_json)
                     status = get_status(assistant_reply_json)
+                    print("status", status)
                     await self.send_event("update_agent_status", self.ai_id, status)
                     # command_name, arguments = assistant_reply_json_valid["command"]["name"], assistant_reply_json_valid["command"]["args"]
                     if cfg.speak_mode:

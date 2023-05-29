@@ -99,7 +99,7 @@ async def create_new_org(should_speak=False):
     initial_budget = 50000
     new_organization = await Organization.create(org_name, initial_budget)
     await new_organization.create_agent(
-        name=ai_name, role=ai_role, goals=ai_goals, founder=True
+        name=ai_name, role=ai_role, goals=ai_goals, founder=True, initial_budget=initial_budget
     )
     await new_organization.save()
 

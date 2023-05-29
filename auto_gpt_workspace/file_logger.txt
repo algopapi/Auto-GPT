@@ -3,3 +3,5 @@ write: employee_roles_goals_budget.txt
 write: budget.txt
 write: job_listing.txt
 write: messages.txt
+write: initial_code.py
+write: message_to_staff.txt

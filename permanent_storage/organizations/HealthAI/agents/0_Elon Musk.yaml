@@ -1,0 +1,11 @@
+ai_goals:
+- Hire a staff member
+- message him
+- fire him
+ai_id: 0
+ai_name: Elon Musk
+ai_role: Setup a personal health consultancy organization
+founder: true
+init_memory: false
+loop_count: 0
+terminated: false

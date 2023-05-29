@@ -75,7 +75,7 @@ async def update_yaml_after(func):
 
 
 async def async_update_yaml(obj, yaml_path):
-
+    
     # Create a dictionary to represent the organization data
     org_data = {
         'name': obj.name,
@@ -94,6 +94,7 @@ async def async_update_yaml(obj, yaml_path):
 
 def update_yaml_after_async(func):
     async def wrapper(*args, **kwargs):
+        print("Updating YAML file after function call.")
         obj = args[0]
         async with obj.action_lock:
             res = await func(*args, **kwargs)
@@ -106,6 +107,7 @@ def update_yaml_after_async(func):
 
             async with obj.file_lock:  # Use the file lock here
                 await async_update_yaml(obj, file_path)
+        print(" YAML file updated.")
         return res
     return wrapper
 
@@ -424,7 +426,6 @@ class Organization(metaclass=Singleton):
         if founder:
             self.agent_budgets[agent_id] = initial_budget
 
-
         return await self.add_agent(agent_cfg)
 
 
@@ -540,19 +541,19 @@ class Organization(metaclass=Singleton):
 
 
     async def build_status_update(self, agent_id):
-        staff_info = f"Your Staff Status:\n\n"
+        staff_info = f"Your Staff Status:\n"
+        
         if not await self.has_staff(agent_id):
             staff_info += f"Agent {agent_id} currently has no staff in service\n"
         else:
             staff_info += self.get_employee_hierarchy(agent_id, 0)
-        
+    
         # Build organization info context for agent
         running_costs = await self.calculate_operating_cost_of_agent(agent_id)
         budget = self.agent_budgets[agent_id]
         runaway_time = self.agent_budgets[agent_id] / running_costs
-        staff_info += f"Your current budget is ${budget}\n"
+        staff_info += f"\n\n Your current budget is ${budget}\n"
         staff_info += f"Your current running costs are ${running_costs} per step\n"
-   
         staff_info += f"With your current running costs you will run out in {runaway_time} steps.\n"
         staff_info += f"A simple task will typically take 15 steps."
         return staff_info
@@ -565,7 +566,7 @@ class Organization(metaclass=Singleton):
     async def has_staff(self, agent_id):
         return bool(self.supervisor_to_staff.get(agent_id, []))
 
-    # Asynchornous function that returns supervisode ID. 
+    # Asynchornous function that returns supervisode ID.
     async def get_supervisor_id(self, agent_id):
         for supervisor, staff in self.supervisor_to_staff.items():
             if agent_id in staff:
