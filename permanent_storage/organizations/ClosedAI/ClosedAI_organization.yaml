@@ -1,20 +1,16 @@
 agent_budgets:
-  0: 48400
-  1: 300
-  2: 600
+  0: 49400
+  1: 4800
 agent_running_costs:
-  0: 300
+  0: 200
   1: 100
-  2: 100
 agent_statuses:
-  0: idle
+  0: starting interaction loop
   1: idle
-  2: idle
 agent_termination_events: {}
 initial_budget: 50000
-name: PoepAI
+name: ClosedAI
 pending_messages: {}
 supervisor_to_staff:
   0:
-  - 1
-  - 2
+    - 1

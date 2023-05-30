@@ -1,9 +1,0 @@
-ai_goals:
-- Create jokes on various topics
-ai_id: 2
-ai_name: Joke Writer 2
-ai_role: Joke Creator
-founder: false
-init_memory: false
-loop_count: 0
-terminated: false

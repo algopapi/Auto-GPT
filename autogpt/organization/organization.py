@@ -58,7 +58,6 @@ def update_and_visualize(func):
         result = await func(self, *args, **kwargs)
         await self.visualize_organization()
         return result
-
     return wrapper
 
 
@@ -70,7 +69,6 @@ async def update_yaml_after(func):
         if not kwargs.get("skip_update_yaml", False):
             await self.save()
         return result
-
     return wrapper
 
 
@@ -90,6 +88,7 @@ async def async_update_yaml(obj, yaml_path):
 
     async with aiofiles.open(yaml_path, mode='w') as outfile:
         await outfile.write(yaml.dump(org_data))
+
 
 
 def update_yaml_after_async(func):
@@ -112,6 +111,8 @@ def update_yaml_after_async(func):
     return wrapper
 
 
+
+
 cfg = Config()
 # An organization of multiple agents.
 class Organization(metaclass=Singleton):
@@ -119,6 +120,7 @@ class Organization(metaclass=Singleton):
         self.name = name
        
         self.agents: Dict[int, Agent] = {}
+        self.running_agents = []
         self.initial_budget = initial_budget
         self.free_agent_ids: List[int] = []
         self.agent_budgets = {}
@@ -141,19 +143,35 @@ class Organization(metaclass=Singleton):
         self.action_lock = asyncio.Lock()
         self.file_lock = asyncio.Lock()
         self.org_lock = asyncio.Lock()
+        
 
-    def handle_termination_signal(self, signum, frame):
-        # Get the current running event loop
-        loop = asyncio.get_running_loop()
-        # Set the termination event using the event loop
-        loop.call_soon_threadsafe(self.termination_event.set)
+    async def register_agent(self, agent):
+        self.running_agents.append(agent)
 
 
+    async def notify_termination(self, agent):
+        self.running_agents.remove(agent)
+
+    # def handle_termination_signal(self, signum, frame):
+    #     # Get the current running event loop
+    #     print("handling termination signal")
+    #     loop = asyncio.get_running_loop()
+    #     # Set the termination event using the event loop
+    #     loop.call_soon_threadsafe(self.termination_event.set)
+
+
+    
     async def process_events(self):
         iteration_count = 0
-        while True:
-            event = await self.event_queue.get()
-            if event.agent.ai_id in self.agents and not self.agents[event.agent.ai_id].terminated:
+        while not self.termination_event.is_set():
+            try:
+                # Wait for an event to be available in the queue or for the timeout to be reached
+                event = await asyncio.wait_for(self.event_queue.get(), timeout=1.0)
+            except asyncio.TimeoutError:
+                # If the timeout was reached, continue to the next iteration of the loop
+                continue
+
+            if event.agent.ai_id in self.agents:
                 await event.process()  # Call the process method for each event
             else:
                 print(f"Discarded event from terminated agent {event.agent.ai_id}.")
@@ -164,6 +182,10 @@ class Organization(metaclass=Singleton):
             if iteration_count % 50 == 0:
                 print("Contents of the event queue:")
                 self.event_queue.print_contents()
+            print('\n processing event \n')
+
+        print("\nTermination event set. Exited process_events loop.\n")
+        
 
 
     async def get_event_result(self, event_id):
@@ -268,6 +290,8 @@ class Organization(metaclass=Singleton):
 
 
     async def start_agent_loop(self, agent):
+        # Register agent in running agents (handy for cleanup)
+        await self.register_agent(agent)
         await agent.start_interaction_loop(self.termination_event)
         #await agent.start_test_loop(self.termination_event)
 
@@ -734,3 +758,32 @@ class Organization(metaclass=Singleton):
         with open(self.file_path, 'w') as file:
             yaml.dump(data, file)
 
+
+        
+    async def shutdown(self):
+            # Signal all agents to stop generating new events
+            for agent in self.agents.values():
+                agent.terminated = True
+            print("Signaled all agents to stop generating new events.")
+
+            # Wait until all agents have succesfully terminated 
+            while len(self.running_agents) > 0:
+                await asyncio.sleep(1)
+
+            print("All agents have terminated")
+
+
+            # Now process remaining events
+            while not self.event_queue.empty():  # check if there are still pending events
+                print("processing remaining events")
+                event = await self.event_queue.get()  # fetch an event from the queue
+                await event.process()
+
+            print("all remaining events have been processed")
+         
+            # Now it is safe to stop the event processing loop
+            print("setting termination event")
+            self.termination_event.set()
+            print("Stopped the event processing loop.")
+
+    

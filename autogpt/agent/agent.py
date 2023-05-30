@@ -112,7 +112,7 @@ class Agent:
                 print(f"\033[31m\n ******************** Terminating agent: {self.ai_name} ******************\033[0m")
                 self.terminated = True
                 break
-
+                
             try:
                 # Add a timeout to the blocking operation
                 dice_result = await asyncio.wait_for(self.dice_roll(), timeout=1.0)
@@ -213,7 +213,6 @@ class Agent:
         #print(f"\033[31m\n ******************** Agent {self.ai_name} loop terminated ******************\033[0m")
 
 
-
     async def start_interaction_loop(self, termination_event):
         print(f"\nstarting interaction loop of agent: {self.ai_name}\n")
         # Interaction Loop
@@ -223,14 +222,15 @@ class Agent:
         arguments = None
         user_input = ""
 
+        print("going in the interaction loop")
         await self.send_event("update_agent_status", self.ai_id, "starting interaction loop")
 
         while not self.terminated:
 
-            if termination_event.is_set():
-                print(f"\033[31m\n ******************** Terminating agent: {self.ai_name} ******************\033[0m")
-                self.terminated = True
-                break
+            # if termination_event.is_set():
+            #     print(f"\033[31m\n ******************** Terminating agent: {self.ai_name} ******************\033[0m")
+            #     self.terminated = True
+            #     break
             
             loop_count += 1
 
@@ -274,7 +274,7 @@ class Agent:
                 self.memory,
                 cfg.fast_token_limit,
             )  # TODO: This hardcodes the model to use GPT3.5. Make this an argument
-           
+
             assistant_reply_json = await fix_json_using_multiple_techniques(assistant_reply)
 
             # Print Assistant thoughts
@@ -285,13 +285,16 @@ class Agent:
                     print_assistant_thoughts(self.ai_name, assistant_reply_json)
                     command_name, arguments = get_command(assistant_reply_json)
                     status = get_status(assistant_reply_json)
-                    print("status", status)
-                    await self.send_event("update_agent_status", self.ai_id, status)
                     # command_name, arguments = assistant_reply_json_valid["command"]["name"], assistant_reply_json_valid["command"]["args"]
                     if cfg.speak_mode:
                         say_text(f"I want to execute {command_name}")
                 except Exception as e:
                     logger.error("Error: \n", str(e))
+            
+            print("updating agent status to", status)
+            event_id = await self.send_event("update_agent_status", self.ai_id, status)
+            res = await self.organization.get_event_result(event_id)
+            print("update status response", res)
 
             if 1 == 0:
                 ### GET USER AUTHORIZATION TO EXECUTE COMMAND ###
@@ -304,7 +307,7 @@ class Agent:
                     f"ARGUMENTS = {Fore.CYAN}{arguments}{Style.RESET_ALL}",
                 )
                 print(
-                    "Enter 'y' to authorise command, 'y -N' to run N continuous "
+                    "Enter 'y' to authorise comman  d, 'y -N' to run N continuous "
                     "commands, 'n' to exit program, or enter feedback for "
                     f"{self.ai_name}...",
                     flush=True,
@@ -393,4 +396,8 @@ class Agent:
 
             # self.organization.update_status(self.ai_id, "working on loop " + str(loop_count))
             await asyncio.sleep(1)
-    
+        
+
+        # Remove agent from running agents
+        await self.organization.notify_termination(self)
+        print(f"\033[31m\n ******************** Terminated agent: {self.ai_name} ******************\033[0m")

@@ -1,10 +1,10 @@
 ai_goals:
-- Hire a staff member
-- message him
+- hire a staff member
+- message the hired staff member
 - fire him
 ai_id: 0
 ai_name: Elon Musk
-ai_role: Setup a personal health consultancy organization
+ai_role: setup a dummy org
 founder: true
 init_memory: false
 loop_count: 0

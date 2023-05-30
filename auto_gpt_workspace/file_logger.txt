@@ -5,3 +5,5 @@ write: job_listing.txt
 write: messages.txt
 write: initial_code.py
 write: message_to_staff.txt
+write: tasks.txt
+write: prioritized_tasks.txt

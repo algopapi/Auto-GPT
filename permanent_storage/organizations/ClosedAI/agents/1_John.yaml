@@ -1,8 +1,8 @@
 ai_goals:
-- Create jokes on various topics
+- Complete assigned tasks
 ai_id: 1
-ai_name: Joke Writer 1
-ai_role: Joke Creator
+ai_name: John
+ai_role: Assistant
 founder: false
 init_memory: false
 loop_count: 0

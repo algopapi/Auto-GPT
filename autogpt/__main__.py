@@ -2,6 +2,7 @@
 import asyncio
 import logging
 import signal
+from contextlib import suppress
 
 from colorama import Fore
 
@@ -29,26 +30,16 @@ async def main() -> None:
 
     # Define a signal handler to set the termination event
     def handle_signal(*args):
-        print("[handle_signal] Termination signal received. Stopping agents...")
-        org.termination_event.set()
-        print("[handle_signal] Termination event set.")
+        print("[handle_signal] Termination signal received. Initiating shutdown...")
+        asyncio.create_task(org.shutdown())
+        print("[handle_signal] Shutdown process initiated.")
 
     # Add the signal handler to the event loop
     loop = asyncio.get_running_loop()
     loop.add_signal_handler(signal.SIGINT, handle_signal)
 
-    try:
-        # Wait for the termination event to be set
-        await org.termination_event.wait()
-    finally:
-        # Cancel the start_task
-        start_task.cancel()
-        try:
-            # Wait for the task to be cancelled
-            await start_task
-        except asyncio.CancelledError:
-            # Task was cancelled, agents should have exited gracefully
-            print("Agents stopped gracefully.")
+    # Wait for the start task to finish
+    await start_task
 
 if __name__ == "__main__":
     asyncio.run(main())
