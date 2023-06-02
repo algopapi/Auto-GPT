@@ -1,6 +1,0 @@
-1. Prioritized Experience Replay
-2. Double Deep Q Network
-3. Dueling Network Architectures
-4. Actor-Critic Methods
-5. Noisy Networks
-6. Distributional Reinforcement Learning

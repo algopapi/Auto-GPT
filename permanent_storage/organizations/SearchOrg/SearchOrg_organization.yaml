@@ -1,0 +1,25 @@
+agent_budgets:
+  0: 49000
+  1: 4600
+  2: 4700
+  3: 4900
+agent_running_costs:
+  0: 400
+  1: 100
+  2: 100
+  3: 100
+agent_statuses:
+  0: I am currently planning to hire the remaining 3 agents for searching using the
+    'hire_staff' command.
+  1: I am currently deciding on my next course of action.
+  2: I am currently deciding on my next action.
+  3: I am currently deciding on my next course of action.
+agent_termination_events: {}
+initial_budget: 50000
+name: SearchOrg
+pending_messages: {}
+supervisor_to_staff:
+  0:
+  - 1
+  - 2
+  - 3

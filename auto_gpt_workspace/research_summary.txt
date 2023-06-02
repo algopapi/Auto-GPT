@@ -1,5 +1,0 @@
-Replay Memory is a cyclic buffer of bounded size that stores recently observed transitions, allowing for data reuse during training. It has a .sample() method for selecting a random batch of transitions for training purposes.
-
-Double Deep Q Learning is an advanced reinforcement learning technique that utilizes two neural networks, the Q (online) network and the target network, to improve model training efficiency. The online network predicts the best action to take in a new state, while the target network reduces the overestimation of Q values and stabilizes the training process. Double Deep Q Learning helps in achieving more stable learning through better action evaluation.
-
-Soft Target Updates involve updating the target network weights more gradually by blending policy network weights with target network weights using a parameter, TAU (0 < TAU < 1). This technique improves convergence and stability during training, and helps in controlling the divergence in the learning process.

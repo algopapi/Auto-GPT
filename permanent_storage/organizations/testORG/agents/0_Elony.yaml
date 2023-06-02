@@ -1,10 +1,10 @@
 ai_goals:
 - hire a staff member
-- message the hired staff member
+- have a brief conversation with him
 - fire him
 ai_id: 0
-ai_name: Elon Musk
-ai_role: setup a dummy org
+ai_name: Elony
+ai_role: Setup a dummy org
 founder: true
 init_memory: false
 loop_count: 0

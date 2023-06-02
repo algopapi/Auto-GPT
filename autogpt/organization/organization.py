@@ -235,6 +235,9 @@ class Organization(metaclass=Singleton):
             elif event_type == 'message_staff':
                 # Perform the 'message_staff' action and return the result
                 sender_id, receiver_id, message = args
+                print("sender_id", sender_id)
+                print("receiver_id", receiver_id)
+                print("message", message)
                 return await self.message_staff(sender_id, receiver_id, message)
 
             elif event_type == 'message_supervisor':
@@ -471,7 +474,7 @@ class Organization(metaclass=Singleton):
     @update_yaml_after_async
     async def message_staff(self, sender_id, receiver_id, message):
         try:
-            sender_id = int(sender_id)
+            receiver_id = int(receiver_id)
         except ValueError:
             return "You're likely entering the employee name as agent_id, please enter a valid integer agent_id"
 

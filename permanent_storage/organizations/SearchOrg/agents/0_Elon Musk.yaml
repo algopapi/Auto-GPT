@@ -1,0 +1,11 @@
+ai_goals:
+- hire 5 agents for searching
+- manage them. align them towards the goal
+ai_id: 0
+ai_name: Elon Musk
+ai_role: setup an organization with 5 agents. each agent should search for jobs. one
+  for each major industry. Also have a agent that rates the quality of the found jobs
+founder: true
+init_memory: false
+loop_count: 0
+terminated: false

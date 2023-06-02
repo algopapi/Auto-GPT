@@ -29,18 +29,18 @@ def get_prompt() -> str:
     prompt_generator.add_constraint(
         "You have a total spending budget (given below) you can use yourself or use to hire staff. "
         "Each staff member has a running cost of 100$ per step. Hiring staff will result in "
-        "Faster budget depletion. Complete your task before you run out of budget."
+        "faster budget depletion. Complete your task before you run out of budget."
     )
     
     # Add constraints to the PromptGenerator object
     prompt_generator.add_constraint(
         "~4000 word limit for short term memory. Your short term memory is short, so"
-        " immediately save important information to files."
+        "immediately save important information to files."
     )
 
     prompt_generator.add_constraint(
         "If you are unsure how you previously did something or want to recall past"
-        " events, thinking about similar events will help you remember."
+        "events, thinking about similar events will help you remember."
     )
 
     prompt_generator.add_constraint("No user assistance")

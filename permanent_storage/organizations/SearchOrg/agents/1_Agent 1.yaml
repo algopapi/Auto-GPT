@@ -1,8 +1,8 @@
 ai_goals:
-- Complete assigned tasks
+- Search for jobs in the Technology industry
 ai_id: 1
-ai_name: John
-ai_role: Assistant
+ai_name: Agent 1
+ai_role: Search Agent
 founder: false
 init_memory: false
 loop_count: 0

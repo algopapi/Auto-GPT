@@ -1,0 +1,11 @@
+agent_budgets:
+  0: 49800
+agent_running_costs:
+  0: 100
+agent_statuses:
+  0: I am currently browsing job boards to post a job listing.
+agent_termination_events: {}
+initial_budget: 50000
+name: testORG
+pending_messages: {}
+supervisor_to_staff: {}

@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 import json
+from itertools import islice
 
-from duckduckgo_search import ddg
+from duckduckgo_search import DDGS
 
 from autogpt.config import Config
 
@@ -11,7 +12,7 @@ CFG = Config()
 
 
 def google_search(query: str, num_results: int = 8) -> str:
-    """Return the results of a google search
+    """Return the results of a Google search
 
     Args:
         query (str): The search query.
@@ -20,19 +21,20 @@ def google_search(query: str, num_results: int = 8) -> str:
     Returns:
         str: The results of the search.
     """
+    print(" regular google search")
     search_results = []
     if not query:
         return json.dumps(search_results)
 
-    results = ddg(query, max_results=num_results)
+    results = DDGS().text(query)
     if not results:
         return json.dumps(search_results)
 
-    for j in results:
-        search_results.append(j)
+    for item in islice(results, num_results):
+        search_results.append(item)
 
-    return json.dumps(search_results, ensure_ascii=False, indent=4)
-
+    results = json.dumps(search_results, ensure_ascii=False, indent=4)
+    return results
 
 def google_official_search(query: str, num_results: int = 8) -> str | list[str]:
     """Return the results of a google search using the official Google API

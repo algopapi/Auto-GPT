@@ -31,8 +31,6 @@ from autogpt.speech import say_text
 CFG = Config()
 AGENT_MANAGER = AgentManager()
 
-
-
 def is_valid_int(value: str) -> bool:
     """Check if the value is a valid integer
 
@@ -77,7 +75,6 @@ def get_command(response_json: Dict):
         if "name" not in command:
             return "Error:", "Missing 'name' field in 'command' object"
     
-
         command_name = command["name"]
 
         # Use an empty dictionary if 'args' field is not present in 'command' object
@@ -139,6 +136,7 @@ def map_command_synonyms(command_name: str):
     for seen_command, actual_command_name in synonyms:
         if command_name == seen_command:
             return actual_command_name
+        
     return command_name
 
 
