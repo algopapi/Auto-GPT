@@ -39,12 +39,12 @@ supported_memory = ["json_file", "no_memory"]
 #     MilvusMemory = None
 
 
-def get_memory(cfg: Config, init=False) -> VectorMemory:
+def get_memory(cfg: Config, agent_mem_path=None) -> VectorMemory:
     memory = None
 
     match cfg.memory_backend:
         case "json_file":
-            memory = JSONFileMemory(cfg)
+            memory = JSONFileMemory(cfg, agent_mem_path)
 
         case "pinecone":
             raise NotImplementedError(

@@ -1,4 +1,6 @@
 """Main script for the autogpt package."""
+import asyncio
+
 import click
 
 
@@ -65,6 +67,13 @@ import click
     is_flag=True,
     help="Installs external dependencies for 3rd party plugins.",
 )
+
+@click.option(
+    "--organization",
+    "-o",
+    is_flag=True,
+    help=""
+)
 @click.pass_context
 def main(
     ctx: click.Context,
@@ -83,6 +92,7 @@ def main(
     skip_news: bool,
     workspace_directory: str,
     install_plugin_deps: bool,
+    organization: bool,
 ) -> None:
     """
     Welcome to AutoGPT an experimental open-source application showcasing the capabilities of the GPT-4 pushing the boundaries of AI.
@@ -91,26 +101,48 @@ def main(
     """
     # Put imports inside function to avoid importing everything when starting the CLI
     from autogpt.main import run_auto_gpt
+    from autogpt.organization.main import run_autogpt_org
 
     if ctx.invoked_subcommand is None:
-        run_auto_gpt(
-            continuous,
-            continuous_limit,
-            ai_settings,
-            prompt_settings,
-            skip_reprompt,
-            speak,
-            debug,
-            gpt3only,
-            gpt4only,
-            memory_type,
-            browser_name,
-            allow_downloads,
-            skip_news,
-            workspace_directory,
-            install_plugin_deps,
-        )
+        if not organization:
+            run_auto_gpt(
+                continuous,
+                continuous_limit,
+                ai_settings,
+                prompt_settings,
+                skip_reprompt,
+                speak,
+                debug,
+                gpt3only,
+                gpt4only,
+                memory_type,
+                browser_name,
+                allow_downloads,
+                skip_news,
+                workspace_directory,
+                install_plugin_deps,
+                organization,
+            )
+        else: 
+            run_autogpt_org(
+                continuous,
+                continuous_limit,
+                ai_settings,
+                prompt_settings,
+                skip_reprompt,
+                speak,
+                debug,
+                gpt3only,
+                gpt4only,
+                memory_type,
+                browser_name,
+                allow_downloads,
+                skip_news,
+                workspace_directory,
+                install_plugin_deps,
+                organization,
+            )
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     asyncio.run(main())

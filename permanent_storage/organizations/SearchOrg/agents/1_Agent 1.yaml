@@ -1,9 +1,0 @@
-ai_goals:
-- Search for jobs in the Technology industry
-ai_id: 1
-ai_name: Agent 1
-ai_role: Search Agent
-founder: false
-init_memory: false
-loop_count: 0
-terminated: false

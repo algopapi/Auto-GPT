@@ -1,5 +1,7 @@
 """The application entry point.  Can be invoked by a CLI or any other front end application."""
+import asyncio
 import logging
+import signal
 import sys
 from pathlib import Path
 
@@ -11,6 +13,7 @@ from autogpt.config import Config, check_openai_api_key
 from autogpt.configurator import create_config
 from autogpt.logs import logger
 from autogpt.memory.vector import get_memory
+from autogpt.organization.initialize_org import initialize_organization
 from autogpt.plugins import scan_plugins
 from autogpt.prompts.prompt import DEFAULT_TRIGGERING_PROMPT, construct_main_ai_config
 from autogpt.utils import (
@@ -38,23 +41,52 @@ COMMAND_CATEGORIES = [
 ]
 
 
-def run_auto_gpt(
-    organization: bool,
-    continuous: bool,
-    continuous_limit: int,
-    ai_settings: str,
-    prompt_settings: str,
-    skip_reprompt: bool,
-    speak: bool,
-    debug: bool,
-    gpt3only: bool,
-    gpt4only: bool,
-    memory_type: str,
-    browser_name: str,
-    allow_downloads: bool,
-    skip_news: bool,
-    workspace_directory: str,
-    install_plugin_deps: bool,
+# Load environment variables from .env file
+
+async def startup() -> None:
+    """Main function for the script"""
+    cfg = Config()
+    # TODO: fill in llm values here
+    check_openai_api_key()
+    parse_arguments()
+    logger.set_level(logging.DEBUG if cfg.debug_mode else logging.INFO)
+    
+    org = await get_organization()
+
+    # Create a task for the org.start() method
+    start_task = asyncio.create_task(org.start())
+
+    # Define a signal handler to set the termination event
+    def handle_signal(*args):
+        print("[handle_signal] Termination signal received. Initiating shutdown...")
+        asyncio.create_task(org.shutdown())
+        print("[handle_signal] Shutdown process initiated.")
+
+    # Add the signal handler to the event loop
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGINT, handle_signal)
+
+    # Wait for the start task to finish
+    await start_task
+
+
+def run_autogpt_org(
+        continuous: bool,
+        continuous_limit: int,
+        ai_settings: str,
+        prompt_settings: str,
+        skip_reprompt: bool,
+        speak: bool,
+        debug: bool,
+        gpt3only: bool,
+        gpt4only: bool,
+        memory_type: str,
+        browser_name: str,
+        allow_downloads: bool,
+        skip_news: bool,
+        workspace_directory: str,
+        install_plugin_deps: bool,
+        organization: bool,
 ):
     # Configure logging before we do anything else.
     logger.set_level(logging.DEBUG if debug else logging.INFO)
@@ -120,17 +152,19 @@ def run_auto_gpt(
     if install_plugin_deps:
         install_plugin_dependencies()
 
+
     # TODO: have this directory live outside the repository (e.g. in a user's
     #   home directory) and have it come in as a command line argument or part of
     #   the env file.
     if workspace_directory is None:
-        workspace_directory = Path(__file__).parent / "auto_gpt_workspace"
+        workspace_directory = Path(__file__).parent/"my_organizations"
     else:
         workspace_directory = Path(workspace_directory)
     # TODO: pass in the ai_settings file and the env file and have them cloned into
     #   the workspace directory so we can bind them to the agent.
     workspace_directory = Workspace.make_workspace(workspace_directory)
     cfg.workspace_path = str(workspace_directory)
+
 
     # HACK: doing this here to collect some globals that depend on the workspace.
     file_logger_path = workspace_directory / "file_logger.txt"
@@ -158,14 +192,14 @@ def run_auto_gpt(
     for command_category in enabled_command_categories:
         command_registry.import_commands(command_category)
 
-    ai_name = ""
-    ai_config = construct_main_ai_config()
-    ai_config.command_registry = command_registry
-    if ai_config.ai_name:
-        ai_name = ai_config.ai_name
-    # print(prompt)
-    # Initialize variables
-    next_action_count = 0
+    # ai_name = ""
+    # ai_config = construct_main_ai_config()
+    # ai_config.command_registry = command_registry
+    # if ai_config.ai_name:
+    #     ai_name = ai_config.ai_name
+    # # print(prompt)
+    # # Initialize variables
+    # next_action_count = 0
 
     # add chat plugins capable of report to logger
     if cfg.chat_messages_enabled:
@@ -176,26 +210,21 @@ def run_auto_gpt(
 
     # Initialize memory and make sure it is empty.
     # this is particularly important for indexing and referencing pinecone memory
+    org = initialize_organization()
 
-    memory = get_memory(cfg, init=True)
-    logger.typewriter_log(
-        "Using memory of type:", Fore.GREEN, f"{memory.__class__.__name__}"
-    )
-    logger.typewriter_log("Using Browser:", Fore.GREEN, cfg.selenium_web_browser)
-    system_prompt = ai_config.construct_full_prompt()
-    if cfg.debug_mode:
-        logger.typewriter_log("Prompt:", Fore.GREEN, system_prompt)
+    # # Create a task for the org.start() method
+    # start_task = asyncio.create_task(org.start())
 
-    agent = Agent(
-        ai_name=ai_name,
-        memory=memory,
-        next_action_count=next_action_count,
-        command_registry=command_registry,
-        config=ai_config,
-        system_prompt=system_prompt,
-        triggering_prompt=DEFAULT_TRIGGERING_PROMPT,
-        workspace_directory=workspace_directory,
-    )
-    agent.start_interaction_loop()
+    # # Define a signal handler to set the termination event
+    # def handle_signal(*args):
+    #     print("[handle_signal] Termination signal received. Initiating shutdown...")
+    #     asyncio.create_task(org.shutdown())
+    #     print("[handle_signal] Shutdown process initiated.")
+
+    # # Add the signal handler to the event loop
+    # loop = asyncio.get_running_loop()
+    # loop.add_signal_handler(signal.SIGINT, handle_signal)
+
+    # # Wait for the start task to finish
+    # await start_task
     
-        

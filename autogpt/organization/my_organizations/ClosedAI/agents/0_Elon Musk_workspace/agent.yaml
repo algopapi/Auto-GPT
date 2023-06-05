@@ -1,0 +1,15 @@
+agent_dir_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/0_Elon
+  Musk_workspace
+agent_yaml_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/0_Elon
+  Musk_workspace/agent.yaml
+ai_goals:
+- hire a staff member
+- message him
+- fire him
+ai_id: 0
+ai_name: Elon Musk
+ai_role: hire a staff member
+founder: true
+init_memory: false
+loop_count: 0
+terminated: false

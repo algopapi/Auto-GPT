@@ -1,7 +1,6 @@
 import asyncio
 import functools
 import glob
-import importlib.resources
 import os
 import signal
 from functools import wraps
@@ -11,8 +10,31 @@ import aiofiles
 import matplotlib.pyplot as plt
 import networkx as nx
 import yaml
+from colorama import Fore, Style
 from yaml.constructor import ConstructorError
 
+from autogpt.agent import Agent
+from autogpt.config import Config
+from autogpt.config.ai_config import AIConfig
+from autogpt.config.config import Singleton
+from autogpt.logs import logger
+from autogpt.memory.vector import get_memory
+from autogpt.commands.command import CommandRegistry
+
+COMMAND_CATEGORIES = [
+    "autogpt.commands.analyze_code",
+    "autogpt.commands.audio_text",
+    "autogpt.commands.execute_code",
+    "autogpt.commands.file_operations",
+    "autogpt.commands.git_operations",
+    "autogpt.commands.google_search",
+    "autogpt.commands.image_gen",
+    "autogpt.commands.improve_code",
+    "autogpt.commands.web_selenium",
+    "autogpt.commands.write_tests",
+    "autogpt.app",
+    "autogpt.commands.task_statuses",
+]
 
 class DebuggableQueue(asyncio.Queue):
     def __init__(self, *args, **kwargs):
@@ -41,15 +63,6 @@ class DebuggableQueue(asyncio.Queue):
 def construct_python_tuple(constructor, node):
     return tuple(constructor.construct_sequence(node))
 
-from colorama import Fore, Style
-
-import permanent_storage
-from autogpt.agent import Agent
-from autogpt.config import Config
-from autogpt.config.ai_config import AIConfig
-from autogpt.config.config import Singleton
-from autogpt.logs import logger
-from autogpt.memory import get_memory
 
 
 def update_and_visualize(func):
@@ -67,7 +80,7 @@ async def update_yaml_after(func):
     async def wrapper(self, *args, **kwargs):
         result = await func(self, *args, **kwargs)
         if not kwargs.get("skip_update_yaml", False):
-            await self.save()
+            await self.a_save()
         return result
     return wrapper
 
@@ -111,14 +124,11 @@ def update_yaml_after_async(func):
     return wrapper
 
 
-
-
 cfg = Config()
 # An organization of multiple agents.
 class Organization(metaclass=Singleton):
     def __init__(self, name, initial_budget):
         self.name = name
-       
         self.agents: Dict[int, Agent] = {}
         self.running_agents = []
         self.initial_budget = initial_budget
@@ -129,13 +139,18 @@ class Organization(metaclass=Singleton):
         self.agent_statuses = {}
         self.supervisor_to_staff: Dict[int, List[int]] = {}  # Maps supervisor ID to staff IDs
         self.agent_termination_events = {}
-        self.file_path = f'{self.name}_organization.yaml'
+
+        # File paths
+        self.org_dir_path = f"{cfg.workspace_path}/{self.name}"
+        self.org_yaml_path = self.org_dir_path + "/" + f"{self.name}_organization.yaml"
+       
+        print("org workspace", self.org_dir_path)
 
         # Organization event queue
         self.event_queue = DebuggableQueue()
         self.event_results = {}
 
-        # Handles termination 
+        # Handles termination
         self.termination_event = asyncio.Event()
 
         # Some locks
@@ -152,15 +167,7 @@ class Organization(metaclass=Singleton):
     async def notify_termination(self, agent):
         self.running_agents.remove(agent)
 
-    # def handle_termination_signal(self, signum, frame):
-    #     # Get the current running event loop
-    #     print("handling termination signal")
-    #     loop = asyncio.get_running_loop()
-    #     # Set the termination event using the event loop
-    #     loop.call_soon_threadsafe(self.termination_event.set)
 
-
-    
     async def process_events(self):
         iteration_count = 0
         while not self.termination_event.is_set():
@@ -183,7 +190,6 @@ class Organization(metaclass=Singleton):
                 print("Contents of the event queue:")
                 self.event_queue.print_contents()
             print('\n processing event \n')
-
         print("\nTermination event set. Exited process_events loop.\n")
         
 
@@ -286,9 +292,9 @@ class Organization(metaclass=Singleton):
             
     
     @classmethod
-    async def create(cls, name, initial_budget):
+    def create(cls, name, initial_budget):
         org = cls(name, initial_budget)
-        await org.save()
+        org.save()
         return org
 
 
@@ -326,7 +332,7 @@ class Organization(metaclass=Singleton):
         except ValueError:
             raise ValueError(f"Budget value '{budget}' is not a valid integer.")
         
-        new_employee = await self.create_agent(
+        new_employee = await self.a_create_agent(
             name=name,
             role=role,
             goals=goals,
@@ -376,10 +382,8 @@ class Organization(metaclass=Singleton):
 
             # Remove agent events from the event queue
             await self.event_queue.filter_queue(lambda event: event.agent.ai_id != agent_id)
-
             self.free_agent_ids.append(agent_id)
           
-
             # Remove the agent from the organization
             await self.remove_agent(agent_id)
             return f"Successfully removed employee with name: {agent_name}\n"
@@ -410,14 +414,40 @@ class Organization(metaclass=Singleton):
         return f"Successfully added employee with Agent_id: {new_employee_id} to supervisor with Agent_id: {supervisor_id}\n"
     
 
-    async def add_agent(self, agent_cfg):
-        memory = get_memory(cfg=cfg, organization_name=self.name, agent_config=agent_cfg)
-        new_agent = Agent(agent_cfg, self, memory)
+    async def a_add_agent(self, agent_cfg):
+        agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg['ai_id']}_{agent_cfg['ai_name']}_workspace/agent_memory.json"
+        memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
+
+        TODO: 
+        new_agent = Agent(
+            agent_cfg, 
+            self, 
+            memory    
+        )
+        self.agents[new_agent.ai_id] = new_agent
+        return new_agent
+    
+
+    def add_agent(self, agent_cfg):
+        agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
+        memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
+        command_registry = ()
+        new_agent = Agent(
+            memory = memory,
+            command_registry="",
+            config = agent_cfg,
+            system_promp = "",
+            triggering_promp="",
+            workspace_directory="",
+            organization=self,
+            next_action_count=0, 
+        )
+
         self.agents[new_agent.ai_id] = new_agent
         return new_agent
 
 
-    async def create_agent(
+    async def a_create_agent(
         self,
         name,
         role,
@@ -433,13 +463,8 @@ class Organization(metaclass=Singleton):
             agent_id = len(self.agents)
             print(" agent id Assigned = ", agent_id)
 
-
-        agent_file = (
-            importlib.resources.files(permanent_storage)
-            / f"organizations/{self.name}/agents/{agent_id}_{name}.yaml"
-        )
-        #print(" Agent file: ", agent_file)
-
+        agent_file = f"{self.org_dir_path}/agents/{agent_id}_{name}.yaml"
+     
         agent_cfg = AIConfig(
             ai_name=name,
             ai_id=agent_id,
@@ -454,6 +479,49 @@ class Organization(metaclass=Singleton):
             self.agent_budgets[agent_id] = initial_budget
 
         return await self.add_agent(agent_cfg)
+    
+    def create_agent(
+        self,
+        name,
+        role,
+        goals,
+        initial_budget = 0,
+        founder=False,
+    ):
+        if self.free_agent_ids:
+            # Allocate from freed Ids if available
+            agent_id = self.free_agent_ids.pop(0)
+            print(" Agent id Popped = ", agent_id)
+        else:
+            agent_id = len(self.agents)
+            print(" agent id Assigned = ", agent_id)
+
+        agent_workspace_directory = f"{self.org_dir_path}/agents/{agent_id}_{name}_workspace"
+
+        # Create the commands that should be passed to the staffmember
+        command_registry = CommandRegistry()
+
+        enabled_command_catergories = [
+            x for x in COMMAND_CATERGORIES if x not in cfg.disabled_command_categories
+        ]
+
+        for command_catergory in enabled_command_catergories:
+            command_registry.import_commands(command_catergory)
+
+        agent_cfg = AIConfig(
+            ai_name=name,
+            ai_id=agent_id,
+            ai_role=role,
+            ai_goals=goals,
+            founder=founder,
+            agent_dir_path=agent_workspace_directory,
+        )
+
+        # If it is the founder we set the budget here
+        if founder:
+            self.agent_budgets[agent_id] = initial_budget
+
+        return self.add_agent(agent_cfg)
 
 
     async def remove_agent(self, agent_id):
@@ -517,7 +585,6 @@ class Organization(metaclass=Singleton):
 
     @update_yaml_after_async
     async def receive_message(self, agent_id):
-        
         # Check if the agent ID exists in the pending_messages dictionary
         if agent_id in self.pending_messages:
             # Pop the first message from the agent's pending message list
@@ -680,26 +747,25 @@ class Organization(metaclass=Singleton):
 
 
     @classmethod
-    async def load(cls, organization_name):
-       
+    async def a_load(cls, organization_name):
         """
             Function that loads the organization yaml file and loads in the organization data and all the agents
         """
         # Update the organization_folder to use importlib.resources.files
-        organization_folder = (
-            importlib.resources.files(permanent_storage) / f"organizations/{organization_name}"
-        )
+        # organization_folder = (
+        #     importlib.resources.files(permanent_storage)/f"organizations/{organization_name}"
+        # ) 
 
-        org_file_path = organization_folder / f"{organization_name}_organization.yaml"
-        print(" org file path",  org_file_path)
-
+        print("workspace path", cfg.workspace_path)
+        organization_directory = os.path.join(cfg.workspace_path, organization_name)
+        org_file_path = f"{organization_directory}/{organization_name}_organization.yaml"
+        print("org file path",  org_file_path)
 
         # Load organization data from the YAML file
         with open(org_file_path, 'r') as org_file:
             yaml.SafeLoader.add_constructor('tag:yaml.org,2002:python/tuple', construct_python_tuple)
             org_data = yaml.safe_load(org_file)
 
-        print("org_data", org_data)
 
         org = Organization(org_data['name'], org_data['initial_budget'])
         org.agent_budgets = org_data['agent_budgets']
@@ -709,17 +775,75 @@ class Organization(metaclass=Singleton):
         org.supervisor_to_staff = org_data['supervisor_to_staff']
 
        
-        agent_files = glob.glob(str(organization_folder / "agents" / "*.yaml"))
+        agent_directories = glob.glob(os.path.join(organization_directory, "agents", "*"))
 
         # Create all the agents
-        for file_path in agent_files:
-            #print("file path", file_path)
-            agent_config = AIConfig.load(file_path) # This should be the
-            #print("agent_config", agent_config)
+        for agent_dir in agent_directories:
+            # print("file path", file_path)
+            yaml_path = os.path.join(agent_dir, f"agent.yaml")
+
+            agent_config = AIConfig.load(yaml_path) # This should be the
+            # print("agent_config", agent_config)
             if agent_config is not None:
                 agent_config.init_memory = False
                 #print(" adding  agent", agent_config)
-                await org.add_agent(agent_config)
+                org.add_agent(agent_config)
+
+       
+        # Add staff to supervisor
+        for supervisor_id, staff_ids in org.supervisor_to_staff.items():
+            supervisor = org.agents.get(supervisor_id)
+            if supervisor is not None:
+                for staff_id in staff_ids:
+                    staff_agent = org.agents.get(staff_id)
+                    if staff_agent is not None:
+                        staff_budget = org.agent_budgets.get(staff_id)
+                        supervisor.organization.add_staff(supervisor_id, staff_id, staff_budget, skip_update_yaml=True)
+
+        return org
+    
+    @classmethod
+    def load(cls, organization_name):
+        """
+            Function that loads the organization yaml file and loads in the organization data and all the agents
+        """
+        # Update the organization_folder to use importlib.resources.files
+        # organization_folder = (
+        #     importlib.resources.files(permanent_storage)/f"organizations/{organization_name}"
+        # ) 
+
+        print("workspace path", cfg.workspace_path)
+        organization_directory = os.path.join(cfg.workspace_path, organization_name)
+        org_file_path = f"{organization_directory}/{organization_name}_organization.yaml"
+        print("org file path",  org_file_path)
+
+        # Load organization data from the YAML file
+        with open(org_file_path, 'r') as org_file:
+            yaml.SafeLoader.add_constructor('tag:yaml.org,2002:python/tuple', construct_python_tuple)
+            org_data = yaml.safe_load(org_file)
+
+
+        org = Organization(org_data['name'], org_data['initial_budget'])
+        org.agent_budgets = org_data['agent_budgets']
+        org.agent_running_costs = org_data['agent_running_costs']
+        org.pending_messages = org_data['pending_messages']
+        org.agent_statuses = org_data['agent_statuses']
+        org.supervisor_to_staff = org_data['supervisor_to_staff']
+
+       
+        agent_directories = glob.glob(os.path.join(organization_directory, "agents", "*"))
+
+        # Create all the agents
+        for agent_dir in agent_directories:
+            # print("file path", file_path)
+            yaml_path = os.path.join(agent_dir, f"agent.yaml")
+
+            agent_config = AIConfig.load(yaml_path) # This should be the
+            # print("agent_config", agent_config)
+            if agent_config is not None:
+                agent_config.init_memory = False
+                #print(" adding  agent", agent_config)
+                org.add_agent(agent_config)
 
        
         # Add staff to supervisor
@@ -735,7 +859,7 @@ class Organization(metaclass=Singleton):
         return org
         
 
-    async def save(self):
+    async def a_save(self):
         # Create a dictionary to store the relevant attributes
         data = {
             'name': self.name,
@@ -747,22 +871,38 @@ class Organization(metaclass=Singleton):
             'supervisor_to_staff': self.supervisor_to_staff,
         }
 
-        # Update the file path to include the organization_name
-        org_directory = (
-            importlib.resources.files(permanent_storage)/f"organizations/{self.name}"
-        )
-        self.file_path = str(org_directory / f"{self.name}_organization.yaml")
-        #print("saving organization at " , self.file_path)
+        print("saving organization at " , self.org_yaml_path)
         # Ensure the directory exists
-        if not os.path.exists(org_directory):
-            os.makedirs(org_directory)
+        if not os.path.exists(self.org_dir_path):
+            os.makedirs(self.org_dir_path)
 
         # Write the data to the YAML file
-        with open(self.file_path, 'w') as file:
+        with open(self.org_yaml_path, 'w') as file:
             yaml.dump(data, file)
 
 
-        
+    def save(self):
+        # Create a dictionary to store the relevant attributes
+        data = {
+            'name': self.name,
+            'initial_budget': self.initial_budget,
+            'agent_budgets': self.agent_budgets,
+            'agent_running_costs': self.agent_running_costs,
+            'pending_messages': self.pending_messages,
+            'agent_statuses': self.agent_statuses,
+            'supervisor_to_staff': self.supervisor_to_staff,
+        }
+
+        print("saving organization at " , self.org_yaml_path)
+        # Ensure the directory exists
+        if not os.path.exists(self.org_dir_path):
+            os.makedirs(self.org_dir_path)
+
+        # Write the data to the YAML file
+        with open(self.org_yaml_path, 'w') as file:
+            yaml.dump(data, file)
+
+
     async def shutdown(self):
             # Signal all agents to stop generating new events
             for agent in self.agents.values():

@@ -1,9 +1,0 @@
-ai_goals:
-- Evaluate potential jobs found by Job Searcher 1
-ai_id: 3
-ai_name: Job Evaluator 1
-ai_role: Job Evaluator
-founder: false
-init_memory: false
-loop_count: 0
-terminated: false

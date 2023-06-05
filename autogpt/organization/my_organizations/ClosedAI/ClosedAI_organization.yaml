@@ -1,0 +1,7 @@
+agent_budgets: {}
+agent_running_costs: {}
+agent_statuses: {}
+initial_budget: 50000
+name: ClosedAI
+pending_messages: {}
+supervisor_to_staff: {}

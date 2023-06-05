@@ -1,9 +1,0 @@
-ai_goals:
-- Search for jobs in the Healthcare industry
-ai_id: 2
-ai_name: Agent 2
-ai_role: Search Agent
-founder: false
-init_memory: false
-loop_count: 0
-terminated: false

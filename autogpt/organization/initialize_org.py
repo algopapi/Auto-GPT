@@ -1,17 +1,19 @@
-import importlib.resources
 import os
 
 from colorama import Fore, Style
 
-import permanent_storage as storage
+from autogpt.config import Config
 from autogpt.logs import Logger
 from autogpt.organization.organization import Organization
 
 logger = Logger()
 
-async def get_organization(should_speak=False):
-    organizations_folder = importlib.resources.files(storage) / "organizations"
+cfg = Config()
+
+def initialize_organization(should_speak=False):
+    organizations_folder = cfg.workspace_path
     organizations = os.listdir(organizations_folder)
+
     if organizations:
         logger.typewriter_log(
             "Welcome back! ",
@@ -25,15 +27,15 @@ async def get_organization(should_speak=False):
         if should_continue.lower() == "y":
             name = input("Please specify the name of the existing organization: ")
             if name in organizations:
-                return await Organization.load(name)
+                return Organization.load(name)
             else:
                 print(
                     f"Organization with name: {name} doesn't exist, stopping execution..."
                 )
-    return await create_new_org(should_speak)
+    return create_new_org(should_speak)
 
 
-async def create_new_org(should_speak=False):
+def create_new_org(should_speak=False):
     ai_name = ""
     logger.typewriter_log(
         "Welcome to Auto-GPT.",
@@ -97,10 +99,11 @@ async def create_new_org(should_speak=False):
             "Develop and manage multiple businesses autonomously",
         ]
     initial_budget = 50000
-    new_organization = await Organization.create(org_name, initial_budget)
-    await new_organization.create_agent(
+    new_organization = Organization.create(org_name, initial_budget)
+    new_organization.create_agent(
         name=ai_name, role=ai_role, goals=ai_goals, founder=True, initial_budget=initial_budget
     )
-    await new_organization.save()
 
+    # Save the organization
+    new_organization.save()
     return new_organization
