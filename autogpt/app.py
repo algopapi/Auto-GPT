@@ -162,81 +162,81 @@ def get_hyperlinks(url: str, config: Config) -> Union[str, List[str]]:
     return scrape_links(url, config)
 
 
-@command(
-    "start_agent",
-    "Start GPT Agent",
-    '"name": "<name>", "task": "<short_task_desc>", "prompt": "<prompt>"',
-)
-def start_agent(name: str, task: str, prompt: str, config: Config, model=None) -> str:
-    """Start an agent with a given name, task, and prompt
+# @command(
+#     "start_agent",
+#     "Start GPT Agent",
+#     '"name": "<name>", "task": "<short_task_desc>", "prompt": "<prompt>"',
+# )
+# def start_agent(name: str, task: str, prompt: str, config: Config, model=None) -> str:
+#     """Start an agent with a given name, task, and prompt
 
-    Args:
-        name (str): The name of the agent
-        task (str): The task of the agent
-        prompt (str): The prompt for the agent
-        model (str): The model to use for the agent
+#     Args:
+#         name (str): The name of the agent
+#         task (str): The task of the agent
+#         prompt (str): The prompt for the agent
+#         model (str): The model to use for the agent
 
-    Returns:
-        str: The response of the agent
-    """
-    agent_manager = AgentManager()
+#     Returns:
+#         str: The response of the agent
+#     """
+#     agent_manager = AgentManager()
 
-    # Remove underscores from name
-    voice_name = name.replace("_", " ")
+#     # Remove underscores from name
+#     voice_name = name.replace("_", " ")
 
-    first_message = f"""You are {name}.  Respond with: "Acknowledged"."""
-    agent_intro = f"{voice_name} here, Reporting for duty!"
+#     first_message = f"""You are {name}.  Respond with: "Acknowledged"."""
+#     agent_intro = f"{voice_name} here, Reporting for duty!"
 
-    # Create agent
-    if config.speak_mode:
-        say_text(agent_intro, 1)
-    key, ack = agent_manager.create_agent(task, first_message, model)
+#     # Create agent
+#     if config.speak_mode:
+#         say_text(agent_intro, 1)
+#     key, ack = agent_manager.create_agent(task, first_message, model)
 
-    if config.speak_mode:
-        say_text(f"Hello {voice_name}. Your task is as follows. {task}.")
+#     if config.speak_mode:
+#         say_text(f"Hello {voice_name}. Your task is as follows. {task}.")
 
-    # Assign task (prompt), get response
-    agent_response = agent_manager.message_agent(key, prompt)
+#     # Assign task (prompt), get response
+#     agent_response = agent_manager.message_agent(key, prompt)
 
-    return f"Agent {name} created with key {key}. First response: {agent_response}"
-
-
-@command("message_agent", "Message GPT Agent", '"key": "<key>", "message": "<message>"')
-def message_agent(key: str, message: str, config: Config) -> str:
-    """Message an agent with a given key and message"""
-    # Check if the key is a valid integer
-    if is_valid_int(key):
-        agent_response = AgentManager().message_agent(int(key), message)
-    else:
-        return "Invalid key, must be an integer."
-
-    # Speak response
-    if config.speak_mode:
-        say_text(agent_response, 1)
-    return agent_response
+#     return f"Agent {name} created with key {key}. First response: {agent_response}"
 
 
-@command("list_agents", "List GPT Agents", "() -> str")
-def list_agents(config: Config) -> str:
-    """List all agents
+# @command("message_agent", "Message GPT Agent", '"key": "<key>", "message": "<message>"')
+# def message_agent(key: str, message: str, config: Config) -> str:
+#     """Message an agent with a given key and message"""
+#     # Check if the key is a valid integer
+#     if is_valid_int(key):
+#         agent_response = AgentManager().message_agent(int(key), message)
+#     else:
+#         return "Invalid key, must be an integer."
 
-    Returns:
-        str: A list of all agents
-    """
-    return "List of agents:\n" + "\n".join(
-        [str(x[0]) + ": " + x[1] for x in AgentManager().list_agents()]
-    )
+#     # Speak response
+#     if config.speak_mode:
+#         say_text(agent_response, 1)
+#     return agent_response
 
 
-@command("delete_agent", "Delete GPT Agent", '"key": "<key>"')
-def delete_agent(key: str, config: Config) -> str:
-    """Delete an agent with a given key
+# @command("list_agents", "List GPT Agents", "() -> str")
+# def list_agents(config: Config) -> str:
+#     """List all agents
 
-    Args:
-        key (str): The key of the agent to delete
+#     Returns:
+#         str: A list of all agents
+#     """
+#     return "List of agents:\n" + "\n".join(
+#         [str(x[0]) + ": " + x[1] for x in AgentManager().list_agents()]
+#     )
 
-    Returns:
-        str: A message indicating whether the agent was deleted or not
-    """
-    result = AgentManager().delete_agent(key)
-    return f"Agent {key} deleted." if result else f"Agent {key} does not exist."
+
+# @command("delete_agent", "Delete GPT Agent", '"key": "<key>"')
+# def delete_agent(key: str, config: Config) -> str:
+#     """Delete an agent with a given key
+
+#     Args:
+#         key (str): The key of the agent to delete
+
+#     Returns:
+#         str: A message indicating whether the agent was deleted or not
+#     """
+#     result = AgentManager().delete_agent(key)
+#     return f"Agent {key} deleted." if result else f"Agent {key} does not exist."

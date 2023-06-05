@@ -34,8 +34,14 @@ class AIConfig:
     def __init__(
         self,
         ai_name: str = "",
+        ai_id: int = 0,
         ai_role: str = "",
         ai_goals: list | None = None,
+        founder: bool = False,
+        init_memory: bool = False,
+        terminated: bool = False,
+        loop_count: int = 0,
+        agent_dir_path: str = "",
         api_budget: float = 0.0,
     ) -> None:
         """
@@ -51,6 +57,7 @@ class AIConfig:
         """
         if ai_goals is None:
             ai_goals = []
+        self.ai_id = ai_id
         self.ai_name = ai_name
         self.ai_role = ai_role
         self.ai_goals = ai_goals
@@ -58,59 +65,59 @@ class AIConfig:
         self.prompt_generator: PromptGenerator | None = None
         self.command_registry: CommandRegistry | None = None
 
-    @staticmethod
-    def load(config_file: str = SAVE_FILE) -> "AIConfig":
+        self.terminated = terminated
+        self.loop_count = loop_count
+        self.founder = founder
+        self.init_memory = init_memory
+        self.agent_dir_path = agent_dir_path
+        print("agent file path: ", self.agent_dir_path)
+        self.agent_yaml_path = os.path.join(agent_dir_path, "agent.yaml")
+        self.save()
+
+    @classmethod
+    def load(cls, file_path):
         """
-        Returns class object with parameters (ai_name, ai_role, ai_goals, api_budget) loaded from
-          yaml file if yaml file exists,
-        else returns class with no parameters.
+            Returns class object with parameters (ai_name, ai_role, ai_goals, api_budget) loaded from
+            yaml file if yaml file exists,
+            else returns class with no parameters.
 
-        Parameters:
-           config_file (int): The path to the config yaml file.
-             DEFAULT: "../ai_settings.yaml"
-
-        Returns:
-            cls (object): An instance of given cls object
+            Parameters:
+            config_file (int): The path to the direcotry of the.
+                DEFAULT: "../ai_settings.yaml"
+    
+            Returns:
+                cls (object): An instance of given cls object
         """
-
         try:
-            with open(config_file, encoding="utf-8") as file:
-                config_params = yaml.load(file, Loader=yaml.FullLoader) or {}
+            with open(file_path) as file:
+                config_params = yaml.load(file, Loader=yaml.FullLoader)
+                instance = cls(file_path=str(file_path), **config_params)
+                return instance
         except FileNotFoundError:
-            config_params = {}
+            return None
 
-        ai_name = config_params.get("ai_name", "")
-        ai_role = config_params.get("ai_role", "")
-        ai_goals = [
-            str(goal).strip("{}").replace("'", "").replace('"', "")
-            if isinstance(goal, dict)
-            else str(goal)
-            for goal in config_params.get("ai_goals", [])
-        ]
-        api_budget = config_params.get("api_budget", 0.0)
-        # type: Type[AIConfig]
-        return AIConfig(ai_name, ai_role, ai_goals, api_budget)
+    def remove(self):
+        if os.path.exists(self.agent_yaml_path):
+            os.remove(self.agent_yaml_path)
 
-    def save(self, config_file: str = SAVE_FILE) -> None:
-        """
-        Saves the class parameters to the specified file yaml file path as a yaml file.
+        if os.path.exists(self.agent_dir_path):
+            os.remove(self.agent_dir_path)
+        else:
+            print(
+                f"Can't remove agent: {self.ai_name} as couldn't find file: {self.agent_yaml_path}."
+            )
 
-        Parameters:
-            config_file(str): The path to the config yaml file.
-              DEFAULT: "../ai_settings.yaml"
+    def save(self):
+        print("agent dir path", self.agent_dir_path)
+        print("agent yaml_path", self.agent_yaml_path)
+        if not os.path.exists(Path(self.agent_dir_path)):
+            os.makedirs(Path(self.agent_dir_path), exist_ok=True)
 
-        Returns:
-            None
-        """
 
-        config = {
-            "ai_name": self.ai_name,
-            "ai_role": self.ai_role,
-            "ai_goals": self.ai_goals,
-            "api_budget": self.api_budget,
-        }
-        with open(config_file, "w", encoding="utf-8") as file:
-            yaml.dump(config, file, allow_unicode=True)
+        config = {attr: getattr(self, attr) for attr in vars(self)}
+        config.pop("file", None)  # Exclude file attribute
+        with open(self.agent_yaml_path, "w") as file:
+            yaml.dump(config, file)
 
     def construct_full_prompt(
         self, prompt_generator: Optional[PromptGenerator] = None

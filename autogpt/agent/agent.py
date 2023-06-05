@@ -1,3 +1,4 @@
+import asyncio
 import signal
 import sys
 from datetime import datetime
@@ -60,7 +61,6 @@ class Agent:
 
     def __init__(
         self,
-        ai_name: str,
         memory: VectorMemory,
         next_action_count: int,
         command_registry: CommandRegistry,
@@ -68,9 +68,15 @@ class Agent:
         system_prompt: str,
         triggering_prompt: str,
         workspace_directory: str,
+        organization
     ):
         cfg = Config()
-        self.ai_name = ai_name
+        self.ai_config = config
+        self.ai_name = config.ai_name
+        self.ai_id = config.ai_id
+        self.role = config.ai_role
+        self.goals = config.ai_goals
+
         self.memory = memory
         self.history = MessageHistory(self)
         self.next_action_count = next_action_count
@@ -82,6 +88,14 @@ class Agent:
         self.created_at = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.cycle_count = 0
         self.log_cycle_handler = LogCycleHandler()
+
+        self.terminated = config.terminated
+        self.loop_count = config.loop_count
+        self.founder = config.founder
+
+        self.respone_queue = asyncio.Queue()
+        self.organization = organization
+        self.memory = memory
 
     def start_interaction_loop(self):
         # Interaction Loop
