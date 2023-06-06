@@ -88,6 +88,10 @@ class Agent:
         self.config = config
         self.system_prompt = system_prompt
         self.triggering_prompt = triggering_prompt
+
+        print("system prompt", self.system_prompt)
+        print("triggering prompt", self.triggering_prompt)
+
         self.workspace = Workspace(workspace_directory, cfg.restrict_to_workspace)
         self.created_at = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.cycle_count = 0
@@ -102,36 +106,10 @@ class Agent:
         self.memory = memory
 
 
-    async def update_agent_config(self, **kwargs):
-        for key, value in kwargs.items():
-            if hasattr(self.config, key):
-                setattr(self.config, key, value)
-            else:
-                print(f"Unknown attribute '{key}' in AgentConfig.")
-        self.config.save()  # Save the updated configuration to the YAML file
-        
-
-    async def dice_roll(self):
-        """Rolls a dice and returns the result"""
-        return random.randint(1, 5)
-
-
-    async def random_budget(self):
-        """ Creates an abitrary budget to give to an agent"""
-        return random.randint(1000, 100000)
-
-
-    async def send_event(self, event_type, *args):
-        event_id = uuid.uuid4()
-        event = Event(event_id, self, event_type, *args)
-        await self.organization.event_queue.put(event)  # Put the event object into the queue
-        return event_id
+    
 
 
     async def start_test_loop(self, termination_event):
-        # print(f"\033[31m\n ******************** Starting interaction loop of agent: {self.ai_name} ******************\033[0m")
-        # Interaction Loop
-        # initialize the agents status
         await self.send_event("update_agent_status", self.ai_id, "starting interaction loop")
 
         while not self.terminated:
@@ -171,10 +149,7 @@ class Agent:
             # Build the status udpate of the agent to add to prompt 
             status_event_id = await self.send_event("build_status_update", self.ai_id)
             agent_status = await self.organization.get_event_result(status_event_id)
-            print("agent status: ", agent_status)
-            
-            # print("agent message: ", message)
-
+    
             # Build an arbitrary status
             status = f"agent {self.ai_name} is in loop {self.loop_count} rolled {dice_result}"
 
@@ -241,7 +216,34 @@ class Agent:
         print(f"\033[31m\n ******************** Agent {self.ai_name} loop terminated ******************\033[0m")
         await self.organization.notify_termination(self)
 
-    def start_interaction_loop(self, termination_event):
+
+    async def update_agent_config(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self.config, key):
+                setattr(self.config, key, value)
+            else:
+                print(f"Unknown attribute '{key}' in AgentConfig.")
+        self.config.save()  # Save the updated configuration to the YAML file
+        
+
+    async def dice_roll(self):
+        """Rolls a dice and returns the result"""
+        return random.randint(1, 5)
+
+
+    async def random_budget(self):
+        """ Creates an abitrary budget to give to an agent"""
+        return random.randint(1000, 100000)
+
+
+    async def send_event(self, event_type, *args):
+        event_id = uuid.uuid4()
+        event = Event(event_id, self, event_type, *args)
+        await self.organization.event_queue.put(event)  # Put the event object into the queue
+        return event_id
+
+
+    async def start_interaction_loop(self, termination_event):
         # Interaction Loop
         cfg = Config()
         self.cycle_count = 0
@@ -262,8 +264,10 @@ class Agent:
                 self.next_action_count = 0
 
         signal.signal(signal.SIGINT, signal_handler)
+        
+        await self.send_event("update_agent_status", self.ai_id, "starting interaction loop")
 
-        while True:
+        while not self.terminated:
             # Discontinue if continuous limit is reached
             self.cycle_count += 1
             self.log_cycle_handler.log_count_within_cycle = 0
@@ -283,16 +287,38 @@ class Agent:
                     "Continuous Limit Reached: ", Fore.YELLOW, f"{cfg.continuous_limit}"
                 )
                 break
+
+            # await self.udpate_agent_config(loop_count=self.loop_count)
+            event_id = await self.send_event("calculate_operating_cost_of_agent", self.ai_id)
+            agent_operating_costs = await self.organization.get_event_result(event_id)
+            
+            await self.send_event("update_agent_running_cost", self.ai_id, agent_operating_costs)
+            await self.send_event("update_agent_budget", self.ai_id, agent_operating_costs)
+            
+            # Receive message and build status update
+            message_event_id = await self.send_event("receive_message", self.ai_id)
+            message = await self.organization.get_event_result(message_event_id)
+
+            # Build the status udpate of the agent to add to prompt
+            status_event_id = await self.send_event("build_status_update", self.ai_id)
+            org_status = await self.organization.get_event_result(status_event_id)
+
+            # Update the current system prompt
+            self.system_prompt = self.ai_config.construct_full_prompt(self.organization)
+
+            full_prompt = self.system_prompt + "\n" + org_status + "\n" + message
+            print("full prompt", full_prompt)
+
             # Send message to AI, get response
-            with Spinner("Thinking... ", plain_output=cfg.plain_output):
-                assistant_reply = chat_with_ai(
-                    cfg,
-                    self,
-                    self.system_prompt,
-                    self.triggering_prompt,
-                    cfg.fast_token_limit,
-                    cfg.fast_llm_model,
-                )
+            # with Spinner("Thinking... ", plain_output=cfg.plain_output):
+            assistant_reply = chat_with_ai(
+                cfg,
+                self,
+                self.system_prompt,
+                self.triggering_prompt,
+                cfg.fast_token_limit,
+                cfg.fast_llm_model,
+            )
 
             assistant_reply_json = fix_json_using_multiple_techniques(assistant_reply)
             for plugin in cfg.plugins:
@@ -316,6 +342,7 @@ class Agent:
 
                 except Exception as e:
                     logger.error("Error: \n", str(e))
+                    
             self.log_cycle_handler.log_cycle(
                 self.config.ai_name,
                 self.created_at,
@@ -465,6 +492,10 @@ class Agent:
                 logger.typewriter_log(
                     "SYSTEM: ", Fore.YELLOW, "Unable to execute command"
                 )
+        
+        # Notify the org agent is terminated 
+        print(f"\033[31m\n ******************** Agent {self.ai_name} loop terminated ******************\033[0m")
+        await self.organization.notify_termination(self)
 
     def _resolve_pathlike_command_args(self, command_args):
         if "directory" in command_args and command_args["directory"] in {"", "/"}:

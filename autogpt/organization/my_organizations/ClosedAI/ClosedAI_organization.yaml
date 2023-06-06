@@ -1,32 +1,43 @@
 agent_budgets:
-  0: 47900
-  1: 9092
-  2: 29257
+  0: 49200
+  1: 4922
+  2: 968
 agent_running_costs:
-  0: 200
-  1: 100
+  0: 300
+  1: 200
   2: 100
 agent_statuses:
-  0: "Your Staff Status:\nAgent_Id:1. Agent_Name: staff_1, Supervisor: Elon Musk\n\
-    Role: iwdoccmewk, Status: Your Staff Status:\nAgent 1 currently has no staff in\
-    \ service\n\n\n Your current budget is $9092\nYour current running costs are $100\
-    \ per step\nWith your current running costs you will run out in 90.92 steps.\n\
-    A simple task will typically take 15 steps., Operating Cost: 100, Budget: 9092\n\
-    \n\n Your current budget is $47900\nYour current running costs are $200 per step\n\
-    With your current running costs you will run out in 239.5 steps.\nA simple task\
-    \ will typically take 15 steps."
-  1: "Your Staff Status:\nAgent 1 currently has no staff in service\n\n\n Your current\
-    \ budget is $9092\nYour current running costs are $100 per step\nWith your current\
-    \ running costs you will run out in 90.92 steps.\nA simple task will typically\
+  0:
+    "Your Staff Status:\nAgent_Id:1. Agent_Name: staff_1, Supervisor: Elon Musk\n\
+    Role: xulspwhoff, Status: Your Staff Status:\nAgent 1 currently has no staff in\
+    \ service\n\n\n Your current budget is $5122\nYour current running costs are $100\
+    \ per step\nWith your current running costs you will run out in 51.22 steps.\n\
+    A simple task will typically take 15 steps., Operating Cost: 100, Budget: 5122\n\
+    \  Agent_Id:2. Agent_Name: staff_2, Supervisor: staff_1\n  Role: xuqlblclsv, Status:\
+    \ Your Staff Status:\nAgent 2 currently has no staff in service\n\n\n Your current\
+    \ budget is $968\nYour current running costs are $100 per step\nWith your current\
+    \ running costs you will run out in 9.68 steps.\nA simple task will typically\
+    \ take 15 steps., Operating Cost: 100, Budget: 968\n\n\n Your current budget is\
+    \ $49200\nYour current running costs are $300 per step\nWith your current running\
+    \ costs you will run out in 164.0 steps.\nA simple task will typically take 15\
+    \ steps."
+  1:
+    "Your Staff Status:\nAgent 1 currently has no staff in service\n\n\n Your current\
+    \ budget is $5122\nYour current running costs are $100 per step\nWith your current\
+    \ running costs you will run out in 51.22 steps.\nA simple task will typically\
     \ take 15 steps."
-  2: starting interaction loop
+  2:
+    "Your Staff Status:\nAgent 2 currently has no staff in service\n\n\n Your current\
+    \ budget is $968\nYour current running costs are $100 per step\nWith your current\
+    \ running costs you will run out in 9.68 steps.\nA simple task will typically\
+    \ take 15 steps."
 agent_termination_events: {}
 initial_budget: 50000
 name: ClosedAI
 pending_messages:
   0: []
-  1: []
 supervisor_to_staff:
   0:
-  - 1
-  - 2
+    - 1
+  1:
+    - 2

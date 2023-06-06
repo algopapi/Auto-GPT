@@ -184,7 +184,6 @@ class Organization(metaclass=Singleton):
             if iteration_count % 50 == 0:
                 print("Contents of the event queue:")
                 self.event_queue.print_contents()
-            print('\n processing event \n')
         print("\nTermination event set. Exited process_events loop.\n")
         
 
@@ -922,8 +921,6 @@ class Organization(metaclass=Singleton):
                 await asyncio.sleep(1)
 
             print("All agents have terminated")
-
-
             # Now process remaining events
             while not self.event_queue.empty():  # check if there are still pending events
                 print("processing remaining events")

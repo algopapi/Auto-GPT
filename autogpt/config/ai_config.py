@@ -155,6 +155,7 @@ class AIConfig:
         cfg = Config()
         if prompt_generator is None:
             prompt_generator = build_default_prompt_generator()
+            
         prompt_generator.goals = self.ai_goals
         prompt_generator.name = self.ai_name
         prompt_generator.role = self.ai_role

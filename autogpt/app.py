@@ -67,6 +67,8 @@ def get_command(response_json: Dict):
     # All other errors, return "Error: + error message"
     except Exception as e:
         return "Error:", str(e)
+    
+
 
 
 def map_command_synonyms(command_name: str):

@@ -11,5 +11,5 @@ file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organization
   Musk_workspace
 founder: true
 init_memory: false
-loop_count: 18
+loop_count: 5
 terminated: false
