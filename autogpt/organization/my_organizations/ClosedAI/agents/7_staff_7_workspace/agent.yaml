@@ -1,0 +1,11 @@
+ai_goals:
+- elilzymtpq
+ai_id: 7
+ai_name: staff_7
+ai_role: yijjulogig
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/7_staff_7_workspace
+founder: false
+init_memory: false
+loop_count: 10
+terminated: false

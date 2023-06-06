@@ -41,8 +41,10 @@ class AIConfig:
         init_memory: bool = False,
         terminated: bool = False,
         loop_count: int = 0,
-        agent_dir_path: str = "",
+        file_path: str = "",
         api_budget: float = 0.0,
+        command_registry: CommandRegistry | None = None,
+        prompt_generator: PromptGenerator | None = None,
     ) -> None:
         """
         Initialize a class instance
@@ -55,6 +57,8 @@ class AIConfig:
         Returns:
             None
         """
+      
+
         if ai_goals is None:
             ai_goals = []
         self.ai_id = ai_id
@@ -62,16 +66,18 @@ class AIConfig:
         self.ai_role = ai_role
         self.ai_goals = ai_goals
         self.api_budget = api_budget
-        self.prompt_generator: PromptGenerator | None = None
-        self.command_registry: CommandRegistry | None = None
+        self.command_registry: command_registry
+        self.prompt_generator: prompt_generator
+     
 
         self.terminated = terminated
         self.loop_count = loop_count
         self.founder = founder
         self.init_memory = init_memory
-        self.agent_dir_path = agent_dir_path
-        print("agent file path: ", self.agent_dir_path)
-        self.agent_yaml_path = os.path.join(agent_dir_path, "agent.yaml")
+        self.file_path = file_path
+        
+        print("agent file path: ", self.file_path)
+        self.agent_yaml_path = os.path.join(file_path, "agent.yaml")
         self.save()
 
     @classmethod
@@ -91,7 +97,8 @@ class AIConfig:
         try:
             with open(file_path) as file:
                 config_params = yaml.load(file, Loader=yaml.FullLoader)
-                instance = cls(file_path=str(file_path), **config_params)
+                print("file path = ", file_path)
+                instance = cls(**config_params)
                 return instance
         except FileNotFoundError:
             return None
@@ -100,22 +107,24 @@ class AIConfig:
         if os.path.exists(self.agent_yaml_path):
             os.remove(self.agent_yaml_path)
 
-        if os.path.exists(self.agent_dir_path):
-            os.remove(self.agent_dir_path)
+        if os.path.exists(self.file_path):
+            os.rmdir(self.file_path)
+
         else:
             print(
                 f"Can't remove agent: {self.ai_name} as couldn't find file: {self.agent_yaml_path}."
             )
 
     def save(self):
-        print("agent dir path", self.agent_dir_path)
+        print("agent dir path", self.file_path)
         print("agent yaml_path", self.agent_yaml_path)
-        if not os.path.exists(Path(self.agent_dir_path)):
-            os.makedirs(Path(self.agent_dir_path), exist_ok=True)
+        if not os.path.exists(Path(self.file_path)):
+            os.makedirs(Path(self.file_path), exist_ok=True)
 
 
         config = {attr: getattr(self, attr) for attr in vars(self)}
         config.pop("file", None)  # Exclude file attribute
+        config.pop("agent_yaml_path", None)  # Exclude agent_yaml_path (we construct this during init)
         with open(self.agent_yaml_path, "w") as file:
             yaml.dump(config, file)
 

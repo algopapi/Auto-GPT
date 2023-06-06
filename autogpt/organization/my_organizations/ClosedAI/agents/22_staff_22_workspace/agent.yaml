@@ -1,0 +1,11 @@
+ai_goals:
+- setcgcsbub
+ai_id: 22
+ai_name: staff_22
+ai_role: nszejsejii
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/22_staff_22_workspace
+founder: false
+init_memory: false
+loop_count: 2
+terminated: false

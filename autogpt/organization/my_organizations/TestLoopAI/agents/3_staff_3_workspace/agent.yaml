@@ -1,0 +1,11 @@
+ai_goals:
+- cvywtmobcc
+ai_id: 3
+ai_name: staff_3
+ai_role: iyhvlzjikg
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/TestLoopAI/agents/3_staff_3_workspace
+founder: false
+init_memory: false
+loop_count: 3
+terminated: false

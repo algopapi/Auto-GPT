@@ -1,0 +1,11 @@
+ai_goals:
+- yjapvdrjpa
+ai_id: 25
+ai_name: staff_25
+ai_role: rgrtwcahlw
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/25_staff_25_workspace
+founder: false
+init_memory: false
+loop_count: 1
+terminated: false

@@ -70,7 +70,7 @@ async def startup() -> None:
     await start_task
 
 
-def run_autogpt_org(
+async def run_autogpt_org(
         continuous: bool,
         continuous_limit: int,
         ai_settings: str,
@@ -192,15 +192,6 @@ def run_autogpt_org(
     for command_category in enabled_command_categories:
         command_registry.import_commands(command_category)
 
-    # ai_name = ""
-    # ai_config = construct_main_ai_config()
-    # ai_config.command_registry = command_registry
-    # if ai_config.ai_name:
-    #     ai_name = ai_config.ai_name
-    # # print(prompt)
-    # # Initialize variables
-    # next_action_count = 0
-
     # add chat plugins capable of report to logger
     if cfg.chat_messages_enabled:
         for plugin in cfg.plugins:
@@ -212,19 +203,17 @@ def run_autogpt_org(
     # this is particularly important for indexing and referencing pinecone memory
     org = initialize_organization()
 
-    # # Create a task for the org.start() method
-    # start_task = asyncio.create_task(org.start())
+    # Create a task for the org.start() method
+    start_task = asyncio.create_task(org.start())
 
-    # # Define a signal handler to set the termination event
-    # def handle_signal(*args):
-    #     print("[handle_signal] Termination signal received. Initiating shutdown...")
-    #     asyncio.create_task(org.shutdown())
-    #     print("[handle_signal] Shutdown process initiated.")
+    # Define a signal handler to set the termination event
+    def handle_signal(*args):
+        print("[handle_signal] Termination signal received. Initiating shutdown...")
+        asyncio.create_task(org.shutdown())
+        print("[handle_signal] Shutdown process initiated.")
 
-    # # Add the signal handler to the event loop
-    # loop = asyncio.get_running_loop()
-    # loop.add_signal_handler(signal.SIGINT, handle_signal)
+    # Add the signal handler to the event loop
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGINT, handle_signal)
 
-    # # Wait for the start task to finish
-    # await start_task
-    
+    await start_task

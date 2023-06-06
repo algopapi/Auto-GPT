@@ -1,0 +1,38 @@
+agent_budgets:
+  0: 49700
+  1: 10150
+  2: 2390
+  3: 908
+agent_running_costs:
+  0: 100
+  1: 100
+  2: 100
+  3: 100
+agent_statuses:
+  0: "Your Staff Status:\nAgent 0 currently has no staff in service\n\n\n Your current\
+    \ budget is $49700\nYour current running costs are $100 per step\nWith your current\
+    \ running costs you will run out in 497.0 steps.\nA simple task will typically\
+    \ take 15 steps."
+  1: "Your Staff Status:\nAgent 1 currently has no staff in service\n\n\n Your current\
+    \ budget is $10150\nYour current running costs are $100 per step\nWith your current\
+    \ running costs you will run out in 101.5 steps.\nA simple task will typically\
+    \ take 15 steps."
+  2: "Your Staff Status:\nAgent 2 currently has no staff in service\n\n\n Your current\
+    \ budget is $2390\nYour current running costs are $100 per step\nWith your current\
+    \ running costs you will run out in 23.9 steps.\nA simple task will typically\
+    \ take 15 steps."
+  3: "Your Staff Status:\nAgent 3 currently has no staff in service\n\n\n Your current\
+    \ budget is $908\nYour current running costs are $100 per step\nWith your current\
+    \ running costs you will run out in 9.08 steps.\nA simple task will typically\
+    \ take 15 steps."
+agent_termination_events: {}
+initial_budget: 50000
+name: TestLoopAI
+pending_messages: {}
+supervisor_to_staff:
+  0:
+  - 1
+  1:
+  - 2
+  2:
+  - 3

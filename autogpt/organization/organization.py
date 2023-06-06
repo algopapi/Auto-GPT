@@ -110,12 +110,7 @@ def update_yaml_after_async(func):
         obj = args[0]
         async with obj.action_lock:
             res = await func(*args, **kwargs)
-
-            name = obj.name
-            org_directory = (
-                importlib.resources.files(permanent_storage)/f"organizations/{name}"
-            )
-            file_path = str(org_directory / f"{name}_organization.yaml")
+            file_path = obj.org_yaml_path
 
             async with obj.file_lock:  # Use the file lock here
                 await async_update_yaml(obj, file_path)
@@ -301,8 +296,8 @@ class Organization(metaclass=Singleton):
     async def start_agent_loop(self, agent):
         # Register agent in running agents (handy for cleanup)
         await self.register_agent(agent)
-        await agent.start_interaction_loop(self.termination_event)
-        #await agent.start_test_loop(self.termination_event)
+        # await agent.start_interaction_loop(self.termination_event)
+        await agent.start_test_loop(self.termination_event)
 
     
     async def start_event_processing_loop(self):
@@ -415,13 +410,27 @@ class Organization(metaclass=Singleton):
     
 
     async def a_add_agent(self, agent_cfg):
-        agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg['ai_id']}_{agent_cfg['ai_name']}_workspace/agent_memory.json"
+        agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
         memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
-        
+                # Create the commands that should be passed to the staffmember
+        command_registry = CommandRegistry()
+
+        enabled_command_catergories = [
+            x for x in COMMAND_CATEGORIES if x not in cfg.disabled_command_categories
+        ]
+
+        for command_catergory in enabled_command_catergories:
+            command_registry.import_commands(command_catergory)
+
         new_agent = Agent(
-            agent_cfg, 
-            self, 
-            memory,
+            memory = memory,
+            next_action_count=0,
+            command_registry="",
+            triggering_prompt="",
+            config = agent_cfg,
+            system_prompt = "",
+            workspace_directory="",
+            organization=self,
         )
 
         self.agents[new_agent.ai_id] = new_agent
@@ -479,14 +488,14 @@ class Organization(metaclass=Singleton):
             ai_role=role,
             ai_goals=goals,
             founder=founder,
-            agent_dir_path=agent_workspace_directory,
+            file_path=agent_workspace_directory,
         )
 
         # If it is the founder we set the budget here
         if founder:
             self.agent_budgets[agent_id] = initial_budget
 
-        return await self.add_agent(agent_cfg)
+        return await self.a_add_agent(agent_cfg)
     
     def create_agent(
         self,
@@ -512,7 +521,7 @@ class Organization(metaclass=Singleton):
             ai_role=role,
             ai_goals=goals,
             founder=founder,
-            agent_dir_path=agent_workspace_directory,
+            file_path=agent_workspace_directory,
         )
 
         # If it is the founder we set the budget here
@@ -836,7 +845,7 @@ class Organization(metaclass=Singleton):
             # print("file path", file_path)
             yaml_path = os.path.join(agent_dir, f"agent.yaml")
 
-            agent_config = AIConfig.load(yaml_path) # This should be the
+            agent_config = AIConfig.load(yaml_path)
             # print("agent_config", agent_config)
             if agent_config is not None:
                 agent_config.init_memory = False
@@ -909,6 +918,7 @@ class Organization(metaclass=Singleton):
 
             # Wait until all agents have succesfully terminated 
             while len(self.running_agents) > 0:
+               
                 await asyncio.sleep(1)
 
             print("All agents have terminated")
@@ -925,6 +935,6 @@ class Organization(metaclass=Singleton):
             # Now it is safe to stop the event processing loop
             print("setting termination event")
             self.termination_event.set()
-            print("Stopped the event processing loop.")
+            print("[SHUTDOWN FINISHED] Stopped the event processing loop.")
 
     

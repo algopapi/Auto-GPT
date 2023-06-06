@@ -1,0 +1,11 @@
+ai_goals:
+- rpqdaqppeq
+ai_id: 16
+ai_name: staff_16
+ai_role: ueoamlovko
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/16_staff_16_workspace
+founder: false
+init_memory: false
+loop_count: 4
+terminated: false

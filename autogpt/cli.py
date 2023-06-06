@@ -1,4 +1,6 @@
 """Main script for the autogpt package."""
+import asyncio
+
 import click
 
 
@@ -120,7 +122,7 @@ def main(
                 install_plugin_deps,
             )
         else: 
-            run_autogpt_org(
+           asyncio.run(run_autogpt_org(
                 continuous,
                 continuous_limit,
                 ai_settings,
@@ -137,7 +139,7 @@ def main(
                 workspace_directory,
                 install_plugin_deps,
                 organization,
-            )
+            ))
 
 
 if __name__ == "__main__":
