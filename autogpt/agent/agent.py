@@ -304,7 +304,7 @@ class Agent:
             org_status = await self.organization.get_event_result(status_event_id)
 
             # Update the current system prompt
-            self.system_prompt = self.ai_config.construct_full_prompt(self.organization)
+            self.system_prompt = self.ai_config.construct_full_prompt(organization=self.organization)
 
             full_prompt = self.system_prompt + "\n" + org_status + "\n" + message
             print("full prompt", full_prompt)
@@ -456,12 +456,13 @@ class Agent:
                     command_name, arguments = plugin.pre_command(
                         command_name, arguments
                     )
-                command_result = execute_command(
+                command_result = await execute_command(
                     self.command_registry,
                     command_name,
                     arguments,
                     self.config.prompt_generator,
                     config=cfg,
+                    agent=self,
                 )
                 result = f"Command {command_name} returned: " f"{command_result}"
 

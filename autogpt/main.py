@@ -185,7 +185,7 @@ def run_auto_gpt(
         logger.typewriter_log("Prompt:", Fore.GREEN, system_prompt)
 
     agent = Agent(
-        ai_name=ai_name,
+        #ai_name=ai_name,
         memory=memory,
         next_action_count=next_action_count,
         command_registry=command_registry,

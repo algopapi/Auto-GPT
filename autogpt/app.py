@@ -86,12 +86,13 @@ def map_command_synonyms(command_name: str):
     return command_name
 
 
-def execute_command(
+async def execute_command(
     command_registry: CommandRegistry,
     command_name: str,
     arguments,
     prompt: PromptGenerator,
     config: Config,
+    agent, 
 ):
     """Execute the command and return the result
 
@@ -107,7 +108,7 @@ def execute_command(
 
         # If the command is found, call it with the provided arguments
         if cmd:
-            return cmd(**arguments, config=config)
+            return await cmd(**arguments, config=config, agent=agent)
 
         # TODO: Remove commands below after they are moved to the command registry.
         command_name = map_command_synonyms(command_name.lower())

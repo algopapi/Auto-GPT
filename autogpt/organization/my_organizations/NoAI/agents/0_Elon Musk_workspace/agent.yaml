@@ -1,10 +1,9 @@
 ai_goals:
-- hire a staff member
-- message him
-- fire him
+- hire a staff member with hire_staff
+- google what cats are red colored
 ai_id: 0
 ai_name: Elon Musk
-ai_role: Setup a dummy org
+ai_role: setup an org
 api_budget: 0.0
 command_registry: !!python/object:autogpt.commands.command.CommandRegistry
   commands:
@@ -168,7 +167,7 @@ command_registry: !!python/object:autogpt.commands.command.CommandRegistry
       method: !!python/name:autogpt.commands.file_operations.write_to_file ''
       name: write_to_file
       signature: '"filename": "<filename>", "text": "<text>"'
-file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/0_Elon
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/NoAI/agents/0_Elon
   Musk_workspace
 founder: true
 init_memory: false

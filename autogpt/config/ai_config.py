@@ -66,8 +66,8 @@ class AIConfig:
         self.ai_role = ai_role
         self.ai_goals = ai_goals
         self.api_budget = api_budget
-        self.command_registry: command_registry
-        self.prompt_generator: prompt_generator
+        self.command_registry = command_registry
+        self.prompt_generator =  prompt_generator
      
 
         self.terminated = terminated
@@ -129,7 +129,7 @@ class AIConfig:
             yaml.dump(config, file)
 
     def construct_full_prompt(
-        self, prompt_generator: Optional[PromptGenerator] = None
+        self, organization = None, prompt_generator: Optional[PromptGenerator] = None, 
     ) -> str:
         """
         Returns a prompt to the user with the class information in an organized fashion.

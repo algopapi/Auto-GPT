@@ -29,7 +29,8 @@ JSON_SCHEMA = """
         "reasoning": "reasoning",
         "plan": "- short bulleted\n- list that conveys\n- long-term plan",
         "criticism": "constructive self-criticism",
-        "speak": "thoughts summary to say to user"
+        "speak": "thoughts summary to say to user",
+        "status": "short description of current engangement i.e., Im working on X",
     }
 }
 """
