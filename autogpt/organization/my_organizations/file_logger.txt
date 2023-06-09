@@ -1,1 +1,10 @@
-File Operation Logger 
+File Operation Logger write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/NoobyOrg/agents/1_John Doe_workspace/jokes.txt #22f64616c92c0a9d77af18811f34078b
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/0_Eddie Murphy_workspace/thoughts.txt #274b77964f81479179b5c22427fc17e5
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/1_John Doe_workspace/jokes.txt #22f64616c92c0a9d77af18811f34078b
+append: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/1_John Doe_workspace/jokes.txt #5ab4482195da8995f7b21667dc47c08d
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/2_Jane Doe_workspace/jokes.txt #84b81aaaf80971afadefce6a7987f8b6
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/1_John Doe_workspace/jokes.txt #f1e39ce677be9a62b4e5ba85224bb854
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/2_Jane Doe_workspace/feedback.txt #050e8d59c36747b8103add30ea240273
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/1_John Doe_workspace/goals.txt #ef25769190e0e6668447ad4caf628d1e
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/2_Jane Doe_workspace/improvement.txt #54d49741eb2f85aea5b8b6ff5fa8c2b7
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/0_Eddie Murphy_workspace/employee_performance.txt #9b7ab823276f8423c771d2f112cf2ae7

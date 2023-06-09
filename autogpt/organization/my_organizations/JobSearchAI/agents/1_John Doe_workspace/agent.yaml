@@ -1,0 +1,13 @@
+ai_goals:
+- Find hospitality jobs in Hilversum
+ai_id: 1
+ai_name: John Doe
+ai_role: Job Quality Assessor
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/JobSearchAI/agents/1_John
+  Doe_workspace
+founder: false
+init_memory: false
+loop_count: 0
+prompt_generator: null
+terminated: false

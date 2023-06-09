@@ -8,7 +8,7 @@ from datetime import datetime
 
 from colorama import Fore, Style
 
-from autogpt.app import execute_command, get_command
+from autogpt.app import execute_command, get_command, get_status
 from autogpt.commands.command import CommandRegistry
 from autogpt.config import Config
 from autogpt.config.ai_config import AIConfig
@@ -89,9 +89,6 @@ class Agent:
         self.system_prompt = system_prompt
         self.triggering_prompt = triggering_prompt
 
-        print("system prompt", self.system_prompt)
-        print("triggering prompt", self.triggering_prompt)
-
         self.workspace = Workspace(workspace_directory, cfg.restrict_to_workspace)
         self.created_at = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.cycle_count = 0
@@ -107,8 +104,6 @@ class Agent:
 
 
     
-
-
     async def start_test_loop(self, termination_event):
         await self.send_event("update_agent_status", self.ai_id, "starting interaction loop")
 
@@ -146,7 +141,7 @@ class Agent:
             message_event_id = await self.send_event("receive_message", self.ai_id)
             message = await self.organization.get_event_result(message_event_id)
 
-            # Build the status udpate of the agent to add to prompt 
+            # Build the status udpate of the agent to add to prompt
             status_event_id = await self.send_event("build_status_update", self.ai_id)
             agent_status = await self.organization.get_event_result(status_event_id)
     
@@ -335,6 +330,7 @@ class Agent:
                         self.ai_name, assistant_reply_json, cfg.speak_mode
                     )
                     command_name, arguments = get_command(assistant_reply_json)
+                    status = get_status(assistant_reply_json)
                     if cfg.speak_mode:
                         say_text(f"I want to execute {command_name}")
 
@@ -357,6 +353,14 @@ class Agent:
                 f"COMMAND = {Fore.CYAN}{command_name}{Style.RESET_ALL}  "
                 f"ARGUMENTS = {Fore.CYAN}{arguments}{Style.RESET_ALL}",
             )
+
+            # Update agent status in the organization
+            try :
+                event_id = await self.send_event("update_agent_status", self.ai_id, status)
+                res = await self.organization.get_event_result(event_id)
+            except Exception as e:
+                logger.error("Error: \n", str(e))
+            
 
             if not cfg.continuous_mode and self.next_action_count == 0:
                 # ### GET USER AUTHORIZATION TO EXECUTE COMMAND ###
@@ -493,6 +497,9 @@ class Agent:
                 logger.typewriter_log(
                     "SYSTEM: ", Fore.YELLOW, "Unable to execute command"
                 )
+            
+            # add a little cooldown here. 
+            await asyncio.sleep(1)
         
         # Notify the org agent is terminated 
         print(f"\033[31m\n ******************** Agent {self.ai_name} loop terminated ******************\033[0m")
@@ -550,3 +557,6 @@ class Agent:
             SUPERVISOR_FEEDBACK_FILE_NAME,
         )
         return feedback
+
+
+       

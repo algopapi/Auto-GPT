@@ -20,6 +20,7 @@ from autogpt.config.ai_config import AIConfig
 from autogpt.config.config import Singleton
 from autogpt.logs import logger
 from autogpt.memory.vector import get_memory
+from autogpt.organization.message import Message, MessageCenter
 from autogpt.prompts.prompt import DEFAULT_TRIGGERING_PROMPT, construct_main_ai_config
 
 COMMAND_CATEGORIES = [
@@ -133,6 +134,7 @@ class Organization(metaclass=Singleton):
         self.agent_budgets = {}
         self.agent_running_costs = {}
         self.pending_messages = {}
+        self.message_center = MessageCenter() # New message center we should implement soon
         self.agent_statuses = {}
         self.supervisor_to_staff: Dict[int, List[int]] = {}  # Maps supervisor ID to staff IDs
         self.agent_termination_events = {}
@@ -141,7 +143,6 @@ class Organization(metaclass=Singleton):
         self.org_dir_path = f"{cfg.workspace_path}/{self.name}"
         self.org_yaml_path = self.org_dir_path + "/" + f"{self.name}_organization.yaml"
        
-        print("org workspace", self.org_dir_path)
 
         # Organization event queue
         self.event_queue = DebuggableQueue()
@@ -216,29 +217,20 @@ class Organization(metaclass=Singleton):
 
             elif event_type == 'hire_staff':
                 # Perform the 'hire_staff' action and return the result
-                print(f"free agent ids:", self.free_agent_ids)
-                name, role, goals, budget, supervisor_name, supervisor_id = args
+                name, role, goals, budget, supervisor_id = args
                 goals_list = self.convert_string_to_list(goals)
-                print("goals list", goals_list)
-                res = await self.hire_staff(name, role, goals_list, budget, supervisor_name, supervisor_id)
-                print(f"Agent {name} response to hiring staff: {res}")
+                res = await self.hire_staff(name, role, goals_list, budget, supervisor_id)
                 return res
 
             elif event_type == 'fire_staff':
                 # Perform the 'fire_staff' action and return the result
-                print(f"free agent ids:", self.free_agent_ids)
                 ai_id = args[0]
-                print(f"the agent that is going to be fired is: {ai_id}")
                 res = await self.fire_staff(ai_id)
-                print(f"Agent {ai_id} response to firing staff: {res}")
                 return res
 
             elif event_type == 'message_staff':
                 # Perform the 'message_staff' action and return the result
                 sender_id, receiver_id, message = args
-                print("sender_id", sender_id)
-                print("receiver_id", receiver_id)
-                print("message", message)
                 return await self.message_staff(sender_id, receiver_id, message)
 
             elif event_type == 'message_supervisor':
@@ -320,7 +312,7 @@ class Organization(metaclass=Singleton):
     
 
     @update_yaml_after_async
-    async def hire_staff(self, name: str, role: str, goals: str, budget: str, supervisor_id: str, config: Config) -> str:
+    async def hire_staff(self, name: str, role: str, goals: str, budget: str, supervisor_id: str) -> str:
         try:
             # Validate and convert budget to integer
             budget = int(budget)
@@ -333,6 +325,7 @@ class Organization(metaclass=Singleton):
             goals=goals,
             founder=False,
         )
+
         new_employee_id = new_employee.ai_id  # Retrieve the ai_id of the new employee
         res = await self.a_add_staff(supervisor_id, new_employee_id, budget)
         # Start the interection loop of the newly hired agent
@@ -430,14 +423,13 @@ class Organization(metaclass=Singleton):
         
         return f"Successfully added employee with Agent_id: {new_employee_id} to supervisor with Agent_id: {supervisor_id}\n"
 
-    async def a_add_agent(self, agent_cfg):
+    async def a_add_agent(self, agent_cfg, command_registry):
         agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
         memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
                 # Create the commands that should be passed to the staffmember
 
-        command_registry = agent_cfg.command_registry
-        workspace_directory = agent_cfg.file_path
-        system_prompt = agent_cfg.construct_full_prompt()
+        workspace_directory = agent_cfg.file_path # Get the workspace from the agent config
+        system_prompt = agent_cfg.construct_full_prompt() # Construct the system prompt
 
         new_agent = Agent(
             memory = memory,
@@ -454,12 +446,11 @@ class Organization(metaclass=Singleton):
         return new_agent
     
 
-    def add_agent(self, agent_cfg):
+    def add_agent(self, agent_cfg, command_registry):
         agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
         memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
                 # Create the commands that should be passed to the staffmember
 
-        command_registry = agent_cfg.command_registry # Get the command registry from the config
         workspace_directory = agent_cfg.file_path # Get the workspace from the agent config
         system_prompt = agent_cfg.construct_full_prompt() # Construct the system prompt
 
@@ -494,8 +485,18 @@ class Organization(metaclass=Singleton):
             agent_id = len(self.agents)
             print(" agent id Assigned = ", agent_id)
 
-
         agent_workspace_directory = f"{self.org_dir_path}/agents/{agent_id}_{name}_workspace"
+
+        command_registry = CommandRegistry()
+
+        enabled_command_catergories = [
+            x for x in COMMAND_CATEGORIES if x not in cfg.disabled_command_categories
+        ]
+
+        for command_catergory in enabled_command_catergories:
+            command_registry.import_commands(command_catergory)
+
+
         agent_cfg = AIConfig(
             ai_name=name,
             ai_id=agent_id,
@@ -503,13 +504,14 @@ class Organization(metaclass=Singleton):
             ai_goals=goals,
             founder=founder,
             file_path=agent_workspace_directory,
+            command_registry=command_registry,
         )
 
         # If it is the founder we set the budget here
         if founder:
             self.agent_budgets[agent_id] = initial_budget
 
-        return await self.a_add_agent(agent_cfg)
+        return await self.a_add_agent(agent_cfg, command_registry=command_registry)
     
     def create_agent(
         self,
@@ -536,7 +538,6 @@ class Organization(metaclass=Singleton):
         ]
 
         for command_catergory in enabled_command_catergories:
-            print("Importing commands from ", command_catergory)
             command_registry.import_commands(command_catergory)
 
 
@@ -554,7 +555,7 @@ class Organization(metaclass=Singleton):
         if founder:
             self.agent_budgets[agent_id] = initial_budget
 
-        return self.add_agent(agent_cfg)
+        return self.add_agent(agent_cfg, command_registry)
 
 
     async def remove_agent(self, agent_id):
@@ -582,6 +583,8 @@ class Organization(metaclass=Singleton):
         receiver = self.find_agent_by_id(receiver_id)
 
         if receiver:
+            
+            # Implement the new message center system
             if receiver_id not in self.pending_messages:
                 self.pending_messages[receiver_id] = []
 
@@ -630,6 +633,16 @@ class Organization(metaclass=Singleton):
                 return "You have no pending messages"  # No pending messages for the agent
         else:
             return "You have no pending messages"  # Agent ID not found in the pending_messages dictionary
+        
+    
+    async def receive_message_2(self, agent_id):
+        if agent_id in self.pending_messages:
+            message_list = self.pending_messages[agent_id]
+
+            # get the first message from the agents pending message list that has not responded to
+            # message object contains a bool message.responded which is set to false if not responded to.
+
+
 
 
     @update_yaml_after_async
@@ -802,17 +815,22 @@ class Organization(metaclass=Singleton):
        
         agent_directories = glob.glob(os.path.join(organization_directory, "agents", "*"))
 
+        command_registry = CommandRegistry()
+        enabled_command_catergories = [
+            x for x in COMMAND_CATEGORIES if x not in cfg.disabled_command_categories
+        ]
+        for command_catergory in enabled_command_catergories:
+            command_registry.import_commands(command_catergory)
+
+
         # Create all the agents
         for agent_dir in agent_directories:
-            # print("file path", file_path)
             yaml_path = os.path.join(agent_dir, f"agent.yaml")
 
-            agent_config = AIConfig.load(yaml_path) # This should be the
-            # print("agent_config", agent_config)
+            agent_config = AIConfig.load(yaml_path, command_registry) # This should be the
             if agent_config is not None:
                 agent_config.init_memory = False
-                #print(" adding  agent", agent_config)
-                org.add_agent(agent_config)
+                org.add_agent(agent_config, command_registry)
 
        
         # Add staff to supervisor
@@ -832,10 +850,6 @@ class Organization(metaclass=Singleton):
         """
             Function that loads the organization yaml file and loads in the organization data and all the agents
         """
-        # Update the organization_folder to use importlib.resources.files
-        # organization_folder = (
-        #     importlib.resources.files(permanent_storage)/f"organizations/{organization_name}"
-        # ) 
 
         organization_directory = os.path.join(cfg.workspace_path, organization_name)
         org_file_path = f"{organization_directory}/{organization_name}_organization.yaml"
@@ -856,17 +870,25 @@ class Organization(metaclass=Singleton):
        
         agent_directories = glob.glob(os.path.join(organization_directory, "agents", "*"))
 
+        command_registry = CommandRegistry()
+        enabled_command_catergories = [
+            x for x in COMMAND_CATEGORIES if x not in cfg.disabled_command_categories
+        ]
+        for command_catergory in enabled_command_catergories:
+            command_registry.import_commands(command_catergory)
+
+
         # Create all the agents
         for agent_dir in agent_directories:
             # print("file path", file_path)
             yaml_path = os.path.join(agent_dir, f"agent.yaml")
 
-            agent_config = AIConfig.load(yaml_path)
+            agent_config = AIConfig.load(file_path=yaml_path, command_registry=command_registry)
             # print("agent_config", agent_config)
             if agent_config is not None:
                 agent_config.init_memory = False
                 #print(" adding  agent", agent_config)
-                org.add_agent(agent_config)
+                org.add_agent(agent_config, command_registry)
 
        
         # Add staff to supervisor
@@ -934,7 +956,6 @@ class Organization(metaclass=Singleton):
 
             # Wait until all agents have succesfully terminated 
             while len(self.running_agents) > 0:
-               
                 await asyncio.sleep(1)
 
             print("All agents have terminated")

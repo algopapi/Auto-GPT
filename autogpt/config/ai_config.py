@@ -81,7 +81,7 @@ class AIConfig:
         self.save()
 
     @classmethod
-    def load(cls, file_path):
+    def load(cls, file_path, command_registry):
         """
             Returns class object with parameters (ai_name, ai_role, ai_goals, api_budget) loaded from
             yaml file if yaml file exists,
@@ -98,7 +98,7 @@ class AIConfig:
             with open(file_path) as file:
                 config_params = yaml.load(file, Loader=yaml.FullLoader)
                 print("file path = ", file_path)
-                instance = cls(**config_params)
+                instance = cls(**config_params, command_registry=command_registry)
                 return instance
         except FileNotFoundError:
             return None
@@ -125,6 +125,7 @@ class AIConfig:
         config = {attr: getattr(self, attr) for attr in vars(self)}
         config.pop("file", None)  # Exclude file attribute
         config.pop("agent_yaml_path", None)  # Exclude agent_yaml_path (we construct this during init)
+        config.pop("command_registry", None)  # Exclude command_registry (we construct this during init)
         with open(self.agent_yaml_path, "w") as file:
             yaml.dump(config, file)
 

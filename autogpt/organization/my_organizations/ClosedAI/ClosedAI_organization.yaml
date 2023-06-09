@@ -1,11 +1,31 @@
 agent_budgets:
-  0: 49800
+  0: 45100
+  1: 3600
+  2: 3800
+  3: 9400
+  4: 4600
 agent_running_costs:
-  0: 100
+  0: 500
+  1: 100
+  2: 100
+  3: 100
+  4: 100
 agent_statuses:
   0: starting interaction loop
+  1: starting interaction loop
+  2: starting interaction loop
+  3: starting interaction loop
+  4: starting interaction loop
 agent_termination_events: {}
 initial_budget: 50000
 name: ClosedAI
-pending_messages: {}
-supervisor_to_staff: {}
+pending_messages:
+  0: []
+  1: []
+  3: []
+supervisor_to_staff:
+  0:
+  - 1
+  - 2
+  - 3
+  - 4
