@@ -59,16 +59,18 @@ async def get_conversation_history(agent_id: str, config: Config, agent: Agent) 
         "Respond to a message from an agent in your inbox",
         '"message_id" : "<message_id of message you want to respond to>"',
 )
-async def respond_to_message(message_id: str, config: Config, agent: Agent) -> str:
-    """Gets the conversation history between you and an agent. 
+async def respond_to_message(message_id: str, response: str, config: Config, agent: Agent) -> str:
+    """
+        Responds to a message from an agent in your inbox.
 
         Args:
-            agent_id (str): The ID of the agent to get the conversation history with
+            message_id (str): The ID of the message to respond to
+            response (str): The response to the message
 
-        Returns:
-            str: The conversation history
+        Returns: 
+            str: confirmation or error
     """
-    event_id = await agent.send_event("get_conversation_history", agent.ai_id, agent_id)
+    event_id = await agent.send_event("respond_to_message", message_id, response, agent.ai_id)
     response = await agent.organization.get_event_result(event_id)
     return response
 

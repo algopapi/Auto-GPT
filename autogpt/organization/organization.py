@@ -232,11 +232,7 @@ class Organization(metaclass=Singleton):
                 # Perform the 'message_staff' action and return the result
                 sender_id, receiver_id, message = args
                 return await self.message_agent(sender_id, receiver_id, message)
-
-            elif event_type == 'message_supervisor':
-                # Perform the 'message_supervisor' action and return the result
-                sender_id, message = args
-                return await self.message_supervisor(sender_id, message)
+            
         
             elif event_type == 'receive_message':
                 # Get pending messages 
@@ -248,8 +244,8 @@ class Organization(metaclass=Singleton):
                 return await self.message_center.generate_conversation_prompt(sender_id, receiver_id)
 
             elif event_type == "respond_to_message":
-
-                return await self.message_center.respond_to_message(message_id, response, sender_id)
+                message_id, response, sender_id = args
+                return await self.respond_to_message(message_id, response, sender_id)
 
             elif event_type == 'calculate_operating_cost_of_agent':
                 # Perform the 'calculate_operating_cost_of_agent' action and return the result
@@ -388,7 +384,6 @@ class Organization(metaclass=Singleton):
             return f"Failed to remove employee with Agent_id: {agent_id}\n"
             
 
-
     def add_staff(self, supervisor_id, new_employee_id, budget, skip_update_yaml=False):
         if skip_update_yaml:
             return
@@ -431,6 +426,7 @@ class Organization(metaclass=Singleton):
         self.agent_running_costs[new_employee_id] = 100
         
         return f"Successfully added employee with Agent_id: {new_employee_id} to supervisor with Agent_id: {supervisor_id}\n"
+
 
     async def a_add_agent(self, agent_cfg, command_registry):
         agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
@@ -522,6 +518,7 @@ class Organization(metaclass=Singleton):
 
         return await self.a_add_agent(agent_cfg, command_registry=command_registry)
     
+
     def create_agent(
         self,
         name,
@@ -614,7 +611,6 @@ class Organization(metaclass=Singleton):
             return f"Failed to send message to employee with Agent_id: {receiver_id}\n"
     
 
-
     @update_yaml_after_async
     async def receive_message(self, agent_id):
         """ 
@@ -645,6 +641,7 @@ class Organization(metaclass=Singleton):
 
             # get the first message from the agents pending message list that has not responded to
             # message object contains a bool message.responded which is set to false if not responded to.
+
 
     @update_yaml_after_async
     async def update_agent_running_cost(self, agent_id, agent_running_cost):
@@ -707,6 +704,7 @@ class Organization(metaclass=Singleton):
     async def has_staff(self, agent_id):
         return bool(self.supervisor_to_staff.get(agent_id, []))
 
+
     # Asynchornous function that returns supervisode ID.
     async def get_supervisor_id(self, agent_id):
         for supervisor, staff in self.supervisor_to_staff.items():
@@ -714,12 +712,14 @@ class Organization(metaclass=Singleton):
                 return supervisor
         return None
     
+
     def _get_supervisor_id(self, agent_id):
         for supervisor, staff in self.supervisor_to_staff.items():
             if agent_id in staff:
                 return supervisor
         return None
-        
+
+
     # Asynchronous method to get the supervisor's id and name
     def get_supervisor_info(self, agent_id: int):
         # Get the supervisor ID
@@ -732,6 +732,7 @@ class Organization(metaclass=Singleton):
         # If there is no supervisor or the supervisor is not in the agents dictionary, return None
         print("cannot find supervisor for agent id ", agent_id)
         return None, None
+
 
     async def get_staff(self, agent_id):
         staff_ids = self.supervisor_to_staff.get(agent_id, [])
@@ -846,6 +847,7 @@ class Organization(metaclass=Singleton):
 
         return org
     
+
     @classmethod
     def load(cls, organization_name):
         """
@@ -974,7 +976,6 @@ class Organization(metaclass=Singleton):
             print("[SHUTDOWN FINISHED] Stopped the event processing loop.")
 
     
-
     # DECREPATED
     # @update_yaml_after_async
     # async def message_staff(self, sender_id: int, receiver_id: str , message: str) -> str:
