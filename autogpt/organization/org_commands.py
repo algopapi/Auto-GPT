@@ -13,21 +13,14 @@ if TYPE_CHECKING:
     from autogpt.config import Config
 
 
-# async def get_agent_by_id(id: str, organization) -> Union[Agent, str]:
-#     agent_id = int(id)
-#     if agent_id in organization.agents:
-#         return organization.agents[agent_id]
-#     else:
-#         return "Check if you passed your ID correctly"
-
 @command(
-    "message_staff",
-    "Message an employee",
+    "message_agent",
+    "Message an agent in the organization",
     '"receiver_id" : "<receiver_id>", "message" : "<message>"',
     enabled=True, # change this to be dependent on whether the user is running org mode
     disabled_reason="not an organization"
 )
-async def message_staff(receiver_id: str, message: str, config: Config, agent: Agent) -> str:
+async def message_agent(receiver_id: str, message: str, config: Config, agent: Agent) -> str:
     """Messages a staff member (employee) with a given message. 
 
         Args:
@@ -37,28 +30,45 @@ async def message_staff(receiver_id: str, message: str, config: Config, agent: A
         Returns:
             str: Send confirmation or error
     """
-    event_id = await agent.send_event("message_staff", agent.ai_id, receiver_id, message)
+    event_id = await agent.send_event("message_agent", agent.ai_id, receiver_id, message)
     response = await agent.organization.get_event_result(event_id)
     return response
 
 
 @command(
-    "message_supervisor",
-    "Message your supervisor",
-    '"message" : "<message to supervisor>"',
-    enabled=True, # change this to be dependent on whether the user is running org mode
-    disabled_reason="not an organization"
+        "get_conversation_history",
+        "Get the conversation history between you and an agent",
+        '"agent_id" : "<agent_id of message respondent>"',
 )
-async def message_supervisor( message: str, config: Config, agent: Agent) -> str:
-    """Messages a employees supervisor with a given message. 
+async def get_conversation_history(agent_id: str, config: Config, agent: Agent) -> str:
+    """Gets the conversation history between you and an agent. 
 
         Args:
-            message (str): The message to send to the supervsiro
+            agent_id (str): The ID of the agent to get the conversation history with
 
         Returns:
-            str: Send confirmation or error
+            str: The conversation history
     """
-    event_id = await agent.send_event("message_supervisor",agent.ai_id, message)
+    event_id = await agent.send_event("get_conversation_history", agent.ai_id, agent_id)
+    response = await agent.organization.get_event_result(event_id)
+    return response
+
+
+@command(
+        "respond_to_message",
+        "Respond to a message from an agent in your inbox",
+        '"message_id" : "<message_id of message you want to respond to>"',
+)
+async def respond_to_message(message_id: str, config: Config, agent: Agent) -> str:
+    """Gets the conversation history between you and an agent. 
+
+        Args:
+            agent_id (str): The ID of the agent to get the conversation history with
+
+        Returns:
+            str: The conversation history
+    """
+    event_id = await agent.send_event("get_conversation_history", agent.ai_id, agent_id)
     response = await agent.organization.get_event_result(event_id)
     return response
 
@@ -108,16 +118,43 @@ async def fire_staff(agent_id: str, config: Config, agent: Agent) -> str:
 
 
 @command(
-    'respond_to_message',
-    'Respond to an incoming message',
-    '"message_id":"<id of message to respond to>", "response":"<response to message>"',
-    enabled=True,
+    "message_supervisor",
+    "Message your supervisor",
+    '"message" : "<message to supervisor>"',
+    enabled=False, # change this to be dependent on whether the user is running org mode
+    disabled_reason="not an organization"
 )
-async def respond_to_message(message_id: str, response: str, config: Config, agent: Agent) -> str:
-    """Responds to an incoming message from a staff member.
-        Args:
-            message_id (str): The ID of the message to respond to
-            response (str): The response to the message 
-    """
+async def message_supervisor( message: str, config: Config, agent: Agent) -> str:
+    """Messages a employees supervisor with a given message. 
 
-    
+        Args:
+            message (str): The message to send to the supervsiro
+
+        Returns:
+            str: Send confirmation or error
+    """
+    event_id = await agent.send_event("message_supervisor",agent.ai_id, message)
+    response = await agent.organization.get_event_result(event_id)
+    return response
+
+
+@command(
+    "message_staff",
+    "Message an agent in the organization",
+    '"receiver_id" : "<receiver_id>", "message" : "<message>"',
+    enabled=False, # change this to be dependent on whether the user is running org mode
+    disabled_reason="not an organization"
+)
+async def message_staff(receiver_id: str, message: str, config: Config, agent: Agent) -> str:
+    """Messages a staff member (employee) with a given message. 
+
+        Args:
+            agent_id (str): The ID of the receiver
+            message (str): The message to send to the receiver
+
+        Returns:
+            str: Send confirmation or error
+    """
+    event_id = await agent.send_event("message_staff", agent.ai_id, receiver_id, message)
+    response = await agent.organization.get_event_result(event_id)
+    return response

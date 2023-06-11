@@ -103,7 +103,6 @@ class Agent:
         self.memory = memory
 
 
-    
     async def start_test_loop(self, termination_event):
         await self.send_event("update_agent_status", self.ai_id, "starting interaction loop")
 
@@ -114,7 +113,6 @@ class Agent:
                 print(f"\033[31m\n ******************** Terminating agent: {self.ai_name} ******************\033[0m")
                 self.terminated = True
                 break
-                
             try:
                 # Add a timeout to the blocking operation
                 dice_result = await asyncio.wait_for(self.dice_roll(), timeout=1.0)
@@ -137,19 +135,19 @@ class Agent:
             # Update the agent budget
             await self.send_event("update_agent_budget", self.ai_id, agent_operating_costs)
 
-            # Receive message and build status update
+            # Get the message to respond to
             message_event_id = await self.send_event("receive_message", self.ai_id)
             message = await self.organization.get_event_result(message_event_id)
 
             # Build the status udpate of the agent to add to prompt
             status_event_id = await self.send_event("build_status_update", self.ai_id)
-            agent_status = await self.organization.get_event_result(status_event_id)
+            agent_update = await self.organization.get_event_result(status_event_id)
     
             # Build an arbitrary status
             status = f"agent {self.ai_name} is in loop {self.loop_count} rolled {dice_result}"
 
             # Update the agent status
-            await self.send_event("update_agent_status", self.ai_id, agent_status)
+            await self.send_event("update_agent_status", self.ai_id, status)
 
             if dice_result == 1:
                 next_free_id = len(self.organization.agents)
@@ -170,6 +168,9 @@ class Agent:
                 await asyncio.sleep(2)
 
             elif dice_result == 2:
+                """ 
+                    Message a random staff member
+                """
                 staff_members = await self.organization.get_staff(self.ai_id)
 
                 if len(staff_members) == 0:
@@ -184,6 +185,9 @@ class Agent:
 
 
             elif dice_result == 3:
+                """
+                    Message your supervisor
+                """
                 message = f"i am {self.ai_name} and iam messaging you in loop {self.loop_count}"
                 event_id = await self.send_event("message_supervisor", self.ai_id, message)
                 response = await self.organization.get_event_result(event_id)
@@ -198,12 +202,29 @@ class Agent:
                 await asyncio.sleep(5)
 
             elif dice_result == 5:
+                """ 
+                    Fire a random staff member
+                """
                 staff_members = await self.organization.get_staff(self.ai_id)
                 if len(staff_members) == 0:
                     #print(f"agent {self.ai_name} has no staff members to fire in loop {self.loop_count}")
                     continue
                 random_staff_member = random.choice(staff_members)
                 event_id = await self.send_event("fire_staff", random_staff_member.ai_id)
+                response = await self.organization.get_event_result(event_id)
+                #print(f"response: {response}")
+                await asyncio.sleep(3)
+
+            elif dice_result == 6:
+                """ 
+                    Respond to messages using respond function
+                """
+                if message is None:
+                    continue
+
+                
+                reponse = f"agent {self.ai_name} is responding to message {message} in loop {self.loop_count}"
+                event_id = await self.send_event("respond_to_message", random_staff_member.ai_id)
                 response = await self.organization.get_event_result(event_id)
                 #print(f"response: {response}")
                 await asyncio.sleep(3)
@@ -498,12 +519,13 @@ class Agent:
                     "SYSTEM: ", Fore.YELLOW, "Unable to execute command"
                 )
             
-            # add a little cooldown here. 
+            # add a little cooldown here.
             await asyncio.sleep(1)
         
-        # Notify the org agent is terminated 
+        # Notify the org agent is terminated
         print(f"\033[31m\n ******************** Agent {self.ai_name} loop terminated ******************\033[0m")
         await self.organization.notify_termination(self)
+
 
     def _resolve_pathlike_command_args(self, command_args):
         if "directory" in command_args and command_args["directory"] in {"", "/"}:
@@ -515,6 +537,7 @@ class Agent:
                         self.workspace.get_path(command_args[pathlike])
                     )
         return command_args
+
 
     def get_self_feedback(self, thoughts: dict, llm_model: str) -> str:
         """Generates a feedback response based on the provided thoughts dictionary.
@@ -557,6 +580,52 @@ class Agent:
             SUPERVISOR_FEEDBACK_FILE_NAME,
         )
         return feedback
+
+
+    async def respond_to_message(self, sender_id, message_id) -> str:
+        """ 
+            This function is called when the agent receives a message from another agent. 
+            The goal is to generate a reponse to the message. 
+            We dont need the regular system prompt/triggering promt here. 
+            - We do need the relevant part of agent History.
+            - Need the relevant part of conversation History.
+
+            Args:
+                sender_id: str (sender_id of the agent who sent the message)
+                message_id: str (message_id of the message to respond to)
+
+            Returns:
+                response: str
+        """
+        cfg = Config()
+
+        RESPONSE_TRIGGER_PROMPT = """
+            Respond to the agent's message given your action history and conversation history.
+        """
+
+        self.system_prompt = self.organization.message_center.get_conversation_prompt(
+            # sender_id = sender_id
+            # responder_id = self.ai_id
+            # message_id = (message_id of the message to respond to)
+        )
+
+        # This gets invoked from whenever an other agent sends a message to this agent.
+        reponse = chat_with_ai(
+            cfg,
+            self,
+            self.system_prompt,
+            RESPONSE_TRIGGER_PROMPT,
+            cfg.fast_token_limit,
+            cfg.fast_llm_model,
+        )
+
+        return reponse
+
+
+
+
+
+        
 
 
        

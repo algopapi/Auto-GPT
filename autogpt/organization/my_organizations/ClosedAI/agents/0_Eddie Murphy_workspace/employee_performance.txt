@@ -1,4 +1,0 @@
-Employee Performance Report:
-
-John Doe: 5 jokes generated
-Jane Smith: 3 jokes reviewed

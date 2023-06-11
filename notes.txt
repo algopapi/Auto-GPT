@@ -1,1 +1,18 @@
 git push origin v4
+
+TODO: 
+- Fix the goolge search API
+- Impelment the new messaging system
+- Do some preliminary stability tests
+
+High level Thoughts/ Possible improvements
+- Rebudgeting requests when an agents runs out of budget
+- Evaluation Rounds / Promotion / Demotion / Firing
+- File sharing ( Which agents can share which files with eachother ) 
+- Allow supervisor Retasking his employees. 
+
+VISION:
+- Lay as much power/responsibilities as possible to the agent
+
+Thoughts on new messaging system:
+- An agent should be able to recieve a message, do some thinky think, and then respond.(coherently)

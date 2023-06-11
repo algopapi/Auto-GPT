@@ -228,10 +228,10 @@ class Organization(metaclass=Singleton):
                 res = await self.fire_staff(ai_id)
                 return res
 
-            elif event_type == 'message_staff':
+            elif event_type == 'message_agent':
                 # Perform the 'message_staff' action and return the result
                 sender_id, receiver_id, message = args
-                return await self.message_staff(sender_id, receiver_id, message)
+                return await self.message_agent(sender_id, receiver_id, message)
 
             elif event_type == 'message_supervisor':
                 # Perform the 'message_supervisor' action and return the result
@@ -239,8 +239,17 @@ class Organization(metaclass=Singleton):
                 return await self.message_supervisor(sender_id, message)
         
             elif event_type == 'receive_message':
+                # Get pending messages 
                 agent_id = args[0]
                 return await self.receive_message(agent_id)
+            
+            elif event_type == "get_conversation_history":
+                sender_id, receiver_id = args
+                return await self.message_center.generate_conversation_prompt(sender_id, receiver_id)
+
+            elif event_type == "respond_to_message":
+
+                return await self.message_center.respond_to_message(message_id, response, sender_id)
 
             elif event_type == 'calculate_operating_cost_of_agent':
                 # Perform the 'calculate_operating_cost_of_agent' action and return the result
@@ -574,7 +583,18 @@ class Organization(metaclass=Singleton):
 
 
     @update_yaml_after_async
-    async def message_staff(self, sender_id, receiver_id, message):
+    async def message_agent(self, sender_id: int, receiver_id: str , message: str) -> str:
+        """ 
+            Adds a message from supervisor to staff to the message center.
+            Args:
+                sender_id (int): The id of the sender
+                receiver_id (str): The id of the receiver
+                message (str): The message to send
+
+            Returns:
+                str: A message indicating success or failure
+        """
+        # Convert the reciever id string to an int
         try:
             receiver_id = int(receiver_id)
         except ValueError:
@@ -583,45 +603,30 @@ class Organization(metaclass=Singleton):
         receiver = self.find_agent_by_id(receiver_id)
 
         if receiver:
-            
             # Implement the new message center system
-            if receiver_id not in self.pending_messages:
-                self.pending_messages[receiver_id] = []
-
-            self.pending_messages[receiver_id].append((sender_id, message))
-            return f"Successfully sent message to employee {receiver.ai_name}\n"
+            await self.message_center.add_new_message(
+                sender_id=sender_id,
+                receiver_id=receiver_id,
+                message=message,
+            ) # Implement this function
+            return f"Message sent to employee with Agent_id: {receiver_id}\n"
         else:
             return f"Failed to send message to employee with Agent_id: {receiver_id}\n"
     
 
-    @update_yaml_after_async
-    async def message_supervisor(self, sender_id, message):
-        """
-        Auto routes a message from the staff member to the supervisor
-        """
-      
-        # Look up the sender agent using sender_id
-        sender = self.agents[sender_id]
-        
-        # Check if the sender ageWnt is the founder
-        supervisor_id =  await self.get_supervisor_id(sender_id)
-        
-        if not sender.founder:
-            if supervisor_id is not None:
-                if supervisor_id not in self.pending_messages:
-                    self.pending_messages[supervisor_id] = []
-
-                self.pending_messages[supervisor_id].append((sender_id, message))
-                return f"Successfully sent message to your supervisor\n"
-            else: 
-                return f"Could not find your supervisors id"
-        else: 
-            return f"You are the founder and therefore don't have a supervisor!\n"
-            
 
     @update_yaml_after_async
     async def receive_message(self, agent_id):
-        # Check if the agent ID exists in the pending_messages dictionary
+        """ 
+            Collects a message from the message center and returns it to the agent. 
+            Args:
+                sender_id (int): The id of the sender
+                receiver_id (str): The id of the receiver
+                message (str): The message to send
+
+            Returns:
+                str: The message in string format.
+        """
         if agent_id in self.pending_messages:
             # Pop the first message from the agent's pending message list
             message_list = self.pending_messages[agent_id]
@@ -635,15 +640,11 @@ class Organization(metaclass=Singleton):
             return "You have no pending messages"  # Agent ID not found in the pending_messages dictionary
         
     
-    async def receive_message_2(self, agent_id):
-        if agent_id in self.pending_messages:
-            message_list = self.pending_messages[agent_id]
+    async def response_message(self, agent_id: int, message_id: int, response: str):
+            message_center = self.message_center
 
             # get the first message from the agents pending message list that has not responded to
             # message object contains a bool message.responded which is set to false if not responded to.
-
-
-
 
     @update_yaml_after_async
     async def update_agent_running_cost(self, agent_id, agent_running_cost):
@@ -973,3 +974,75 @@ class Organization(metaclass=Singleton):
             print("[SHUTDOWN FINISHED] Stopped the event processing loop.")
 
     
+
+    # DECREPATED
+    # @update_yaml_after_async
+    # async def message_staff(self, sender_id: int, receiver_id: str , message: str) -> str:
+    #     """ 
+    #         Adds a message from supervisor to staff to the message center.
+    #         Args:
+    #             sender_id (int): The id of the sender
+    #             receiver_id (str): The id of the receiver
+    #             message (str): The message to send
+
+    #         Returns:
+    #             str: A message indicating success or failure
+    #     """
+    #     # Convert the reciever id string to an int
+    #     try:
+    #         receiver_id = int(receiver_id)
+    #     except ValueError:
+    #         return "You're likely entering the employee name as agent_id, please enter a valid integer agent_id"
+
+    #     receiver = self.find_agent_by_id(receiver_id)
+
+    #     if receiver:
+    #         # Implement the new message center system
+
+    #         self.message_center.add_message(
+    #             sender_id=sender_id,
+    #             receiver_id=receiver_id,
+    #             message=message,
+
+    #         ) # Implement this function
+
+    #         if receiver_id not in self.pending_messages:
+    #             self.pending_messages[receiver_id] = []
+
+    #         self.pending_messages[receiver_id].append((sender_id, message))
+    #         return f"Successfully sent message to employee {receiver.ai_name}\n"
+    #     else:
+    #         return f"Failed to send message to employee with Agent_id: {receiver_id}\n"
+    
+    # DECREPATED
+    # @update_yaml_after_async
+    # async def message_supervisor(self, sender_id: int, message: str) -> str:
+    #     """ 
+    #         Adds a message from supervisor to staff to the message center.
+    #         Finds the supervisor given the ID of the sender. 
+    #         Args:
+    #             sender_id (int): The id of the sender
+    #             receiver_id (str): The id of the receiver
+    #             message (str): The message to send
+
+    #         Returns:
+    #             str: A message indicating success or failure
+    #     """
+      
+    #     # Look up the sender agent using sender_id
+    #     sender = self.agents[sender_id]
+        
+    #     # Check if the sender ageWnt is the founder
+    #     supervisor_id =  await self.get_supervisor_id(sender_id)
+        
+    #     if not sender.founder:
+    #         if supervisor_id is not None:
+    #             if supervisor_id not in self.pending_messages:
+    #                 self.pending_messages[supervisor_id] = []
+
+    #             self.pending_messages[supervisor_id].append((sender_id, message))
+    #             return f"Successfully sent message to your supervisor\n"
+    #         else: 
+    #             return f"Could not find your supervisors id"
+    #     else: 
+    #         return f"You are the founder and therefore don't have a supervisor!\n"
