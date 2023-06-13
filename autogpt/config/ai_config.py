@@ -126,6 +126,7 @@ class AIConfig:
         config.pop("file", None)  # Exclude file attribute
         config.pop("agent_yaml_path", None)  # Exclude agent_yaml_path (we construct this during init)
         config.pop("command_registry", None)  # Exclude command_registry (we construct this during init)
+        config.pop("prompt_generator", None)  # Exclude prompt_generator (we construct this during init)
         with open(self.agent_yaml_path, "w") as file:
             yaml.dump(config, file)
 

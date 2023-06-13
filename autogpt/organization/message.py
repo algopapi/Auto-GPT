@@ -1,5 +1,10 @@
+import glob
+import os
 from datetime import datetime
 from typing import List, Optional, Union
+
+import aiofiles
+import yaml
 
 from autogpt.config.config import Singleton
 
@@ -14,17 +19,27 @@ INBOX_TEMPLATE = """
 """
 
 
+def update_yaml_after_async(func):
+    async def wrapper(self, *args, **kwargs):
+        res = await func(self, *args, **kwargs)
+        # Make sure to call a_save of MessageCenter to update the YAML file.
+        await self.a_save()
+        return res
+    return wrapper
+
 class Message:
     def __init__(
-            self, 
-            message: str, 
-            message_id: int, 
-            sender_id: int, 
-            receiver_id: int, 
-            from_supervisor: bool, 
+            self,
+            message: str,
+            message_id: int,
+            sender_id: int,
+            receiver_id: int,
+            from_supervisor: bool,
             response_to_id: Optional[int] = None,
             response_id: Optional[int] = None,
-            timestamp: Optional[datetime.datetime] = None,
+            timestamp: Optional[datetime] = None,
+            responded: bool = False, 
+            read: bool = False,
         ):
 
         self.message = message
@@ -36,10 +51,9 @@ class Message:
         self.response_to_id = response_to_id # If this is a response to a message, store the id of the message here.
         self.response_id = response_id # store the response of this message here.
  
-        self.read = False
-        self.responded = False
-        self.response = None # Include a field for the response as well.
-        self.timestamp = timestamp # Include the timestamp the message was sent at. 
+        self.read = read
+        self.responded = responded
+        self.timestamp = timestamp # Include the timestamp the message was sent at.
 
     def set_read(self) -> None:
         """
@@ -80,18 +94,64 @@ class Message:
             - Other message details
         """
         if self.from_supervisor:
-            message_prompt = f"message_id-{self.message_id}:Incoming message from supervisor-{self.sender_id}: {self.message}\n"
+            message_prompt = f"Message ID {self.message_id}: Incoming message from supervisor (ID: {self.sender_id}): {self.message}\n"
         else:
-            message_prompt= f"message_id-{self.message_id}:Incoming message from staff member-{self.sender_id}: {self.message}\n"
+            message_prompt= f"Message ID {self.message_id}: Incoming message from staff member (ID: {self.sender_id}): {self.message}\n"
         return message_prompt
 
 
 class MessageCenter(metaclass=Singleton):
-    def __init__(self):
+    def __init__(self, organization):
         self.messages = {}
         self.max_id = 0
+        self.organization = organization
+        self.message_yaml_path = organization.org_dir_path + "/" + f"{organization.name}_messages.yaml"
+        print("message_yaml_path: ", self.message_yaml_path)
 
-    def store_message(self, message: Message) -> None:
+    @update_yaml_after_async
+    async def add_message(self, message: Message):
+        # Logic to add a new message
+        self.messages[message.message_id] = message
+
+    async def a_save(self):
+        data = {
+            'max_id': self.max_id,
+            'messages': {message_id: vars(message) for message_id, message in self.messages.items()}
+        }
+        
+        if not os.path.exists(self.message_yaml_path):
+            os.makedirs(os.path.dirname(self.message_yaml_path), exist_ok=True)
+            
+        async with aiofiles.open(self.message_yaml_path, mode='w') as outfile:
+            await outfile.write(yaml.dump(data))
+
+    def save(self):
+        data = {
+            'max_id': self.max_id,
+            'messages': {message_id: vars(message) for message_id, message in self.messages.items()}
+        }
+        
+        if not os.path.exists(self.message_yaml_path):
+            os.makedirs(os.path.dirname(self.message_yaml_path), exist_ok=True)
+        
+        with open(self.message_yaml_path, mode='w') as outfile:
+            yaml.dump(data, outfile)
+
+    def load_messages(self):
+        if not os.path.exists(self.message_yaml_path):
+            return
+
+        with open(self.message_yaml_path, mode='r') as infile:
+            data = yaml.safe_load(infile.read())
+            self.max_id = data.get('max_id', 0)
+            self.messages = {message_id: Message(**message_data) for message_id, message_data in data.get('messages', {}).items()}
+
+
+
+
+
+
+    async def store_message(self, message: Message) -> None:
         self.messages[message.message_id] = message
 
 
@@ -220,7 +280,7 @@ class MessageCenter(metaclass=Singleton):
             datetime
         )
 
-
+    @update_yaml_after_async
     async def add_new_message(
             self,
             message: str,
@@ -249,7 +309,7 @@ class MessageCenter(metaclass=Singleton):
         )
 
         # Store the message
-        self.store_message(message)
+        await self.store_message(message)
 
 
     def receive_message(self, agent_id: int) -> str:
@@ -270,7 +330,17 @@ class MessageCenter(metaclass=Singleton):
             return self.get_message_prompt(message)
         
 
-    async def construct_inbox(self, agent_id: int) -> str:
+    async def get_inbox_message_ids(self, agent_id: int) -> List[int]:
+        """
+            Return a list of message_ids for all messages in the inbox (unresponded messages)
+        """
+        agent_messages = self.get_unresponded_messages_by_receiver(agent_id)
+        inbox_message_ids = [msg.message_id for msg in agent_messages]
+
+        return inbox_message_ids
+
+
+    async def get_inbox(self, agent_id: int) -> str:
         """
             Construct the inbox for a given agent
             Args:
@@ -278,12 +348,9 @@ class MessageCenter(metaclass=Singleton):
             
             Returns:
                 A string representation of the inbox
-        """
-        # Get all messages
-        agent_messages = self.fetch_messages_by_receiver(agent_id)
-        
-        # Get get unresponded messages
-        unresponded_messages = self.filter_unresponded_messages(agent_messages)
+        """        
+        # Get all unresponded messages
+        unresponded_messages = self.get_unresponded_messages_by_receiver(agent_id)
 
         # Get message from supervisor first
         messages_from_supervisor = self.filter_from_supervisor(unresponded_messages)
@@ -294,18 +361,19 @@ class MessageCenter(metaclass=Singleton):
         # Sort unresponded_messages by timestamp (newest first)
         unresponded_messages.sort(key=lambda msg: msg.timestamp, reverse=True)
 
-        prompt = f"INBOX\n\n"
-        prompt += f"NEW INCOMING MESSAGES - high priority first \n\n"
+        prompt = f"INBOX:\n"
+        prompt += f"NEW INCOMING MESSAGES - high priority first\n"
 
         if len(messages_from_supervisor) > 0:
             for message in messages_from_supervisor:
                 prompt += message.construct_message_prompt()
 
+        prompt += f"\n\nINCOMING RESPONSES - high priority first\n"
+
         if len(unresponded_messages) > 0:
             for message in unresponded_messages:
                 prompt += message.construct_message_prompt()
 
-        print("INBOX PROMPT: ", prompt)
         if len(messages_from_supervisor) + len(unresponded_messages) > 0:
             # there are messages that need possible responding and we should let the agent now how to
             prompt += "\n\nUse the `respond_to_message` command to respond to an incoming message'\n"
@@ -346,7 +414,7 @@ class MessageCenter(metaclass=Singleton):
             return message.receiver_id == receiver_id
         return False
 
-
+    @update_yaml_after_async
     async def respond_to_message(self, message_id: int, response: str, sender_id: int) -> str:
         """
             Respond to a message. 
@@ -355,32 +423,41 @@ class MessageCenter(metaclass=Singleton):
                 response: The response to the message
                 sender_id: The agent responding to the message 
         """
+
+        # Get the message
+        initial_message = self.fetch_message_by_id(message_id)
+
+        # Check if message exists'
+        if initial_message is None:
+            return "Message does not exist. Please double check the message ID"
+
         # Check if message belongs to sender
         if not self.check_message_adressed_to_reciever(message_id, sender_id):
             return "Message does not belong to you. Please double check the message ID"
 
-        # Get the message
-        message = self.fetch_message_by_id(message_id)
-        
         # Check if message is already responded to
-        if message.response_id is not None:
+        if initial_message.response_id is not None:
             return "You have already responded to this message."
         
         # Get a new message ID
         message_id = self.get_free_message_id()
 
+        # Check if message is from supervisor (i.e., are you responding to your supervisor?)
+        from_supervisor = await self.organization.is_supervisor(initial_message.sender_id, sender_id)
+       
         # Create a new message
         message = self.create_message(
             response,
             sender_id,
-            message.sender_id,
-            False, # hmm shouldt his be true or false?
+            initial_message.sender_id,
+            from_supervisor, # hmm shouldt his be true or false?
             message_id,
-            response_to_id=message.message_id
+            response_to_id=initial_message.message_id
         )
 
         # Set the response_id of the original message to the new message id
-        message.response_id = message_id
+        initial_message.response_id = message_id
+        initial_message.responded = True
 
-        self.store_message(message)
-        return "Message sent successfully"
+        await self.store_message(message)
+        return f"Successfully responded to message {message_id}"

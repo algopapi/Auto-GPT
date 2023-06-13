@@ -107,12 +107,7 @@ class Agent:
         await self.send_event("update_agent_status", self.ai_id, "starting interaction loop")
 
         while not self.terminated:
-            # print(f"[start_test_loop] Agent {self.ai_name} starting loop iteration...")
             # Gracefully shut down agent whenever python is closed down. 
-            if termination_event.is_set():
-                print(f"\033[31m\n ******************** Terminating agent: {self.ai_name} ******************\033[0m")
-                self.terminated = True
-                break
             try:
                 # Add a timeout to the blocking operation
                 dice_result = await asyncio.wait_for(self.dice_roll(), timeout=1.0)
@@ -122,12 +117,11 @@ class Agent:
 
             self.loop_count += 1
             await self.update_agent_config(loop_count=self.loop_count)
-            # print(f"\033[32m\n\n ****** Starting agent {self.ai_name} loop {self.loop_count} ******\033[0m")
 
             # Calculate the current agent operating costs
             event_id = await self.send_event("calculate_operating_cost_of_agent", self.ai_id)
             agent_operating_costs = await self.organization.get_event_result(event_id)
-            # print(f"agent operating costs: {agent_operating_costs}")
+            
 
             # Update the running costs in the yaml
             await self.send_event("update_agent_running_cost", self.ai_id, agent_operating_costs)
@@ -135,10 +129,10 @@ class Agent:
             # Update the agent budget
             await self.send_event("update_agent_budget", self.ai_id, agent_operating_costs)
 
-            # Get the message to respond to
-            message_event_id = await self.send_event("receive_message", self.ai_id)
-            message = await self.organization.get_event_result(message_event_id)
-
+            inbox_prompt_event_id = await self.send_event("get_inbox", self.ai_id)
+            inbox_prompt = await self.organization.get_event_result(inbox_prompt_event_id)
+            print(f"Inbox prompt = \n {inbox_prompt} \n")
+            
             # Build the status udpate of the agent to add to prompt
             status_event_id = await self.send_event("build_status_update", self.ai_id)
             agent_update = await self.organization.get_event_result(status_event_id)
@@ -150,8 +144,7 @@ class Agent:
             await self.send_event("update_agent_status", self.ai_id, status)
 
             if dice_result == 1:
-                next_free_id = len(self.organization.agents)
-                name = f"staff_{next_free_id}"
+                name = f"staff_hired_by_{self.ai_id}"
 
                 # Create arbitrary goals and roles
                 goals = ''.join(random.choices(string.ascii_lowercase, k=10))
@@ -161,10 +154,9 @@ class Agent:
                 my_budget = self.organization.agent_budgets.get(self.ai_id)
                 staff_budget = my_budget * random.uniform(0, 1)
 
-                event_id = await self.send_event("hire_staff", name, role, goals, staff_budget, self.ai_name, self.ai_id)
+                event_id = await self.send_event("hire_staff", name, role, goals, staff_budget, self.ai_id)
                 response = await self.organization.get_event_result(event_id)
                 
-                # print(f"response: {response}")
                 await asyncio.sleep(2)
 
             elif dice_result == 2:
@@ -172,36 +164,31 @@ class Agent:
                     Message a random staff member
                 """
                 staff_members = await self.organization.get_staff(self.ai_id)
+                supervisor = await self.organization.get_supervisor(self.ai_id)
+
+                if supervisor is not None:
+                    staff_members.append(supervisor)
+
+                print("staff_members:", staff_members)
 
                 if len(staff_members) == 0:
                     print(f"agent {self.ai_name} has no staff members to message in loop {self.loop_count}")
                     continue
 
                 random_staff_member = random.choice(staff_members)
-                message = f"test message from agent {self.ai_name} to agent {random_staff_member} in loop {self.loop_count}"
-                event_id = await self.send_event("message_staff", self.ai_id, random_staff_member.ai_id, message)
+                test_message = f"test message from {self.ai_id}:{self.ai_name} to {random_staff_member.ai_id}:{random_staff_member.ai_name} in loop {self.loop_count}"
+                event_id = await self.send_event("message_agent", self.ai_id, random_staff_member.ai_id, test_message)
                 response = await self.organization.get_event_result(event_id)
-                await asyncio.sleep(2)
-
+                await asyncio.sleep(10)
 
             elif dice_result == 3:
-                """
-                    Message your supervisor
-                """
-                message = f"i am {self.ai_name} and iam messaging you in loop {self.loop_count}"
-                event_id = await self.send_event("message_supervisor", self.ai_id, message)
-                response = await self.organization.get_event_result(event_id)
-                # print(f"response: {response}")
-                await asyncio.sleep(3)
-
-            elif dice_result == 4:
                 """ 
                     This is a random action that would usually be something like using a tool or some other non organization related action.
                 """
                 #print(f"agent {self.ai_name} did a random action in loop {self.loop_count}")
                 await asyncio.sleep(5)
 
-            elif dice_result == 5:
+            elif dice_result == 4:
                 """ 
                     Fire a random staff member
                 """
@@ -215,21 +202,47 @@ class Agent:
                 #print(f"response: {response}")
                 await asyncio.sleep(3)
 
-            elif dice_result == 6:
+            elif dice_result == 5:
                 """ 
-                    Respond to messages using respond function
+                    Respond to a random message using respond function
                 """
-                if message is None:
+                # Get message ids of messages in inbox
+                message_id_list = await self.organization.message_center.get_inbox_message_ids(self.ai_id)
+
+                # Pick a random id from the list
+                if len(message_id_list) == 0:
+                    print("no possible messages to respond to")
+                    await asyncio.sleep(1)
                     continue
 
-                
-                reponse = f"agent {self.ai_name} is responding to message {message} in loop {self.loop_count}"
-                event_id = await self.send_event("respond_to_message", random_staff_member.ai_id)
-                response = await self.organization.get_event_result(event_id)
-                #print(f"response: {response}")
-                await asyncio.sleep(3)
+                print("message_id_list:", message_id_list, "\n")
+                # Pick a random message id from the list and create a rtandom response
+                random_message_id = random.choice(message_id_list)
+                response = f"sending response from agent {self.ai_id}:{self.ai_name} in loop {self.loop_count}"
+                print("GENERATED RESPONSE:", response, "\n")
+                # Respond to the message
+                event_id = await self.send_event("respond_to_message", str(random_message_id), response, self.ai_id)
+                res = await self.organization.get_event_result(event_id)
+                print(f"respond_to_message_response: {res}")
+                await asyncio.sleep(2)
 
-        print(f"\033[31m\n ******************** Agent {self.ai_name} loop terminated ******************\033[0m")
+            elif dice_result == 6:
+                """ 
+                    Get a random converstaion from the message center. 
+                """
+                staff_members = await self.organization.get_staff(self.ai_id)
+                if len(staff_members) == 0:
+                    await asyncio.sleep(1)
+                    continue
+                random_staff_member = random.choice(staff_members)
+
+                # Get the conversation history between you and the random staff member
+                event_id = await self.send_event("get_conversation_history", self.ai_id, random_staff_member.ai_id)
+                response = await self.organization.get_event_result(event_id)
+                print(f"converstation: {response}")
+
+
+        print(f"\033[31m\n ******************** Agent {self.ai_id}: {self.ai_name} loop terminated ******************\033[0m")
         await self.organization.notify_termination(self)
 
 
@@ -244,7 +257,7 @@ class Agent:
 
     async def dice_roll(self):
         """Rolls a dice and returns the result"""
-        return random.randint(1, 5)
+        return random.randint(1, 6)
 
 
     async def random_budget(self):
@@ -580,52 +593,6 @@ class Agent:
             SUPERVISOR_FEEDBACK_FILE_NAME,
         )
         return feedback
-
-
-    async def respond_to_message(self, sender_id, message_id) -> str:
-        """ 
-            This function is called when the agent receives a message from another agent. 
-            The goal is to generate a reponse to the message. 
-            We dont need the regular system prompt/triggering promt here. 
-            - We do need the relevant part of agent History.
-            - Need the relevant part of conversation History.
-
-            Args:
-                sender_id: str (sender_id of the agent who sent the message)
-                message_id: str (message_id of the message to respond to)
-
-            Returns:
-                response: str
-        """
-        cfg = Config()
-
-        RESPONSE_TRIGGER_PROMPT = """
-            Respond to the agent's message given your action history and conversation history.
-        """
-
-        self.system_prompt = self.organization.message_center.get_conversation_prompt(
-            # sender_id = sender_id
-            # responder_id = self.ai_id
-            # message_id = (message_id of the message to respond to)
-        )
-
-        # This gets invoked from whenever an other agent sends a message to this agent.
-        reponse = chat_with_ai(
-            cfg,
-            self,
-            self.system_prompt,
-            RESPONSE_TRIGGER_PROMPT,
-            cfg.fast_token_limit,
-            cfg.fast_llm_model,
-        )
-
-        return reponse
-
-
-
-
-
-        
 
 
        

@@ -1,0 +1,11 @@
+ai_goals:
+- fqgmwnmcvb
+ai_id: 9
+ai_name: staff_hired_by_8
+ai_role: rlvelgopxb
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/TestMessAI/agents/9_staff_hired_by_8_workspace
+founder: false
+init_memory: false
+loop_count: 7
+terminated: false

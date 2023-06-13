@@ -1,10 +1,12 @@
 import asyncio
 import functools
 import glob
+import hashlib
 import os
 import signal
+import uuid
 from functools import wraps
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import aiofiles
 import matplotlib.pyplot as plt
@@ -96,10 +98,10 @@ async def async_update_yaml(obj, yaml_path):
         'initial_budget': obj.initial_budget,
         'agent_budgets': obj.agent_budgets,
         'agent_running_costs': obj.agent_running_costs,
-        'pending_messages': obj.pending_messages,
         'agent_statuses': obj.agent_statuses,
         'supervisor_to_staff': obj.supervisor_to_staff,
         'agent_termination_events': obj.agent_termination_events,
+        'id_count': obj.id_count,
     }
 
     async with aiofiles.open(yaml_path, mode='w') as outfile:
@@ -130,11 +132,12 @@ class Organization(metaclass=Singleton):
         self.agents: Dict[int, Agent] = {}
         self.running_agents = []
         self.initial_budget = initial_budget
-        self.free_agent_ids: List[int] = []
+        # self.free_agent_ids: List[int] = []
+        self.id_count = 0
         self.agent_budgets = {}
         self.agent_running_costs = {}
         self.pending_messages = {}
-        self.message_center = MessageCenter() # New message center we should implement soon
+        
         self.agent_statuses = {}
         self.supervisor_to_staff: Dict[int, List[int]] = {}  # Maps supervisor ID to staff IDs
         self.agent_termination_events = {}
@@ -142,8 +145,8 @@ class Organization(metaclass=Singleton):
         # File paths
         self.org_dir_path = f"{cfg.workspace_path}/{self.name}"
         self.org_yaml_path = self.org_dir_path + "/" + f"{self.name}_organization.yaml"
-       
 
+        self.message_center = MessageCenter(self) # New message center we should implement soon
         # Organization event queue
         self.event_queue = DebuggableQueue()
         self.event_results = {}
@@ -157,6 +160,7 @@ class Organization(metaclass=Singleton):
         self.file_lock = asyncio.Lock()
         self.org_lock = asyncio.Lock()
         
+
 
     async def register_agent(self, agent):
         self.running_agents.append(agent)
@@ -190,7 +194,6 @@ class Organization(metaclass=Singleton):
         print("\nTermination event set. Exited process_events loop.\n")
         
 
-
     async def get_event_result(self, event_id):
         while event_id not in self.event_results:
             await asyncio.sleep(0.1)
@@ -203,8 +206,16 @@ class Organization(metaclass=Singleton):
         return comma_separated_string.split(',')
 
 
+    def get_free_agent_id(self):
+        """ 
+            returns the next free agent id and increments the id count
+        """
+        self.id_count += 1
+        return self.id_count
+    
+
     async def perform_action(self, event_type, agent_id, *args, **kwargs):
-        # Determine the action to perform based on the event_type
+        # Determine the action to perform based on the event_typeYou're likely
         async with self.org_lock:
             # Do a final check so that fired agents can sneak in an action
             print(f"\n Agent {agent_id} is about to perform an action {event_type}.")
@@ -233,7 +244,6 @@ class Organization(metaclass=Singleton):
                 sender_id, receiver_id, message = args
                 return await self.message_agent(sender_id, receiver_id, message)
             
-        
             elif event_type == 'receive_message':
                 # Get pending messages 
                 agent_id = args[0]
@@ -242,10 +252,14 @@ class Organization(metaclass=Singleton):
             elif event_type == "get_conversation_history":
                 sender_id, receiver_id = args
                 return await self.message_center.generate_conversation_prompt(sender_id, receiver_id)
+            
+            elif event_type == "get_inbox":
+                agent_id = args[0]
+                return await self.message_center.get_inbox(agent_id)
 
             elif event_type == "respond_to_message":
                 message_id, response, sender_id = args
-                return await self.respond_to_message(message_id, response, sender_id)
+                return await self.respond_to_message(sender_id, message_id, response)
 
             elif event_type == 'calculate_operating_cost_of_agent':
                 # Perform the 'calculate_operating_cost_of_agent' action and return the result
@@ -293,8 +307,8 @@ class Organization(metaclass=Singleton):
     async def start_agent_loop(self, agent):
         # Register agent in running agents (handy for cleanup)
         await self.register_agent(agent)
-        await agent.start_interaction_loop(self.termination_event)
-        # await agent.start_test_loop(self.termination_event)
+        # await agent.start_interaction_loop(self.termination_event)
+        await agent.start_test_loop(self.termination_event)
 
     
     async def start_event_processing_loop(self):
@@ -343,11 +357,10 @@ class Organization(metaclass=Singleton):
         # Check if the agent ID exists in the agents dictionary
         if agent_id in self.agents:
             agent = self.agents[agent_id]
-            agent_name = agent.ai_name
 
             # Check if the agent has employees
             if agent_id in self.supervisor_to_staff and self.supervisor_to_staff[agent_id]:
-                return f"Agent {agent_name} cannot be fired because they have employees. Instruct them to let go of their workforce so they can be fired.\n"
+                return f"Agent {agent_id} cannot be fired because they have employees. Instruct them to let go of their workforce so they can be fired.\n"
             
             # Terminate the agent loop
             agent.terminated = True
@@ -364,8 +377,6 @@ class Organization(metaclass=Singleton):
                         del self.supervisor_to_staff[supervisor_id]
 
             # Remove pending messages, running costs, budgets, and statuses
-            if agent_id in self.pending_messages:
-                del self.pending_messages[agent_id]
             if agent_id in self.agent_running_costs:
                 del self.agent_running_costs[agent_id]
             if agent_id in self.agent_budgets:
@@ -375,11 +386,11 @@ class Organization(metaclass=Singleton):
 
             # Remove agent events from the event queue
             await self.event_queue.filter_queue(lambda event: event.agent.ai_id != agent_id)
-            self.free_agent_ids.append(agent_id)
+            #self.free_agent_ids.append(agent_id)
           
             # Remove the agent from the organization
             await self.remove_agent(agent_id)
-            return f"Successfully removed employee with name: {agent_name}\n"
+            return f"Successfully removed employee with Agent_id: {agent_id}\n"
         else:
             return f"Failed to remove employee with Agent_id: {agent_id}\n"
             
@@ -482,13 +493,16 @@ class Organization(metaclass=Singleton):
         initial_budget = 0,
         founder=False,
     ):
-        if self.free_agent_ids:
-            # Allocate from freed Ids if available
-            agent_id = self.free_agent_ids.pop(0)
-            print(" Agent id Popped = ", agent_id)
-        else:
-            agent_id = len(self.agents)
-            print(" agent id Assigned = ", agent_id)
+        # if self.free_agent_ids:
+        #     # Allocate from freed Ids if available
+        #     agent_id = self.free_agent_ids.pop(0)
+        #     print(" Agent id Popped = ", agent_id)
+        # else:
+        #     agent_id = len(self.agents)
+        #     print(" agent id Assigned = ", agent_id)
+
+        # generate a new agent_id
+        agent_id = self.get_free_agent_id()
 
         agent_workspace_directory = f"{self.org_dir_path}/agents/{agent_id}_{name}_workspace"
 
@@ -527,13 +541,15 @@ class Organization(metaclass=Singleton):
         initial_budget = 0,
         founder=False,
     ):
-        if self.free_agent_ids:
-            # Allocate from freed Ids if available
-            agent_id = self.free_agent_ids.pop(0)
-            print(" Agent id Popped = ", agent_id)
-        else:
-            agent_id = len(self.agents)
-            print(" agent id Assigned = ", agent_id)
+        # if self.free_agent_ids:
+        #     # Allocate from freed Ids if available
+        #     agent_id = self.free_agent_ids.pop(0)
+        #     print(" Agent id Popped = ", agent_id)
+        # else:
+        #     agent_id = len(self.agents)
+        #     print(" agent id Assigned = ", agent_id)
+
+        agent_id = self.get_free_agent_id()
 
         agent_workspace_directory = f"{self.org_dir_path}/agents/{agent_id}_{name}_workspace"
 
@@ -599,12 +615,16 @@ class Organization(metaclass=Singleton):
 
         receiver = self.find_agent_by_id(receiver_id)
 
+        # Check if the message is from a supervisor (prioritized)
+        from_supervisor = await self.is_supervisor(sender_id, receiver_id)
+
         if receiver:
             # Implement the new message center system
             await self.message_center.add_new_message(
                 sender_id=sender_id,
                 receiver_id=receiver_id,
                 message=message,
+                from_supervisor=from_supervisor,
             ) # Implement this function
             return f"Message sent to employee with Agent_id: {receiver_id}\n"
         else:
@@ -636,11 +656,32 @@ class Organization(metaclass=Singleton):
             return "You have no pending messages"  # Agent ID not found in the pending_messages dictionary
         
     
-    async def response_message(self, agent_id: int, message_id: int, response: str):
-            message_center = self.message_center
+    async def respond_to_message(self, agent_id: int, message_id: str, response: str) -> str:
+            """
+                Responds to a message in the inbox. 
 
-            # get the first message from the agents pending message list that has not responded to
-            # message object contains a bool message.responded which is set to false if not responded to.
+                Args:
+                    agent_id (int): The id of the agent responding to the message
+                    message_id (str): The id of the message to respond to
+                    response (str): The response to the message
+
+                Returns:
+                    str: Response confirmation message
+            """
+            try:
+                message_id = int(message_id)
+            except ValueError as e:
+                print ("error:", e)
+                return f"You're likely entering the message id as a string, please enter a valid integer message_id."
+            
+
+            response = await self.message_center.respond_to_message(
+                message_id=message_id,
+                sender_id=agent_id,
+                response=response,
+            )
+
+            return response
 
 
     @update_yaml_after_async
@@ -651,15 +692,20 @@ class Organization(metaclass=Singleton):
 
     @update_yaml_after_async
     async def calculate_operating_cost_of_agent(self, agent_id, cost_per_step=100):
-        return await self._recursive_calculate_operating_cost(agent_id, cost_per_step=100)
-
+        try:
+            return await asyncio.wait_for(self._recursive_calculate_operating_cost(agent_id, cost_per_step=100), timeout=10)
+        except asyncio.TimeoutError:
+            return 'Error: Recursive calculate operating cost timed out'
 
     async def _recursive_calculate_operating_cost(self, agent_id, cost_per_step=100):
         # Base cost for the agent
         agent_running_cost = cost_per_step
         # Add the operating cost of each employee under this agent
         for employee_id in self.supervisor_to_staff.get(agent_id, []):
-            agent_running_cost += await self._recursive_calculate_operating_cost(employee_id, cost_per_step)
+            try:
+                agent_running_cost += await asyncio.wait_for(self._recursive_calculate_operating_cost(employee_id, cost_per_step), timeout=10)
+            except asyncio.TimeoutError:
+                return 'Error: Recursive calculate operating cost timed out'
         return agent_running_cost
 
 
@@ -706,10 +752,51 @@ class Organization(metaclass=Singleton):
 
 
     # Asynchornous function that returns supervisode ID.
-    async def get_supervisor_id(self, agent_id):
+    async def get_supervisor_id(self, agent_id) -> int:
+        """
+            Returns the supervisor ID of the agent with the given agent_id
+
+            Args:
+                agent_id (int): The agent ID of the agent to get the supervisor ID of
+            
+            Returns:
+                int: The supervisor ID of the agent with the given agent_id
+        """
         for supervisor, staff in self.supervisor_to_staff.items():
             if agent_id in staff:
                 return supervisor
+        return None
+    
+
+    # Check if check_id is a supervisor of agent_id
+    async def is_supervisor(self, check_id, agent_id) -> bool:
+        """
+            Check if check_id is a supervisor of agent_id
+            
+            Args:
+                check_id (int): The agent ID of the agent to check if they are a supervisor
+                agent_id (int): The agent ID of the agent to check if they are supervised by check_id
+            
+            Returns:    
+                bool: True if check_id is a supervisor of agent_id, False otherwise
+        """
+        return check_id == await self.get_supervisor_id(agent_id)
+
+
+    async def get_supervisor(self, agent_id) -> Union[Agent, None]:
+        """
+            Returns the supervisor of the agent with the given agent_id
+            
+            Args:
+                agent_id (int): The agent ID of the agent to get the supervisor of
+
+            Returns:
+                Agent: The supervisor of the agent with the given agent_id
+        """
+
+        supervisor_id = await self.get_supervisor_id(agent_id)
+        if supervisor_id is not None:
+            return self.agents.get(supervisor_id)
         return None
     
 
@@ -794,66 +881,10 @@ class Organization(metaclass=Singleton):
 
 
     @classmethod
-    async def a_load(cls, organization_name):
-        """
-            Function that loads the organization yaml file and loads in the organization data and all the agents
-        """
-        organization_directory = os.path.join(cfg.workspace_path, organization_name)
-        org_file_path = f"{organization_directory}/{organization_name}_organization.yaml"
-
-        # Load organization data from the YAML file
-        with open(org_file_path, 'r') as org_file:
-            yaml.SafeLoader.add_constructor('tag:yaml.org,2002:python/tuple', construct_python_tuple)
-            org_data = yaml.safe_load(org_file)
-
-
-        org = Organization(org_data['name'], org_data['initial_budget'])
-        org.agent_budgets = org_data['agent_budgets']
-        org.agent_running_costs = org_data['agent_running_costs']
-        org.pending_messages = org_data['pending_messages']
-        org.agent_statuses = org_data['agent_statuses']
-        org.supervisor_to_staff = org_data['supervisor_to_staff']
-
-       
-        agent_directories = glob.glob(os.path.join(organization_directory, "agents", "*"))
-
-        command_registry = CommandRegistry()
-        enabled_command_catergories = [
-            x for x in COMMAND_CATEGORIES if x not in cfg.disabled_command_categories
-        ]
-        for command_catergory in enabled_command_catergories:
-            command_registry.import_commands(command_catergory)
-
-
-        # Create all the agents
-        for agent_dir in agent_directories:
-            yaml_path = os.path.join(agent_dir, f"agent.yaml")
-
-            agent_config = AIConfig.load(yaml_path, command_registry) # This should be the
-            if agent_config is not None:
-                agent_config.init_memory = False
-                org.add_agent(agent_config, command_registry)
-
-       
-        # Add staff to supervisor
-        for supervisor_id, staff_ids in org.supervisor_to_staff.items():
-            supervisor = org.agents.get(supervisor_id)
-            if supervisor is not None:
-                for staff_id in staff_ids:
-                    staff_agent = org.agents.get(staff_id)
-                    if staff_agent is not None:
-                        staff_budget = org.agent_budgets.get(staff_id)
-                        supervisor.organization.a_add_staff(supervisor_id, staff_id, staff_budget, skip_update_yaml=True)
-
-        return org
-    
-
-    @classmethod
     def load(cls, organization_name):
         """
             Function that loads the organization yaml file and loads in the organization data and all the agents
         """
-
         organization_directory = os.path.join(cfg.workspace_path, organization_name)
         org_file_path = f"{organization_directory}/{organization_name}_organization.yaml"
 
@@ -866,11 +897,15 @@ class Organization(metaclass=Singleton):
         org = Organization(org_data['name'], org_data['initial_budget'])
         org.agent_budgets = org_data['agent_budgets']
         org.agent_running_costs = org_data['agent_running_costs']
-        org.pending_messages = org_data['pending_messages']
         org.agent_statuses = org_data['agent_statuses']
         org.supervisor_to_staff = org_data['supervisor_to_staff']
+        org.id_count = org_data['id_count']
+        
+        # Create the message center
+        org.message_center = MessageCenter(org)
+        # Load messages
+        org.message_center.load_messages()
 
-       
         agent_directories = glob.glob(os.path.join(organization_directory, "agents", "*"))
 
         command_registry = CommandRegistry()
@@ -914,10 +949,12 @@ class Organization(metaclass=Singleton):
             'initial_budget': self.initial_budget,
             'agent_budgets': self.agent_budgets,
             'agent_running_costs': self.agent_running_costs,
-            'pending_messages': self.pending_messages,
             'agent_statuses': self.agent_statuses,
             'supervisor_to_staff': self.supervisor_to_staff,
+            'id_count': self.id_count,
         }
+
+        await self.message_center.a_save()
 
         print("saving organization at " , self.org_yaml_path)
         # Ensure the directory exists
@@ -931,14 +968,16 @@ class Organization(metaclass=Singleton):
 
     def save(self):
         # Create a dictionary to store the relevant attributes
+        self.message_center.a_save()
+
         data = {
             'name': self.name,
             'initial_budget': self.initial_budget,
             'agent_budgets': self.agent_budgets,
             'agent_running_costs': self.agent_running_costs,
-            'pending_messages': self.pending_messages,
             'agent_statuses': self.agent_statuses,
             'supervisor_to_staff': self.supervisor_to_staff,
+            'id_count': self.id_count,
         }
 
         print("saving organization at " , self.org_yaml_path)
@@ -959,6 +998,8 @@ class Organization(metaclass=Singleton):
 
             # Wait until all agents have succesfully terminated 
             while len(self.running_agents) > 0:
+                # print ids of running agents
+                print("running agents", [x.ai_id for x in self.running_agents])
                 await asyncio.sleep(1)
 
             print("All agents have terminated")
@@ -974,76 +1015,4 @@ class Organization(metaclass=Singleton):
             print("setting termination event")
             self.termination_event.set()
             print("[SHUTDOWN FINISHED] Stopped the event processing loop.")
-
     
-    # DECREPATED
-    # @update_yaml_after_async
-    # async def message_staff(self, sender_id: int, receiver_id: str , message: str) -> str:
-    #     """ 
-    #         Adds a message from supervisor to staff to the message center.
-    #         Args:
-    #             sender_id (int): The id of the sender
-    #             receiver_id (str): The id of the receiver
-    #             message (str): The message to send
-
-    #         Returns:
-    #             str: A message indicating success or failure
-    #     """
-    #     # Convert the reciever id string to an int
-    #     try:
-    #         receiver_id = int(receiver_id)
-    #     except ValueError:
-    #         return "You're likely entering the employee name as agent_id, please enter a valid integer agent_id"
-
-    #     receiver = self.find_agent_by_id(receiver_id)
-
-    #     if receiver:
-    #         # Implement the new message center system
-
-    #         self.message_center.add_message(
-    #             sender_id=sender_id,
-    #             receiver_id=receiver_id,
-    #             message=message,
-
-    #         ) # Implement this function
-
-    #         if receiver_id not in self.pending_messages:
-    #             self.pending_messages[receiver_id] = []
-
-    #         self.pending_messages[receiver_id].append((sender_id, message))
-    #         return f"Successfully sent message to employee {receiver.ai_name}\n"
-    #     else:
-    #         return f"Failed to send message to employee with Agent_id: {receiver_id}\n"
-    
-    # DECREPATED
-    # @update_yaml_after_async
-    # async def message_supervisor(self, sender_id: int, message: str) -> str:
-    #     """ 
-    #         Adds a message from supervisor to staff to the message center.
-    #         Finds the supervisor given the ID of the sender. 
-    #         Args:
-    #             sender_id (int): The id of the sender
-    #             receiver_id (str): The id of the receiver
-    #             message (str): The message to send
-
-    #         Returns:
-    #             str: A message indicating success or failure
-    #     """
-      
-    #     # Look up the sender agent using sender_id
-    #     sender = self.agents[sender_id]
-        
-    #     # Check if the sender ageWnt is the founder
-    #     supervisor_id =  await self.get_supervisor_id(sender_id)
-        
-    #     if not sender.founder:
-    #         if supervisor_id is not None:
-    #             if supervisor_id not in self.pending_messages:
-    #                 self.pending_messages[supervisor_id] = []
-
-    #             self.pending_messages[supervisor_id].append((sender_id, message))
-    #             return f"Successfully sent message to your supervisor\n"
-    #         else: 
-    #             return f"Could not find your supervisors id"
-    #     else: 
-    #         return f"You are the founder and therefore don't have a supervisor!\n"

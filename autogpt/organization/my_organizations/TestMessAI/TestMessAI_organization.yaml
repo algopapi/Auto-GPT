@@ -1,0 +1,71 @@
+agent_budgets:
+  1: 46100
+  2: 25859
+  4: 43168
+  5: 28125
+  6: 15325
+  7: 17886
+  8: 10870
+  9: 2960
+  10: 10789
+  11: 1695
+  12: 3942
+  13: 213
+  14: 3048
+  15: 426
+agent_running_costs:
+  1: 1300
+  2: 300
+  4: 200
+  5: 600
+  6: 100
+  7: 100
+  8: 600
+  9: 400
+  10: 200
+  11: 100
+  12: 100
+  13: 100
+  14: 100
+  15: 100
+agent_statuses:
+  1: agent Elon Musk is in loop 12 rolled 3
+  2: agent staff_hired_by_1 is in loop 15 rolled 4
+  4: agent staff_hired_by_1 is in loop 8 rolled 2
+  5: agent staff_hired_by_1 is in loop 9 rolled 2
+  6: agent staff_hired_by_4 is in loop 3 rolled 3
+  7: agent staff_hired_by_5 is in loop 2 rolled 2
+  8: agent staff_hired_by_5 is in loop 8 rolled 2
+  9: agent staff_hired_by_8 is in loop 7 rolled 3
+  10: agent staff_hired_by_2 is in loop 3 rolled 3
+  11: agent staff_hired_by_9 is in loop 3 rolled 1
+  12: agent staff_hired_by_10 is in loop 3 rolled 2
+  13: agent staff_hired_by_8 is in loop 1 rolled 2
+  14: agent staff_hired_by_9 is in loop 1 rolled 2
+  15: agent staff_hired_by_11 is in loop 1 rolled 2
+agent_termination_events: {}
+id_count: 15
+initial_budget: 50000
+name: TestMessAI
+supervisor_to_staff:
+  1:
+    - 2
+    - 4
+    - 5
+  2:
+    - 10
+  4:
+    - 6
+  5:
+    - 7
+    - 8
+  8:
+    - 9
+    - 13
+  9:
+    - 11
+    - 14
+  10:
+    - 12
+  11:
+    - 15
