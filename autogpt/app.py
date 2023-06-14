@@ -3,7 +3,6 @@ import asyncio
 import json
 from typing import Dict, List, Union
 
-from autogpt.agent.agent import Agent
 from autogpt.agent.agent_manager import AgentManager
 from autogpt.commands.command import CommandRegistry, command
 from autogpt.commands.web_requests import scrape_links, scrape_text
@@ -128,9 +127,8 @@ async def execute_command(
     command_registry: CommandRegistry,
     command_name: str,
     arguments: dict[str, str],
-    prompt: PromptGenerator,
-    config: Config,
-    agent: Agent,
+    config,
+    agent,
 ):
     """Execute the command and return the result
 
@@ -178,7 +176,7 @@ async def execute_command(
     "get_text_summary", "Get text summary", '"url": "<url>", "question": "<question>"'
 )
 @validate_url
-def get_text_summary(url: str, question: str, agent: Agent) -> str:
+def get_text_summary(url: str, question: str, agent) -> str:
     """Get the text summary of a webpage
 
     Args:
@@ -196,7 +194,7 @@ def get_text_summary(url: str, question: str, agent: Agent) -> str:
 
 @command("get_hyperlinks", "Get hyperlinks", '"url": "<url>"')
 @validate_url
-def get_hyperlinks(url: str, agent: Agent) -> Union[str, List[str]]:
+def get_hyperlinks(url: str, agent) -> Union[str, List[str]]:
     """Get all hyperlinks on a webpage
 
     Args:

@@ -1,48 +1,36 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-        "thoughts": {
-            "type": "object",
-            "properties": {
-                "text": {
-                    "type": "string",
-                    "description": "thoughts"
-                },
-                "reasoning": {
-                    "type": "string"
-                },
-                "plan": {
-                    "type": "string",
-                    "description": "- short bulleted\n- list that conveys\n- long-term plan"
-                },
-                "criticism": {
-                    "type": "string",
-                    "description": "constructive self-criticism"
-                },
-                "speak": {
-                    "type": "string",
-                    "description": "thoughts summary to say to user"
-                },
-                "status": { 
-                  "type": "string",
-                  "description": "Currently working on X (1 sentence)"
-                }
-            },
-            "required": ["text", "reasoning", "plan", "criticism", "speak", "status"],
-            "additionalProperties": false
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "thoughts": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "thoughts"
         },
-        "command": {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "args": {
-                    "type": "object"
-                }
-            },
-            "required": ["name", "args"],
-            "additionalProperties": false
+        "reasoning": {
+          "type": "string"
+        },
+        "plan": {
+          "type": "string",
+          "description": "- short bulleted\n- list that conveys\n- long-term plan"
+        },
+        "criticism": {
+          "type": "string",
+          "description": "constructive self-criticism"
+        },
+        "speak": {
+          "type": "string",
+          "description": "thoughts summary to say to user"
+        },
+        "status": {
+          "type": "string",
+          "description": "Currently working on X (1 sentence)"
         }
+      },
+      "required": ["text", "reasoning", "plan", "criticism", "speak", "status"],
+      "additionalProperties": false
     },
     "command": {
       "type": "object",

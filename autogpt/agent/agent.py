@@ -75,33 +75,32 @@ class Agent:
         workspace_directory: str,
         organization
     ):
-        cfg = Config()
-        self.ai_config = config
-        self.ai_name = config.ai_name
-        self.ai_id = config.ai_id
-        self.role = config.ai_role
-        self.goals = config.ai_goals
+        self.cfg = Config()
+        self.ai_config = ai_config
+        self.ai_name = ai_config.ai_name
+        self.ai_id = ai_config.ai_id
+        self.role = ai_config.ai_role
+        self.goals = ai_config.ai_goals
 
         self.memory = memory
         self.history = MessageHistory(self)
         self.next_action_count = next_action_count
         self.command_registry = command_registry
-        self.config = config
         self.ai_config = ai_config
         self.system_prompt = system_prompt
         self.triggering_prompt = triggering_prompt
 
-        self.workspace = Workspace(workspace_directory, cfg.restrict_to_workspace)
+        self.workspace = Workspace(workspace_directory, self.cfg.restrict_to_workspace)
         self.created_at = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.cycle_count = 0
         self.log_cycle_handler = LogCycleHandler()
         self.fast_token_limit = OPEN_AI_CHAT_MODELS.get(
-            config.fast_llm_model
+            self.cfg.fast_llm_model
         ).max_tokens
 
-        self.terminated = config.terminated
-        self.loop_count = config.loop_count
-        self.founder = config.founder
+        self.terminated = ai_config.terminated
+        self.loop_count = ai_config.loop_count
+        self.founder = ai_config.founder
 
         self.respone_queue = asyncio.Queue()
         self.organization = organization
@@ -254,11 +253,11 @@ class Agent:
 
     async def update_agent_config(self, **kwargs):
         for key, value in kwargs.items():
-            if hasattr(self.config, key):
-                setattr(self.config, key, value)
+            if hasattr(self.ai_config, key):
+                setattr(self.ai_config, key, value)
             else:
                 print(f"Unknown attribute '{key}' in AgentConfig.")
-        self.config.save()  # Save the updated configuration to the YAML file
+        self.ai_config.save()  # Save the updated configuration to the YAML file
         
 
     async def dice_roll(self):
@@ -313,14 +312,14 @@ class Agent:
                 FULL_MESSAGE_HISTORY_FILE_NAME,
             )
             if (
-                self.config.continuous_mode
-                and self.config.continuous_limit > 0
-                and self.cycle_count > self.config.continuous_limit
+                self.cfg.continuous_mode
+                and self.cfg.continuous_limit > 0
+                and self.cycle_count > self.cfg.continuous_limit
             ):
                 logger.typewriter_log(
                     "Continuous Limit Reached: ",
                     Fore.YELLOW,
-                    f"{self.config.continuous_limit}",
+                    f"{self.cfg.continuous_limit}",
                 )
                 break
 
@@ -346,13 +345,13 @@ class Agent:
 
             # Send message to AI, get response
             # with Spinner("Thinking... ", plain_output=cfg.plain_output):
-            assistant_reply = chat_with_ai(
-                cfg,
+            assistant_reply = await chat_with_ai(
+                self.cfg,
                 self,
                 full_prompt,
                 self.triggering_prompt,
-                cfg.fast_token_limit,
-                cfg.fast_llm_model,
+                self.fast_token_limit,
+                self.cfg.fast_llm_model,
             )
 
             try:
@@ -362,7 +361,7 @@ class Agent:
                 logger.error(f"Exception while validating assistant reply JSON: {e}")
                 assistant_reply_json = {}
 
-            for plugin in self.config.plugins:
+            for plugin in self.cfg.plugins:
                 if not plugin.can_handle_post_planning():
                     continue
                 assistant_reply_json = plugin.post_planning(assistant_reply_json)
@@ -372,11 +371,11 @@ class Agent:
                 # Get command name and arguments
                 try:
                     print_assistant_thoughts(
-                        self.ai_name, assistant_reply_json, self.config.speak_mode
+                        self.ai_name, assistant_reply_json, self.cfg.speak_mode
                     )
                     command_name, arguments = get_command(assistant_reply_json)
                     status = get_status(assistant_reply_json)
-                    if cfg.speak_mode:
+                    if self.cfg.speak_mode:
                         say_text(f"I want to execute {command_name}")
 
                     arguments = self._resolve_pathlike_command_args(arguments)
@@ -409,7 +408,7 @@ class Agent:
                 logger.error("Error: \n", str(e))
             
 
-            if not cfg.continuous_mode and self.next_action_count == 0:
+            if not self.cfg.continuous_mode and self.next_action_count == 0:
                 # ### GET USER AUTHORIZATION TO EXECUTE COMMAND ###
                 # Get key press: Prompt the user to press enter to continue or escape
                 # to exit
@@ -420,13 +419,13 @@ class Agent:
                     f"{self.ai_name}..."
                 )
                 while True:
-                    if self.config.chat_messages_enabled:
+                    if self.cfg.chat_messages_enabled:
                         console_input = clean_input("Waiting for your response...")
                     else:
                         console_input = clean_input(
                             Fore.MAGENTA + "Input:" + Style.RESET_ALL
                         )
-                    if console_input.lower().strip() == self.config.authorise_key:
+                    if console_input.lower().strip() == self.cfg.authorise_key:
                         user_input = "GENERATE NEXT COMMAND JSON"
                         break
                     elif console_input.lower().strip() == "s":
@@ -437,7 +436,7 @@ class Agent:
                         )
                         thoughts = assistant_reply_json.get("thoughts", {})
                         self_feedback_resp = self.get_self_feedback(
-                            thoughts, self.config.fast_llm_model
+                            thoughts, self.cfg.fast_llm_model
                         )
                         logger.typewriter_log(
                             f"SELF FEEDBACK: {self_feedback_resp}",
@@ -451,7 +450,7 @@ class Agent:
                         logger.warn("Invalid input format.")
                         continue
                     elif console_input.lower().startswith(
-                        f"{self.config.authorise_key} -"
+                        f"{self.cfg.authorise_key} -"
                     ):
                         try:
                             self.next_action_count = abs(
@@ -465,7 +464,7 @@ class Agent:
                             )
                             continue
                         break
-                    elif console_input.lower() == self.config.exit_key:
+                    elif console_input.lower() == self.cfg.exit_key:
                         user_input = "EXIT"
                         break
                     else:
@@ -505,7 +504,7 @@ class Agent:
             elif command_name == "self_feedback":
                 result = f"Self feedback: {user_input}"
             else:
-                for plugin in self.config.plugins:
+                for plugin in self.cfg.plugins:
                     if not plugin.can_handle_pre_command():
                         continue
                     command_name, arguments = plugin.pre_command(
@@ -515,23 +514,22 @@ class Agent:
                     self.command_registry,
                     command_name,
                     arguments,
-                    self.config.prompt_generator,
-                    config=cfg,
+                    config=self.cfg,
                     agent=self,
                 )
                 result = f"Command {command_name} returned: " f"{command_result}"
 
                 result_tlength = count_string_tokens(
-                    str(command_result), self.config.fast_llm_model
+                    str(command_result), self.cfg.fast_llm_model
                 )
                 memory_tlength = count_string_tokens(
-                    str(self.history.summary_message()), self.config.fast_llm_model
+                    str(self.history.summary_message()), self.cfg.fast_llm_model
                 )
                 if result_tlength + memory_tlength + 600 > self.fast_token_limit:
                     result = f"Failure: command {command_name} returned too much output. \
                         Do not execute this command again with the same arguments."
 
-                for plugin in self.config.plugins:
+                for plugin in self.cfg.plugins:
                     if not plugin.can_handle_post_command():
                         continue
                     result = plugin.post_command(command_name, result)

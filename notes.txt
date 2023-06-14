@@ -2,7 +2,7 @@ git push origin v4
 
 TODO: 
 - Fix the goolge search API
-- Impelment the new messaging system
+- Fix the memory (Memory is not being saved)
 - Do some preliminary stability tests
 
 High level Thoughts/ Possible improvements
@@ -16,3 +16,8 @@ VISION:
 
 Thoughts on new messaging system:
 - An agent should be able to recieve a message, do some thinky think, and then respond.(coherently)
+
+
+completed
+- Merge to 14-6-2023
+- Impelmented New messaging system

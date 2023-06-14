@@ -85,7 +85,7 @@ def create_text_completion(
 
 
 # Overly simple abstraction until we create something better
-def create_chat_completion(
+async def create_chat_completion(
     prompt: ChatSequence,
     model: Optional[str] = None,
     temperature: Optional[float] = None,

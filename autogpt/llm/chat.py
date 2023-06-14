@@ -15,7 +15,7 @@ from autogpt.logs import logger
 
 
 # TODO: Change debug from hardcode to argument
-def chat_with_ai(
+async def chat_with_ai(
     config: Config,
     agent: Agent,
     system_prompt: str,
@@ -190,7 +190,7 @@ def chat_with_ai(
 
     # TODO: use a model defined elsewhere, so that model can contain
     # temperature and other settings we care about
-    assistant_reply = create_chat_completion(
+    assistant_reply = await create_chat_completion(
         prompt=message_sequence,
         max_tokens=tokens_remaining,
     )
