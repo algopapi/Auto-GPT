@@ -303,8 +303,8 @@ class Organization(metaclass=Singleton):
     async def start_agent_loop(self, agent):
         # Register agent in running agents (handy for cleanup)
         await self.register_agent(agent)
-        await agent.start_interaction_loop(self.termination_event)
-        #await agent.start_test_loop(self.termination_event)
+        # await agent.start_interaction_loop(self.termination_event)
+        await agent.start_test_loop(self.termination_event)
 
     
     async def start_event_processing_loop(self):
@@ -445,6 +445,7 @@ class Organization(metaclass=Singleton):
         agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
         memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
                 # Create the commands that should be passed to the staffmember
+        print("initialized memory passed to new agent = ", memory)
 
         workspace_directory = agent_cfg.file_path # Get the workspace from the agent config
         system_prompt = agent_cfg.construct_full_prompt() # Construct the system prompt
@@ -466,6 +467,8 @@ class Organization(metaclass=Singleton):
 
     def add_agent(self, agent_cfg, command_registry):
         agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
+
+        print("agent mem path", agent_mem_path)
         memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
                 # Create the commands that should be passed to the staffmember
 

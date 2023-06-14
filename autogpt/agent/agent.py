@@ -104,8 +104,7 @@ class Agent:
 
         self.respone_queue = asyncio.Queue()
         self.organization = organization
-        self.memory = memory
-
+  
 
     async def start_test_loop(self, termination_event):
         await self.send_event("update_agent_status", self.ai_id, "starting interaction loop")
@@ -149,6 +148,7 @@ class Agent:
 
             # Update the agent status
             await self.send_event("update_agent_status", self.ai_id, status)
+            result = None
 
             if dice_result == 1:
                 name = f"staff_hired_by_{self.ai_id}"
@@ -162,7 +162,7 @@ class Agent:
                 staff_budget = my_budget * random.uniform(0, 1)
 
                 event_id = await self.send_event("hire_staff", name, role, goals, staff_budget, self.ai_id)
-                response = await self.organization.get_event_result(event_id)
+                result = await self.organization.get_event_result(event_id)
                 
                 await asyncio.sleep(2)
 
@@ -185,14 +185,14 @@ class Agent:
                 random_staff_member = random.choice(staff_members)
                 test_message = f"test message from {self.ai_id}:{self.ai_name} to {random_staff_member.ai_id}:{random_staff_member.ai_name} in loop {self.loop_count}"
                 event_id = await self.send_event("message_agent", self.ai_id, random_staff_member.ai_id, test_message)
-                response = await self.organization.get_event_result(event_id)
+                result = await self.organization.get_event_result(event_id)
                 await asyncio.sleep(10)
 
             elif dice_result == 3:
                 """ 
                     This is a random action that would usually be something like using a tool or some other non organization related action.
                 """
-                #print(f"agent {self.ai_name} did a random action in loop {self.loop_count}")
+                result = "random action"
                 await asyncio.sleep(5)
 
             elif dice_result == 4:
@@ -205,8 +205,7 @@ class Agent:
                     continue
                 random_staff_member = random.choice(staff_members)
                 event_id = await self.send_event("fire_staff", random_staff_member.ai_id)
-                response = await self.organization.get_event_result(event_id)
-                #print(f"response: {response}")
+                result = await self.organization.get_event_result(event_id)
                 await asyncio.sleep(3)
 
             elif dice_result == 5:
@@ -228,7 +227,7 @@ class Agent:
                 response = f"sending response from agent {self.ai_id}:{self.ai_name} in loop {self.loop_count}"
                 # Respond to the message
                 event_id = await self.send_event("respond_to_message", str(random_message_id), response, self.ai_id)
-                res = await self.organization.get_event_result(event_id)
+                result = await self.organization.get_event_result(event_id)
                 await asyncio.sleep(2)
 
             elif dice_result == 6:
@@ -243,8 +242,11 @@ class Agent:
 
                 # Get the conversation history between you and the random staff member
                 event_id = await self.send_event("get_conversation_history", self.ai_id, random_staff_member.ai_id)
-                response = await self.organization.get_event_result(event_id)
+                result = await self.organization.get_event_result(event_id)
                 print(f"converstation: {response}")
+
+            if result is not None:
+                self.history.add("system", result, "action_result")
 
 
         print(f"\033[31m\n ******************** Agent {self.ai_id}: {self.ai_name} loop terminated ******************\033[0m")

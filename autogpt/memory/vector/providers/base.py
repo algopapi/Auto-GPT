@@ -12,7 +12,7 @@ from .. import MemoryItem, MemoryItemRelevance
 from ..utils import Embedding, get_embedding
 
 
-class VectorMemoryProvider(MutableSet[MemoryItem], AbstractSingleton):
+class VectorMemoryProvider(MutableSet[MemoryItem]):
     @abc.abstractmethod
     def __init__(self, config: Config):
         pass

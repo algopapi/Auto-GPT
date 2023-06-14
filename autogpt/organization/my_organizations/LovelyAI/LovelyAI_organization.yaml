@@ -1,7 +1,0 @@
-agent_budgets: {}
-agent_running_costs: {}
-agent_statuses: {}
-id_count: 0
-initial_budget: 500000
-name: LovelyAI
-supervisor_to_staff: {}

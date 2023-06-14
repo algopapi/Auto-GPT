@@ -115,6 +115,7 @@ def get_memory(cfg: Config, agent_mem_path=None, init=False) -> VectorMemory:
             )
 
     if memory is None:
+        print("Memory is none")
         memory = JSONFileMemory(cfg)
 
     return memory
