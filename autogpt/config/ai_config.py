@@ -76,7 +76,7 @@ class AIConfig:
         self.init_memory = init_memory
         self.file_path = file_path
         
-        print("agent file path: ", self.file_path)
+        #print("agent file path: ", self.file_path)
         self.agent_yaml_path = os.path.join(file_path, "agent.yaml")
         self.save()
 
@@ -116,8 +116,8 @@ class AIConfig:
             )
 
     def save(self):
-        print("agent dir path", self.file_path)
-        print("agent yaml_path", self.agent_yaml_path)
+        #print("agent dir path", self.file_path)
+        #print("agent yaml_path", self.agent_yaml_path)
         if not os.path.exists(Path(self.file_path)):
             os.makedirs(Path(self.file_path), exist_ok=True)
 

@@ -131,7 +131,10 @@ class Agent:
 
             inbox_prompt_event_id = await self.send_event("get_inbox", self.ai_id)
             inbox_prompt = await self.organization.get_event_result(inbox_prompt_event_id)
-            print(f"Inbox prompt = \n {inbox_prompt} \n")
+            
+            print("\033[92m##### START OF INBOX PROMPT OF AGENT {self.ai_name} #####\033[0m")
+            print(f"\033[92mInbox prompt = \n {inbox_prompt} \n\033[0m")
+            print("\033[92m##### END OF INBOX PROMPT #####\033[0m")
             
             # Build the status udpate of the agent to add to prompt
             status_event_id = await self.send_event("build_status_update", self.ai_id)
@@ -219,11 +222,9 @@ class Agent:
                 # Pick a random message id from the list and create a rtandom response
                 random_message_id = random.choice(message_id_list)
                 response = f"sending response from agent {self.ai_id}:{self.ai_name} in loop {self.loop_count}"
-                print("GENERATED RESPONSE:", response, "\n")
                 # Respond to the message
                 event_id = await self.send_event("respond_to_message", str(random_message_id), response, self.ai_id)
                 res = await self.organization.get_event_result(event_id)
-                print(f"respond_to_message_response: {res}")
                 await asyncio.sleep(2)
 
             elif dice_result == 6:
@@ -317,7 +318,6 @@ class Agent:
                 )
                 break
 
-            # await self.udpate_agent_config(loop_count=self.loop_count)
             event_id = await self.send_event("calculate_operating_cost_of_agent", self.ai_id)
             agent_operating_costs = await self.organization.get_event_result(event_id)
             
@@ -325,8 +325,8 @@ class Agent:
             await self.send_event("update_agent_budget", self.ai_id, agent_operating_costs)
             
             # Receive message and build status update
-            message_event_id = await self.send_event("receive_message", self.ai_id)
-            message = await self.organization.get_event_result(message_event_id)
+            inbox_event_id = await self.send_event("get_inbox", self.ai_id)
+            inbox = await self.organization.get_event_result(inbox_event_id)
 
             # Build the status udpate of the agent to add to prompt
             status_event_id = await self.send_event("build_status_update", self.ai_id)
@@ -335,15 +335,15 @@ class Agent:
             # Update the current system prompt
             self.system_prompt = self.ai_config.construct_full_prompt(organization=self.organization)
 
-            full_prompt = self.system_prompt + "\n" + org_status + "\n" + message
-            print("full prompt", full_prompt)
+            full_prompt = self.system_prompt + "\n" + org_status + "\n" + inbox
+            print("full system prompt", full_prompt)
 
             # Send message to AI, get response
             # with Spinner("Thinking... ", plain_output=cfg.plain_output):
             assistant_reply = chat_with_ai(
                 cfg,
                 self,
-                self.system_prompt,
+                full_prompt,
                 self.triggering_prompt,
                 cfg.fast_token_limit,
                 cfg.fast_llm_model,

@@ -1,0 +1,26 @@
+max_id: 2
+messages:
+  1:
+    from_supervisor: true
+    message: Welcome to the team, John Doe. Please let me know if you have any questions.
+    message_id: 1
+    read: false
+    receiver_id: 2
+    responded: true
+    response_id: 2
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-14 16:20:21.068638
+  2:
+    from_supervisor: true
+    message:
+      Thank you for the warm welcome, supervisor. I am ready to start working
+      on tasks and will reach out if I have any questions.
+    message_id: 2
+    read: false
+    receiver_id: 1
+    responded: false
+    response_id: null
+    response_to_id: 1
+    sender_id: 2
+    timestamp: 2023-06-14 16:16:51.178000

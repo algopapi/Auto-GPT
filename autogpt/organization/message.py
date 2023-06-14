@@ -1,7 +1,7 @@
 import glob
 import os
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import aiofiles
 import yaml
@@ -94,9 +94,9 @@ class Message:
             - Other message details
         """
         if self.from_supervisor:
-            message_prompt = f"Message ID {self.message_id}: Incoming message from supervisor (ID: {self.sender_id}): {self.message}\n"
+            message_prompt = f"Message ID {self.message_id}: From supervisor (ID: {self.sender_id}): {self.message}\n"
         else:
-            message_prompt= f"Message ID {self.message_id}: Incoming message from staff member (ID: {self.sender_id}): {self.message}\n"
+            message_prompt= f"Message ID {self.message_id}: From staff member (ID: {self.sender_id}): {self.message}\n"
         return message_prompt
 
 
@@ -147,10 +147,6 @@ class MessageCenter(metaclass=Singleton):
             self.messages = {message_id: Message(**message_data) for message_id, message_data in data.get('messages', {}).items()}
 
 
-
-
-
-
     async def store_message(self, message: Message) -> None:
         self.messages[message.message_id] = message
 
@@ -194,7 +190,8 @@ class MessageCenter(metaclass=Singleton):
         """ 
             Filter unresponded messages from a list of messages
         """
-        return [message for message in messages if not message.responded]
+        unresponded = [message for message in messages if not message.responded]
+        return unresponded
 
 
     @staticmethod
@@ -338,6 +335,51 @@ class MessageCenter(metaclass=Singleton):
         inbox_message_ids = [msg.message_id for msg in agent_messages]
 
         return inbox_message_ids
+    
+
+    async def get_inbox_messages(self, agent_id: int) -> Tuple[List[Message], List[Message]]:
+        """
+            Returns two lists. 
+
+            1. List of unresponded messages (from supervisor on top - then older first)
+            2. List of unresponded responses (from supervisor on top - then older first)
+
+            Args:
+                agent_id: The agent for which the inbox message list is to be constructed
+
+            Returns:
+                2 Lists of messages, empty list if no messages
+        """
+        # Get all unresponded messages
+        unresponded_messages = self.get_unresponded_messages_by_receiver(agent_id)
+
+
+        supervisor_messages, supervisor_responses, agent_messages, agent_responses = [], [], [], []
+
+        for msg in unresponded_messages:
+            if msg.from_supervisor:
+                if msg.response_to_id is not None:
+                    supervisor_responses.append(msg)
+                else:
+                    supervisor_messages.append(msg)
+            else:
+                if msg.response_to_id is not None:
+                    agent_responses.append(msg)
+                else:
+                    agent_messages.append(msg)
+
+
+        # Sort the messages and responses by timestamp (older first)
+        supervisor_messages.sort(key=lambda msg: msg.timestamp)
+        supervisor_responses.sort(key=lambda msg: msg.timestamp)
+        agent_messages.sort(key=lambda msg: msg.timestamp)
+        agent_responses.sort(key=lambda msg: msg.timestamp)
+
+        # Merge supervisor and agent messages (supervisor first)
+        supervisor_messages.extend(agent_messages)
+        supervisor_responses.extend(agent_responses)
+
+        return supervisor_messages, supervisor_responses
 
 
     async def get_inbox(self, agent_id: int) -> str:
@@ -348,35 +390,27 @@ class MessageCenter(metaclass=Singleton):
             
             Returns:
                 A string representation of the inbox
-        """        
-        # Get all unresponded messages
-        unresponded_messages = self.get_unresponded_messages_by_receiver(agent_id)
+        """ 
 
-        # Get message from supervisor first
-        messages_from_supervisor = self.filter_from_supervisor(unresponded_messages)
+        new_messages, new_responses = await self.get_inbox_messages(agent_id)
 
-        # delete messages from supervisor from unresponded messages
-        unresponded_messages = [msg for msg in unresponded_messages if msg not in messages_from_supervisor]
+        prompt = f"\nYOUR INBOX:\n"
+        prompt += f"UNRESPONDED MESSAGES - (NEED RESPONDING)\n"
 
-        # Sort unresponded_messages by timestamp (newest first)
-        unresponded_messages.sort(key=lambda msg: msg.timestamp, reverse=True)
-
-        prompt = f"INBOX:\n"
-        prompt += f"NEW INCOMING MESSAGES - high priority first\n"
-
-        if len(messages_from_supervisor) > 0:
-            for message in messages_from_supervisor:
+        if len(new_messages) > 0:
+            for message in new_messages:
                 prompt += message.construct_message_prompt()
 
-        prompt += f"\n\nINCOMING RESPONSES - high priority first\n"
+        # Add the messages that are a response to a message sent by the agent
+        prompt += f"\nRESPONSES - (NEED RESPONDING)\n"
 
-        if len(unresponded_messages) > 0:
-            for message in unresponded_messages:
+        if len(new_responses) > 0:
+            for message in new_responses:
                 prompt += message.construct_message_prompt()
 
-        if len(messages_from_supervisor) + len(unresponded_messages) > 0:
+        if len(new_messages) + len(new_responses) > 0:
             # there are messages that need possible responding and we should let the agent now how to
-            prompt += "\n\nUse the `respond_to_message` command to respond to an incoming message'\n"
+            prompt += "\nUse the `respond_to_message` command to respond to messages in inbox'\n"
 
         return prompt
     

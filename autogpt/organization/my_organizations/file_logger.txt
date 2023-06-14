@@ -8,3 +8,4 @@ write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/Cl
 write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/1_John Doe_workspace/goals.txt #ef25769190e0e6668447ad4caf628d1e
 write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/2_Jane Doe_workspace/improvement.txt #54d49741eb2f85aea5b8b6ff5fa8c2b7
 write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/ClosedAI/agents/0_Eddie Murphy_workspace/employee_performance.txt #9b7ab823276f8423c771d2f112cf2ae7
+write: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/CodeAI/agents/2_Employee 1_workspace/project_plan.txt #b36ec85d84f90107987699a1f21817d8

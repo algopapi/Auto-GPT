@@ -111,7 +111,6 @@ async def async_update_yaml(obj, yaml_path):
 
 def update_yaml_after_async(func):
     async def wrapper(*args, **kwargs):
-        print("Updating YAML file after function call.")
         obj = args[0]
         async with obj.action_lock:
             res = await func(*args, **kwargs)
@@ -119,7 +118,6 @@ def update_yaml_after_async(func):
 
             async with obj.file_lock:  # Use the file lock here
                 await async_update_yaml(obj, file_path)
-        print(" YAML file updated.")
         return res
     return wrapper
 
@@ -155,7 +153,6 @@ class Organization(metaclass=Singleton):
         self.termination_event = asyncio.Event()
 
         # Some locks
-        #self.org_lock = asyncio.Lock()  # Create a lock for the organization
         self.action_lock = asyncio.Lock()
         self.file_lock = asyncio.Lock()
         self.org_lock = asyncio.Lock()
@@ -219,7 +216,6 @@ class Organization(metaclass=Singleton):
         async with self.org_lock:
             # Do a final check so that fired agents can sneak in an action
             print(f"\n Agent {agent_id} is about to perform an action {event_type}.")
-            
             if agent_id in self.agents and self.agents[agent_id].terminated:
                 return f"Agent {self.agents[agent_id].ai_name} is terminated and cannot perform actions."
 
@@ -265,26 +261,26 @@ class Organization(metaclass=Singleton):
                 # Perform the 'calculate_operating_cost_of_agent' action and return the result
                 ai_id = args[0]
                 res =  await self.calculate_operating_cost_of_agent(ai_id)
-                print(f" Agent {ai_id} response to calculating operating cost: {res}")
+                #print(f" Agent {ai_id} response to calculating operating cost: {res}")
                 return res
             
             elif event_type == 'update_agent_running_cost':
                 # Perform the 'calculate_operating_cost_of_agent' action and return the result
                 ai_id, running_cost= args
                 res = await self.update_agent_running_cost(ai_id, running_cost)
-                print(f" Agent {ai_id} response to updating running cost: {res}")
+                #print(f" Agent {ai_id} response to updating running cost: {res}")
                 return res
             
             elif event_type == 'update_agent_budget':
                 ai_id, running_cost = args
                 res = await self.update_agent_budget(ai_id, running_cost)
-                print(f" Agent {ai_id} response to updating budget: {res}")
+                #print(f" Agent {ai_id} response to updating budget: {res}")
                 return res
 
             elif event_type == 'update_agent_status':
                 ai_id, status = args
                 res = await self.update_agent_status(ai_id, status)
-                print(f" Agent {ai_id} response to updating status: {res}")
+                #print(f" Agent {ai_id} response to updating status: {res}")
                 return res
             
             elif event_type == 'build_status_update':
@@ -307,8 +303,8 @@ class Organization(metaclass=Singleton):
     async def start_agent_loop(self, agent):
         # Register agent in running agents (handy for cleanup)
         await self.register_agent(agent)
-        # await agent.start_interaction_loop(self.termination_event)
-        await agent.start_test_loop(self.termination_event)
+        await agent.start_interaction_loop(self.termination_event)
+        #await agent.start_test_loop(self.termination_event)
 
     
     async def start_event_processing_loop(self):
@@ -353,7 +349,13 @@ class Organization(metaclass=Singleton):
     
 
     @update_yaml_after_async
-    async def fire_staff(self, agent_id):
+    async def fire_staff(self, a_id: str) -> str:
+        # Convert agent_id str to int
+        try:
+            agent_id = int(a_id)
+        except ValueError:
+            raise ValueError(f"Agent ID value '{a_id}' is not a valid Integer.")
+
         # Check if the agent ID exists in the agents dictionary
         if agent_id in self.agents:
             agent = self.agents[agent_id]
@@ -405,7 +407,7 @@ class Organization(metaclass=Singleton):
         # Set the supervisor
         self.supervisor_to_staff[supervisor_id].append(new_employee_id)
 
-        # Initialize the new agent's status 
+        # Initialize the new agent's status
         self.agent_statuses[new_employee_id] = f"agent is on its way on joining the company"
 
         # Initialize agent budget
@@ -449,7 +451,7 @@ class Organization(metaclass=Singleton):
 
         new_agent = Agent(
             memory = memory,
-            next_action_count=0,
+            next_action_count=100,
             command_registry=command_registry,
             triggering_prompt=DEFAULT_TRIGGERING_PROMPT,
             config=agent_cfg,
@@ -472,7 +474,7 @@ class Organization(metaclass=Singleton):
 
         new_agent = Agent(
             memory = memory,
-            next_action_count=0,
+            next_action_count=100,
             command_registry=command_registry,
             triggering_prompt=DEFAULT_TRIGGERING_PROMPT,
             config=agent_cfg,
@@ -493,14 +495,6 @@ class Organization(metaclass=Singleton):
         initial_budget = 0,
         founder=False,
     ):
-        # if self.free_agent_ids:
-        #     # Allocate from freed Ids if available
-        #     agent_id = self.free_agent_ids.pop(0)
-        #     print(" Agent id Popped = ", agent_id)
-        # else:
-        #     agent_id = len(self.agents)
-        #     print(" agent id Assigned = ", agent_id)
-
         # generate a new agent_id
         agent_id = self.get_free_agent_id()
 
@@ -541,13 +535,6 @@ class Organization(metaclass=Singleton):
         initial_budget = 0,
         founder=False,
     ):
-        # if self.free_agent_ids:
-        #     # Allocate from freed Ids if available
-        #     agent_id = self.free_agent_ids.pop(0)
-        #     print(" Agent id Popped = ", agent_id)
-        # else:
-        #     agent_id = len(self.agents)
-        #     print(" agent id Assigned = ", agent_id)
 
         agent_id = self.get_free_agent_id()
 
@@ -674,13 +661,11 @@ class Organization(metaclass=Singleton):
                 print ("error:", e)
                 return f"You're likely entering the message id as a string, please enter a valid integer message_id."
             
-
             response = await self.message_center.respond_to_message(
                 message_id=message_id,
                 sender_id=agent_id,
                 response=response,
             )
-
             return response
 
 
@@ -725,22 +710,23 @@ class Organization(metaclass=Singleton):
 
 
     async def build_status_update(self, agent_id):
-        staff_info = f"Your Staff Status:\n"
+        status = f"\nYOUR STAFF:\n"
         
         if not await self.has_staff(agent_id):
-            staff_info += f"Agent {agent_id} currently has no staff in service\n"
+            status += f"Agent {agent_id} currently has no staff in service\n"
         else:
-            staff_info += self.get_employee_hierarchy(agent_id, 0)
+            status += self.get_employee_hierarchy(agent_id, 0)
     
         # Build organization info context for agent
         running_costs = await self.calculate_operating_cost_of_agent(agent_id)
         budget = self.agent_budgets[agent_id]
         runaway_time = self.agent_budgets[agent_id] / running_costs
-        staff_info += f"\n\n Your current budget is ${budget}\n"
-        staff_info += f"Your current running costs are ${running_costs} per step\n"
-        staff_info += f"With your current running costs you will run out in {runaway_time} steps.\n"
-        staff_info += f"A simple task will typically take 15 steps."
-        return staff_info
+        status += f"\nYOUR BUDGET:\n"
+        status += f"Your current budget is ${budget}\n"
+        status += f"Your current running costs are ${running_costs} per step\n"
+        status += f"With your current running costs you will run out in {runaway_time} steps.\n"
+        status += f"A simple task will typically take 15 steps."
+        return status
 
         
     def get_pending_messages(self, agent_id):

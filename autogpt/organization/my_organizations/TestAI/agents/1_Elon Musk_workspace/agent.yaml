@@ -1,0 +1,14 @@
+ai_goals:
+- Hire a staff member
+- 'Message him '
+- Fire him
+ai_id: 1
+ai_name: Elon Musk
+ai_role: Hire a staff member, have a back and forth, fire him
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/TestAI/agents/1_Elon
+  Musk_workspace
+founder: true
+init_memory: false
+loop_count: 0
+terminated: false

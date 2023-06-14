@@ -30,6 +30,8 @@ async def message_agent(receiver_id: str, message: str, config: Config, agent: A
         Returns:
             str: Send confirmation or error
     """
+    print("here")
+    print("agent")
     event_id = await agent.send_event("message_agent", agent.ai_id, receiver_id, message)
     response = await agent.organization.get_event_result(event_id)
     return response
@@ -57,7 +59,7 @@ async def get_conversation_history(agent_id: str, config: Config, agent: Agent) 
 @command(
         "respond_to_message",
         "Respond to a message from an agent in your inbox",
-        '"message_id" : "<message_id of message you want to respond to>"',
+        '"message_id" : "<message_id of message you want to respond to>", "response" : "<response to the message>"',
 )
 async def respond_to_message(message_id: str, response: str, config: Config, agent: Agent) -> str:
     """
@@ -117,6 +119,7 @@ async def fire_staff(agent_id: str, config: Config, agent: Agent) -> str:
     event_id = await agent.send_event("fire_staff", agent_id)
     response = await agent.organization.get_event_result(event_id)
     return response
+
 
 
 @command(

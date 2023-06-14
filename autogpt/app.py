@@ -123,7 +123,7 @@ def map_command_synonyms(command_name: str):
     return command_name
 
 
-ASYNC_ORGANIZATIONS = {"hire_staff", "fire_staff", "message_supervisor", "message_staff"}
+ASYNC_ORGANIZATIONS = {"hire_staff", "fire_staff", "message_agent", "get_conversation_history", "respond_to_message"}
 
 async def execute_command(
     command_registry: CommandRegistry,

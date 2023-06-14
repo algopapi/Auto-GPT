@@ -98,7 +98,7 @@ def create_new_org(should_speak=False):
             "Grow Twitter Account",
             "Develop and manage multiple businesses autonomously",
         ]
-    initial_budget = 50000
+    initial_budget = 500000
     new_organization = Organization.create(org_name, initial_budget)
     new_organization.create_agent(
         name=ai_name, role=ai_role, goals=ai_goals, founder=True, initial_budget=initial_budget
