@@ -3,12 +3,11 @@ import asyncio
 import json
 from typing import Dict, List, Union
 
+from autogpt.agent.agent import Agent
 from autogpt.agent.agent_manager import AgentManager
 from autogpt.commands.command import CommandRegistry, command
 from autogpt.commands.web_requests import scrape_links, scrape_text
-from autogpt.config import Config
 from autogpt.processing.text import summarize_text
-from autogpt.prompts.generator import PromptGenerator
 from autogpt.speech import say_text
 from autogpt.url_utils.validators import validate_url
 
@@ -128,10 +127,10 @@ ASYNC_ORGANIZATIONS = {"hire_staff", "fire_staff", "message_agent", "get_convers
 async def execute_command(
     command_registry: CommandRegistry,
     command_name: str,
-    arguments,
+    arguments: dict[str, str],
     prompt: PromptGenerator,
     config: Config,
-    agent,
+    agent: Agent,
 ):
     """Execute the command and return the result
 
@@ -160,7 +159,7 @@ async def execute_command(
         # TODO: Change these to take in a file rather than pasted code, if
         # non-file is given, return instructions "Input should be a python
         # filepath, write your code to file and try again
-        for command in prompt.commands:
+        for command in agent.prompt.commands:
             if (
                 command_name == command["label"].lower()
                 or command_name == command["name"].lower()
@@ -179,7 +178,7 @@ async def execute_command(
     "get_text_summary", "Get text summary", '"url": "<url>", "question": "<question>"'
 )
 @validate_url
-def get_text_summary(url: str, question: str, config: Config) -> str:
+def get_text_summary(url: str, question: str, agent: Agent) -> str:
     """Get the text summary of a webpage
 
     Args:
@@ -189,7 +188,7 @@ def get_text_summary(url: str, question: str, config: Config) -> str:
     Returns:
         str: The summary of the text
     """
-    text = scrape_text(url)
+    text = scrape_text(url, agent)
     summary, _ = summarize_text(text, question=question)
 
     return f""" "Result" : {summary}"""
@@ -197,7 +196,7 @@ def get_text_summary(url: str, question: str, config: Config) -> str:
 
 @command("get_hyperlinks", "Get hyperlinks", '"url": "<url>"')
 @validate_url
-def get_hyperlinks(url: str, config: Config) -> Union[str, List[str]]:
+def get_hyperlinks(url: str, agent: Agent) -> Union[str, List[str]]:
     """Get all hyperlinks on a webpage
 
     Args:
@@ -206,7 +205,7 @@ def get_hyperlinks(url: str, config: Config) -> Union[str, List[str]]:
     Returns:
         str or list: The hyperlinks on the page
     """
-    return scrape_links(url, config)
+    return scrape_links(url, agent)
 
 
 # @command(

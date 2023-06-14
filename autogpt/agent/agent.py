@@ -1,4 +1,5 @@
 import asyncio
+import json
 import random
 import signal
 import string
@@ -12,10 +13,10 @@ from autogpt.app import execute_command, get_command, get_status
 from autogpt.commands.command import CommandRegistry
 from autogpt.config import Config
 from autogpt.config.ai_config import AIConfig
-from autogpt.json_utils.json_fix_llm import fix_json_using_multiple_techniques
-from autogpt.json_utils.utilities import LLM_DEFAULT_RESPONSE_FORMAT, validate_json
+from autogpt.json_utils.utilities import extract_json_from_response, validate_json
 from autogpt.llm.base import ChatSequence
 from autogpt.llm.chat import chat_with_ai, create_chat_completion
+from autogpt.llm.providers.openai import OPEN_AI_CHAT_MODELS
 from autogpt.llm.utils import count_string_tokens
 from autogpt.log_cycle.log_cycle import (
     FULL_MESSAGE_HISTORY_FILE_NAME,
@@ -49,7 +50,7 @@ class Agent:
 
         triggering_prompt: The last sentence the AI will see before answering.
             For Auto-GPT, this prompt is:
-            Determine which next command to use, and respond using the format specified
+            Determine exactly one command to use, and respond using the format specified
               above:
             The triggering prompt is not part of the system prompt because between the
               system prompt and the triggering
@@ -68,7 +69,7 @@ class Agent:
         memory: VectorMemory,
         next_action_count: int,
         command_registry: CommandRegistry,
-        config: AIConfig,
+        ai_config: AIConfig,
         system_prompt: str,
         triggering_prompt: str,
         workspace_directory: str,
@@ -86,6 +87,7 @@ class Agent:
         self.next_action_count = next_action_count
         self.command_registry = command_registry
         self.config = config
+        self.ai_config = ai_config
         self.system_prompt = system_prompt
         self.triggering_prompt = triggering_prompt
 
@@ -93,6 +95,9 @@ class Agent:
         self.created_at = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.cycle_count = 0
         self.log_cycle_handler = LogCycleHandler()
+        self.fast_token_limit = OPEN_AI_CHAT_MODELS.get(
+            config.fast_llm_model
+        ).max_tokens
 
         self.terminated = config.terminated
         self.loop_count = config.loop_count
@@ -275,7 +280,6 @@ class Agent:
 
     async def start_interaction_loop(self, termination_event):
         # Interaction Loop
-        cfg = Config()
         self.cycle_count = 0
         command_name = None
         arguments = None
@@ -302,19 +306,21 @@ class Agent:
             self.cycle_count += 1
             self.log_cycle_handler.log_count_within_cycle = 0
             self.log_cycle_handler.log_cycle(
-                self.config.ai_name,
+                self.ai_config.ai_name,
                 self.created_at,
                 self.cycle_count,
                 [m.raw() for m in self.history],
                 FULL_MESSAGE_HISTORY_FILE_NAME,
             )
             if (
-                cfg.continuous_mode
-                and cfg.continuous_limit > 0
-                and self.cycle_count > cfg.continuous_limit
+                self.config.continuous_mode
+                and self.config.continuous_limit > 0
+                and self.cycle_count > self.config.continuous_limit
             ):
                 logger.typewriter_log(
-                    "Continuous Limit Reached: ", Fore.YELLOW, f"{cfg.continuous_limit}"
+                    "Continuous Limit Reached: ",
+                    Fore.YELLOW,
+                    f"{self.config.continuous_limit}",
                 )
                 break
 
@@ -349,19 +355,24 @@ class Agent:
                 cfg.fast_llm_model,
             )
 
-            assistant_reply_json = fix_json_using_multiple_techniques(assistant_reply)
-            for plugin in cfg.plugins:
+            try:
+                assistant_reply_json = extract_json_from_response(assistant_reply)
+                validate_json(assistant_reply_json)
+            except json.JSONDecodeError as e:
+                logger.error(f"Exception while validating assistant reply JSON: {e}")
+                assistant_reply_json = {}
+
+            for plugin in self.config.plugins:
                 if not plugin.can_handle_post_planning():
                     continue
                 assistant_reply_json = plugin.post_planning(assistant_reply_json)
 
             # Print Assistant thoughts
             if assistant_reply_json != {}:
-                validate_json(assistant_reply_json, LLM_DEFAULT_RESPONSE_FORMAT)
                 # Get command name and arguments
                 try:
                     print_assistant_thoughts(
-                        self.ai_name, assistant_reply_json, cfg.speak_mode
+                        self.ai_name, assistant_reply_json, self.config.speak_mode
                     )
                     command_name, arguments = get_command(assistant_reply_json)
                     status = get_status(assistant_reply_json)
@@ -374,13 +385,15 @@ class Agent:
                     logger.error("Error: \n", str(e))
                     
             self.log_cycle_handler.log_cycle(
-                self.config.ai_name,
+                self.ai_config.ai_name,
                 self.created_at,
                 self.cycle_count,
                 assistant_reply_json,
                 NEXT_ACTION_FILE_NAME,
             )
 
+            # First log new-line so user can differentiate sections better in console
+            logger.typewriter_log("\n")
             logger.typewriter_log(
                 "NEXT ACTION: ",
                 Fore.CYAN,
@@ -407,13 +420,13 @@ class Agent:
                     f"{self.ai_name}..."
                 )
                 while True:
-                    if cfg.chat_messages_enabled:
+                    if self.config.chat_messages_enabled:
                         console_input = clean_input("Waiting for your response...")
                     else:
                         console_input = clean_input(
                             Fore.MAGENTA + "Input:" + Style.RESET_ALL
                         )
-                    if console_input.lower().strip() == cfg.authorise_key:
+                    if console_input.lower().strip() == self.config.authorise_key:
                         user_input = "GENERATE NEXT COMMAND JSON"
                         break
                     elif console_input.lower().strip() == "s":
@@ -424,7 +437,7 @@ class Agent:
                         )
                         thoughts = assistant_reply_json.get("thoughts", {})
                         self_feedback_resp = self.get_self_feedback(
-                            thoughts, cfg.fast_llm_model
+                            thoughts, self.config.fast_llm_model
                         )
                         logger.typewriter_log(
                             f"SELF FEEDBACK: {self_feedback_resp}",
@@ -437,7 +450,9 @@ class Agent:
                     elif console_input.lower().strip() == "":
                         logger.warn("Invalid input format.")
                         continue
-                    elif console_input.lower().startswith(f"{cfg.authorise_key} -"):
+                    elif console_input.lower().startswith(
+                        f"{self.config.authorise_key} -"
+                    ):
                         try:
                             self.next_action_count = abs(
                                 int(console_input.split(" ")[1])
@@ -450,14 +465,14 @@ class Agent:
                             )
                             continue
                         break
-                    elif console_input.lower() == cfg.exit_key:
+                    elif console_input.lower() == self.config.exit_key:
                         user_input = "EXIT"
                         break
                     else:
                         user_input = console_input
                         command_name = "human_feedback"
                         self.log_cycle_handler.log_cycle(
-                            self.config.ai_name,
+                            self.ai_config.ai_name,
                             self.created_at,
                             self.cycle_count,
                             user_input,
@@ -475,6 +490,8 @@ class Agent:
                     logger.info("Exiting...")
                     break
             else:
+                # First log new-line so user can differentiate sections better in console
+                logger.typewriter_log("\n")
                 # Print authorized commands left value
                 logger.typewriter_log(
                     f"{Fore.CYAN}AUTHORISED COMMANDS LEFT: {Style.RESET_ALL}{self.next_action_count}"
@@ -488,7 +505,7 @@ class Agent:
             elif command_name == "self_feedback":
                 result = f"Self feedback: {user_input}"
             else:
-                for plugin in cfg.plugins:
+                for plugin in self.config.plugins:
                     if not plugin.can_handle_pre_command():
                         continue
                     command_name, arguments = plugin.pre_command(
@@ -505,16 +522,16 @@ class Agent:
                 result = f"Command {command_name} returned: " f"{command_result}"
 
                 result_tlength = count_string_tokens(
-                    str(command_result), cfg.fast_llm_model
+                    str(command_result), self.config.fast_llm_model
                 )
                 memory_tlength = count_string_tokens(
-                    str(self.history.summary_message()), cfg.fast_llm_model
+                    str(self.history.summary_message()), self.config.fast_llm_model
                 )
-                if result_tlength + memory_tlength + 600 > cfg.fast_token_limit:
+                if result_tlength + memory_tlength + 600 > self.fast_token_limit:
                     result = f"Failure: command {command_name} returned too much output. \
                         Do not execute this command again with the same arguments."
 
-                for plugin in cfg.plugins:
+                for plugin in self.config.plugins:
                     if not plugin.can_handle_post_command():
                         continue
                     result = plugin.post_command(command_name, result)
@@ -564,7 +581,7 @@ class Agent:
         Returns:
             str: A feedback response generated using the provided thoughts dictionary.
         """
-        ai_role = self.config.ai_role
+        ai_role = self.ai_config.ai_role
 
         feedback_prompt = f"Below is a message from me, an AI Agent, assuming the role of {ai_role}. whilst keeping knowledge of my slight limitations as an AI Agent Please evaluate my thought process, reasoning, and plan, and provide a concise paragraph outlining potential improvements. Consider adding or removing ideas that do not align with my role and explaining why, prioritizing thoughts based on their significance, or simply refining my overall thought process."
         reasoning = thoughts.get("reasoning", "")
@@ -576,7 +593,7 @@ class Agent:
         prompt.add("user", feedback_prompt + feedback_thoughts)
 
         self.log_cycle_handler.log_cycle(
-            self.config.ai_name,
+            self.ai_config.ai_name,
             self.created_at,
             self.cycle_count,
             prompt.raw(),
@@ -586,7 +603,7 @@ class Agent:
         feedback = create_chat_completion(prompt)
 
         self.log_cycle_handler.log_cycle(
-            self.config.ai_name,
+            self.ai_config.ai_name,
             self.created_at,
             self.cycle_count,
             feedback,
