@@ -324,7 +324,7 @@ def list_files(directory: str, agent: Agent) -> list[str]:
             if file.startswith("."):
                 continue
             relative_path = os.path.relpath(
-                os.path.join(root, file), agent.config.workspace_path
+                os.path.join(root, file), agent.workspace_path
             )
             found_files.append(relative_path)
 

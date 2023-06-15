@@ -1,0 +1,45 @@
+agent_budgets:
+  1: 491600
+  2: 45200
+  3: 2100
+  4: -900
+  5: 2100
+  6: 1900
+  7: 0
+  8: 500
+agent_running_costs:
+  1: 800
+  2: 400
+  3: 200
+  4: 100
+  5: 100
+  6: 200
+  7: 100
+  8: 100
+agent_statuses:
+  1: Currently reviewing the employee's work and providing feedback on their progress.
+  2: Currently getting a summary of the article.
+  3: Currently executing the employee's task.
+  4: Starting to compile information on the history of love
+  5: Currently creating a file for the article I found on the psychology of love.
+  6: Currently checking the progress of my employees.
+  7: Currently hiring an employee to help me with my research on the history of love.
+  8: starting interaction loop
+agent_termination_events: {}
+goal: LoveAI
+id_count: 8
+initial_budget: 500000
+name: Find the meaning of love
+supervisor_to_staff:
+  1:
+  - 2
+  - 6
+  2:
+  - 3
+  - 5
+  3:
+  - 4
+  6:
+  - 7
+  7:
+  - 8

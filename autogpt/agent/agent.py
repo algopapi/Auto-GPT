@@ -91,6 +91,7 @@ class Agent:
         self.system_prompt = system_prompt
         self.triggering_prompt = triggering_prompt
 
+        self.workspace_path = workspace_directory
         self.workspace = Workspace(workspace_directory, self.config.restrict_to_workspace)
         self.created_at = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.cycle_count = 0

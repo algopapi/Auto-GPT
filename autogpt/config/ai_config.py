@@ -45,6 +45,8 @@ class AIConfig:
         api_budget: float = 0.0,
         command_registry: CommandRegistry | None = None,
         prompt_generator: PromptGenerator | None = None,
+        organization_name: str = "",
+        organization_goal: str = "",
     ) -> None:
         """
         Initialize a class instance
@@ -57,8 +59,7 @@ class AIConfig:
         Returns:
             None
         """
-      
-
+    
         if ai_goals is None:
             ai_goals = []
         self.ai_id = ai_id
@@ -68,6 +69,9 @@ class AIConfig:
         self.api_budget = api_budget
         self.command_registry = command_registry
         self.prompt_generator =  prompt_generator
+
+        self.organization_name = organization_name
+        self.organization_goal = organization_goal
      
 
         self.terminated = terminated
@@ -182,11 +186,19 @@ class AIConfig:
             prompt_start += f"\nThe OS you are running on is: {os_info}"
 
         # Construct full prompt
-        full_prompt = f"You are {prompt_generator.name}, {prompt_generator.role}\n{prompt_start}\n\nGOALS:\n\n"
+        full_prompt = ""
+
+        if self.founder:
+            full_prompt += f"You are {prompt_generator.name}, an AI founder of {self.organization_name}, an organization of AI Agents with the goal of: {self.organization_goal}"
+        else:
+            full_prompt += f"You are {prompt_generator.name}, an AI employee at {self.organization_name}, an organization of AI Agents with the goal of: {self.organization_goal}"
+
+        full_prompt += f"You role at the organization is {prompt_generator.role}\n{prompt_start}\n\nGOALS:\n\n"
+       
         for i, goal in enumerate(self.ai_goals):
             full_prompt += f"{i+1}. {goal}\n"
-        if self.api_budget > 0.0:
-            full_prompt += f"\nIt takes money to let you run. Your API budget is ${self.api_budget:.3f}"
+        # if self.api_budget > 0.0:
+        #     full_prompt += f"\nIt takes money to let you run. Your API budget is ${self.api_budget:.3f}"
         self.prompt_generator = prompt_generator
         full_prompt += f"\n\n{prompt_generator.generate_prompt_string()}"
         return full_prompt

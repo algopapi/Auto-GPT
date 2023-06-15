@@ -528,6 +528,8 @@ class Organization(metaclass=Singleton):
             founder=founder,
             file_path=agent_workspace_directory,
             command_registry=command_registry,
+            organization_goal=self.goal,
+            organization_name=self.name,
         )
 
         # If it is the founder we set the budget here
@@ -567,6 +569,8 @@ class Organization(metaclass=Singleton):
             founder=founder,
             file_path=agent_workspace_directory,
             command_registry=command_registry,
+            organization_goal=self.goal,
+            organization_name=self.name,
         )
 
         # If it is the founder we set the budget here
@@ -889,8 +893,7 @@ class Organization(metaclass=Singleton):
             org_data = yaml.safe_load(org_file)
 
 
-        org = Organization(org_data['name'], org_data['initial_budget'])
-        org.goal = org_data['goal']
+        org = Organization(org_data['goal'], org_data['name'], org_data['initial_budget'])
         org.agent_budgets = org_data['agent_budgets']
         org.agent_running_costs = org_data['agent_running_costs']
         org.agent_statuses = org_data['agent_statuses']

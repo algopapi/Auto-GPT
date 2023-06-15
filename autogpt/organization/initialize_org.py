@@ -110,7 +110,9 @@ def create_new_org(should_speak=False):
             "Develop and manage multiple businesses autonomously",
         ]
     initial_budget = 500000
-    new_organization = Organization.create(org_name, org_goal, initial_budget)
+    new_organization = Organization.create(
+        name=org_name, goal=org_goal, initial_budget=initial_budget
+    )
     new_organization.create_agent(
         name=ai_name, role=ai_role, goals=ai_goals, founder=True, initial_budget=initial_budget
     )

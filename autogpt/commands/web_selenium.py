@@ -64,7 +64,7 @@ def browse_website(url: str, question: str, agent: Agent) -> str:
         return f"Error: {msg}"
 
     add_header(driver)
-    summary = summarize_memorize_webpage(url, text, question, agent, driver)
+    summary = summarize_memorize_webpage(url, text, question, agent, driver, agent.memory)
     links = scrape_links_with_selenium(driver, url)
 
     # Limit links to 5
@@ -205,6 +205,7 @@ def summarize_memorize_webpage(
     question: str,
     agent: Agent,
     driver: Optional[WebDriver] = None,
+    memory = None,
 ) -> str:
     """Summarize text using the OpenAI API
 
@@ -222,8 +223,6 @@ def summarize_memorize_webpage(
 
     text_length = len(text)
     logger.info(f"Text length: {text_length} characters")
-
-    memory = get_memory(agent.config)
 
     new_memory = MemoryItem.from_webpage(text, url, question=question)
     memory.add(new_memory)

@@ -1,0 +1,14 @@
+ai_goals:
+- Research the history of love
+ai_id: 8
+ai_name: Jane Smith
+ai_role: Research Assistant
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/Find
+  the meaning of love/agents/8_Jane Smith_workspace
+founder: false
+init_memory: false
+loop_count: 0
+organization_goal: LoveAI
+organization_name: Find the meaning of love
+terminated: false

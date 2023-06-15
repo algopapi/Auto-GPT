@@ -44,7 +44,7 @@ def test_execute_python_code(random_code: str, random_string: str, agent: Agent)
 
     # Check that the code is stored
     destination = os.path.join(
-        agent.config.workspace_path, ai_name, "executed_code", "test_code.py"
+        agent.workspace_path, ai_name, "executed_code", "test_code.py"
     )
     with open(destination) as f:
         assert f.read() == random_code
@@ -55,7 +55,7 @@ def test_execute_python_code_overwrites_file(
 ):
     ai_name = agent.ai_name
     destination = os.path.join(
-        agent.config.workspace_path, ai_name, "executed_code", "test_code.py"
+        agent.workspace_path, ai_name, "executed_code", "test_code.py"
     )
     os.makedirs(os.path.dirname(destination), exist_ok=True)
 

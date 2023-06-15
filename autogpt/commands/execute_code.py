@@ -34,7 +34,7 @@ def execute_python_code(code: str, basename: str, agent: Agent) -> str:
         str: The STDOUT captured from the code when it ran
     """
     ai_name = agent.ai_name
-    directory = os.path.join(agent.config.workspace_path, ai_name, "executed_code")
+    directory = os.path.join(agent.workspace_path, ai_name, "executed_code")
     os.makedirs(directory, exist_ok=True)
 
     if not basename.endswith(".py"):
@@ -69,7 +69,7 @@ def execute_python_file(filename: str, agent: Agent) -> str:
         return "Error: Invalid file type. Only .py files are allowed."
 
     workspace = Workspace(
-        agent.config.workspace_path, agent.config.restrict_to_workspace
+        agent.workspace_path, agent.config.restrict_to_workspace
     )
 
     path = workspace.get_path(filename)
@@ -118,7 +118,7 @@ def execute_python_file(filename: str, agent: Agent) -> str:
             image_name,
             ["python", str(path.relative_to(workspace.root))],
             volumes={
-                agent.config.workspace_path: {
+                agent.workspace_path: {
                     "bind": "/workspace",
                     "mode": "ro",
                 }
@@ -192,8 +192,8 @@ def execute_shell(command_line: str, agent: Agent) -> str:
 
     current_dir = Path.cwd()
     # Change dir into workspace if necessary
-    if not current_dir.is_relative_to(agent.config.workspace_path):
-        os.chdir(agent.config.workspace_path)
+    if not current_dir.is_relative_to(agent.workspace_path):
+        os.chdir(agent.workspace_path)
 
     logger.info(
         f"Executing command '{command_line}' in working directory '{os.getcwd()}'"
@@ -233,8 +233,8 @@ def execute_shell_popen(command_line, agent: Agent) -> str:
 
     current_dir = os.getcwd()
     # Change dir into workspace if necessary
-    if agent.config.workspace_path not in current_dir:
-        os.chdir(agent.config.workspace_path)
+    if agent.workspace_path not in current_dir:
+        os.chdir(agent.workspace_path)
 
     logger.info(
         f"Executing command '{command_line}' in working directory '{os.getcwd()}'"
