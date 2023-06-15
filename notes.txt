@@ -1,8 +1,7 @@
 git push origin v4
 
 TODO: 
-- Fix the goolge search API
-- Fix the memory (Memory is not being saved)
+- Configure google search
 - Do some preliminary stability tests
 
 High level Thoughts/ Possible improvements
@@ -10,6 +9,7 @@ High level Thoughts/ Possible improvements
 - Evaluation Rounds / Promotion / Demotion / Firing
 - File sharing ( Which agents can share which files with eachother ) 
 - Allow supervisor Retasking his employees. 
+- Fix the memory (Wait for Autogpt fix)
 
 VISION:
 - Lay as much power/responsibilities as possible to the agent

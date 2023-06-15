@@ -303,8 +303,8 @@ class Organization(metaclass=Singleton):
     async def start_agent_loop(self, agent):
         # Register agent in running agents (handy for cleanup)
         await self.register_agent(agent)
-        # await agent.start_interaction_loop(self.termination_event)
-        await agent.start_test_loop(self.termination_event)
+        await agent.start_interaction_loop(self.termination_event)
+        # await agent.start_test_loop(self.termination_event)
 
     
     async def start_event_processing_loop(self):
@@ -459,6 +459,7 @@ class Organization(metaclass=Singleton):
             system_prompt=system_prompt,
             workspace_directory=workspace_directory,
             organization=self,
+            config = cfg
         )
 
         self.agents[new_agent.ai_id] = new_agent
@@ -484,6 +485,7 @@ class Organization(metaclass=Singleton):
             system_prompt=system_prompt,
             workspace_directory=workspace_directory,
             organization=self,
+            config=cfg
         )
 
         self.agents[new_agent.ai_id] = new_agent
@@ -870,7 +872,7 @@ class Organization(metaclass=Singleton):
 
 
     @classmethod
-    def load(cls, organization_name):
+    def load(cls, organization_name: str):
         """
             Function that loads the organization yaml file and loads in the organization data and all the agents
         """

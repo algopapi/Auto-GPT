@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     enabled=True, # change this to be dependent on whether the user is running org mode
     disabled_reason="not an organization"
 )
-async def message_agent(receiver_id: str, message: str, config: Config, agent: Agent) -> str:
+async def message_agent(receiver_id: str, message: str, agent: Agent) -> str:
     """Messages a staff member (employee) with a given message. 
 
         Args:
@@ -30,8 +30,6 @@ async def message_agent(receiver_id: str, message: str, config: Config, agent: A
         Returns:
             str: Send confirmation or error
     """
-    print("here")
-    print("agent")
     event_id = await agent.send_event("message_agent", agent.ai_id, receiver_id, message)
     response = await agent.organization.get_event_result(event_id)
     return response
@@ -42,7 +40,7 @@ async def message_agent(receiver_id: str, message: str, config: Config, agent: A
         "Get the conversation history between you and an agent",
         '"agent_id" : "<agent_id of message respondent>"',
 )
-async def get_conversation_history(agent_id: str, config: Config, agent: Agent) -> str:
+async def get_conversation_history(agent_id: str, agent: Agent) -> str:
     """Gets the conversation history between you and an agent. 
 
         Args:
@@ -61,7 +59,7 @@ async def get_conversation_history(agent_id: str, config: Config, agent: Agent) 
         "Respond to a message from an agent in your inbox",
         '"message_id" : "<message_id of message you want to respond to>", "response" : "<response to the message>"',
 )
-async def respond_to_message(message_id: str, response: str, config: Config, agent: Agent) -> str:
+async def respond_to_message(message_id: str, response: str, agent: Agent) -> str:
     """
         Responds to a message from an agent in your inbox.
 
@@ -84,7 +82,7 @@ async def respond_to_message(message_id: str, response: str, config: Config, age
     enabled=True,
     disabled_reason="not an organization"
 )  
-async def hire_staff(staff_name: str, role: str, goals: str, budget: str, config: Config, agent: Agent) -> str:
+async def hire_staff(staff_name: str, role: str, goals: str, budget: str, agent: Agent) -> str:
     """Hires a staff member into the organization as an employee. 
 
         Args:
@@ -108,7 +106,7 @@ async def hire_staff(staff_name: str, role: str, goals: str, budget: str, config
     enabled=True,
     disabled_reason="not an organization"
 )
-async def fire_staff(agent_id: str, config: Config, agent: Agent) -> str:
+async def fire_staff(agent_id: str, agent: Agent) -> str:
     """Fires a staff member from the organization.
         Args:
             agent_id (str): The ID of the staff member to fire
@@ -129,7 +127,7 @@ async def fire_staff(agent_id: str, config: Config, agent: Agent) -> str:
     enabled=False, # change this to be dependent on whether the user is running org mode
     disabled_reason="not an organization"
 )
-async def message_supervisor( message: str, config: Config, agent: Agent) -> str:
+async def message_supervisor( message: str,  agent: Agent) -> str:
     """Messages a employees supervisor with a given message. 
 
         Args:
@@ -150,7 +148,7 @@ async def message_supervisor( message: str, config: Config, agent: Agent) -> str
     enabled=False, # change this to be dependent on whether the user is running org mode
     disabled_reason="not an organization"
 )
-async def message_staff(receiver_id: str, message: str, config: Config, agent: Agent) -> str:
+async def message_staff(receiver_id: str, message: str, agent: Agent) -> str:
     """Messages a staff member (employee) with a given message. 
 
         Args:

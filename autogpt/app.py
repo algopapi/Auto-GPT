@@ -127,7 +127,6 @@ async def execute_command(
     command_registry: CommandRegistry,
     command_name: str,
     arguments: dict[str, str],
-    config,
     agent,
 ):
     """Execute the command and return the result
@@ -145,9 +144,9 @@ async def execute_command(
         # If the command is found, call it with the provided arguments
         if cmd:
             if command_name in ASYNC_ORGANIZATIONS:
-                return await cmd(**arguments, config=config, agent=agent)
+                return await cmd(**arguments, agent=agent)
             else:
-                return cmd(**arguments, config=config) # remove agent for commands not in ASYNC_ORGANIZATIONS
+                return cmd(**arguments, agent=agent) # remove agent for commands not in ASYNC_ORGANIZATIONS
 
 
 

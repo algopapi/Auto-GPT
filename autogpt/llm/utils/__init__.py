@@ -85,7 +85,7 @@ def create_text_completion(
 
 
 # Overly simple abstraction until we create something better
-async def create_chat_completion(
+def create_chat_completion(
     prompt: ChatSequence,
     model: Optional[str] = None,
     temperature: Optional[float] = None,
@@ -173,3 +173,75 @@ def check_model(
         f"gpt-3.5-turbo.",
     )
     return "gpt-3.5-turbo"
+
+
+#Overly simple abstraction until we create something better
+async def async_chat_completion(
+    prompt: ChatSequence,
+    model: Optional[str] = None,
+    temperature: Optional[float] = None,
+    max_tokens: Optional[int] = None,
+) -> str:
+    """Create a chat completion using the OpenAI API
+
+    Args:
+        messages (List[Message]): The messages to send to the chat completion
+        model (str, optional): The model to use. Defaults to None.
+        temperature (float, optional): The temperature to use. Defaults to 0.9.
+        max_tokens (int, optional): The max tokens to use. Defaults to None.
+
+    Returns:
+        str: The response from the chat completion
+    """
+    cfg = Config()
+    if model is None:
+        model = prompt.model.name
+    if temperature is None:
+        temperature = cfg.temperature
+
+    logger.debug(
+        f"{Fore.GREEN}Creating chat completion with model {model}, temperature {temperature}, max_tokens {max_tokens}{Fore.RESET}"
+    )
+    chat_completion_kwargs = {
+        "model": model,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+
+    for plugin in cfg.plugins:
+        if plugin.can_handle_chat_completion(
+            messages=prompt.raw(),
+            **chat_completion_kwargs,
+        ):
+            message = plugin.handle_chat_completion(
+                messages=prompt.raw(),
+                **chat_completion_kwargs,
+            )
+            if message is not None:
+                return message
+
+    chat_completion_kwargs["api_key"] = cfg.openai_api_key
+    if cfg.use_azure:
+        chat_completion_kwargs["deployment_id"] = cfg.get_azure_deployment_id_for_model(
+            model
+        )
+
+    response = iopenai.create_chat_completion(
+        messages=prompt.raw(),
+        **chat_completion_kwargs,
+    )
+    logger.debug(f"Response: {response}")
+
+    resp = ""
+    if not hasattr(response, "error"):
+        resp = response.choices[0].message["content"]
+    else:
+        logger.error(response.error)
+        raise RuntimeError(response.error)
+
+    for plugin in cfg.plugins:
+        if not plugin.can_handle_on_response():
+            continue
+        resp = plugin.on_response(resp)
+
+    return resp
