@@ -104,20 +104,23 @@ class AIConfig:
             return None
 
     def remove(self):
-        if os.path.exists(self.agent_yaml_path):
-            os.remove(self.agent_yaml_path)
+        #if os.path.exists(self.agent_yaml_path):
+        #    os.remove(self.agent_yaml_path)
 
-        if os.path.exists(self.file_path):
-            os.rmdir(self.file_path)
+        #if os.path.exists(self.file_path):
+        #   os.rmdir(self.file_path)
 
-        else:
-            print(
-                f"Can't remove agent: {self.ai_name} as couldn't find file: {self.agent_yaml_path}."
-            )
+        # else:
+        #     print(
+        #         f"Can't remove agent: {self.ai_name} as couldn't find file: {self.agent_yaml_path}."
+        #     )
+
+        # Keep agent folder for now. (Should remove in the future)
+        pass
+        
+
 
     def save(self):
-        #print("agent dir path", self.file_path)
-        #print("agent yaml_path", self.agent_yaml_path)
         if not os.path.exists(Path(self.file_path)):
             os.makedirs(Path(self.file_path), exist_ok=True)
 

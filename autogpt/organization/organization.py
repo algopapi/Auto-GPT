@@ -95,6 +95,7 @@ async def async_update_yaml(obj, yaml_path):
     # Create a dictionary to represent the organization data
     org_data = {
         'name': obj.name,
+        'goal': obj.goal,
         'initial_budget': obj.initial_budget,
         'agent_budgets': obj.agent_budgets,
         'agent_running_costs': obj.agent_running_costs,
@@ -125,8 +126,12 @@ def update_yaml_after_async(func):
 cfg = Config()
 # An organization of multiple agents.
 class Organization(metaclass=Singleton):
-    def __init__(self, name="Dummy", initial_budget=100):
-        self.name = name
+    def __init__(self, goal, name="Dummy",initial_budget=100):
+        self.name = name # organization name
+        self.id = uuid.uuid4() # organization id
+        self.goal = goal # The main goal of the organization
+
+        # Agents
         self.agents: Dict[int, Agent] = {}
         self.running_agents = []
         self.initial_budget = initial_budget
@@ -294,8 +299,8 @@ class Organization(metaclass=Singleton):
             
     
     @classmethod
-    def create(cls, name, initial_budget):
-        org = cls(name, initial_budget)
+    def create(cls, name, goal, initial_budget):
+        org = cls(name, goal, initial_budget)
         org.save()
         return org
 
@@ -497,7 +502,7 @@ class Organization(metaclass=Singleton):
         name,
         role,
         goals,
-        initial_budget = 0,
+        initial_budget=0,
         founder=False,
     ):
         # generate a new agent_id
@@ -553,7 +558,6 @@ class Organization(metaclass=Singleton):
 
         for command_catergory in enabled_command_catergories:
             command_registry.import_commands(command_catergory)
-
 
         agent_cfg = AIConfig(
             ai_name=name,
@@ -886,6 +890,7 @@ class Organization(metaclass=Singleton):
 
 
         org = Organization(org_data['name'], org_data['initial_budget'])
+        org.goal = org_data['goal']
         org.agent_budgets = org_data['agent_budgets']
         org.agent_running_costs = org_data['agent_running_costs']
         org.agent_statuses = org_data['agent_statuses']
@@ -937,12 +942,14 @@ class Organization(metaclass=Singleton):
         # Create a dictionary to store the relevant attributes
         data = {
             'name': self.name,
+            'goal': self.goal,
             'initial_budget': self.initial_budget,
             'agent_budgets': self.agent_budgets,
             'agent_running_costs': self.agent_running_costs,
             'agent_statuses': self.agent_statuses,
             'supervisor_to_staff': self.supervisor_to_staff,
             'id_count': self.id_count,
+            
         }
 
         await self.message_center.a_save()
@@ -963,6 +970,7 @@ class Organization(metaclass=Singleton):
 
         data = {
             'name': self.name,
+            'goal': self.goal,
             'initial_budget': self.initial_budget,
             'agent_budgets': self.agent_budgets,
             'agent_running_costs': self.agent_running_costs,
