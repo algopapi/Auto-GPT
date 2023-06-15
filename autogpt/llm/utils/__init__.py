@@ -176,7 +176,7 @@ def check_model(
 
 
 #Overly simple abstraction until we create something better
-async def async_chat_completion(
+async def acreate_chat_completion(
     prompt: ChatSequence,
     model: Optional[str] = None,
     temperature: Optional[float] = None,
@@ -226,7 +226,7 @@ async def async_chat_completion(
             model
         )
 
-    response = iopenai.create_chat_completion(
+    response = await iopenai.acreate_chat_completion(
         messages=prompt.raw(),
         **chat_completion_kwargs,
     )

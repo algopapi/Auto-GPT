@@ -300,7 +300,7 @@ class Organization(metaclass=Singleton):
     
     @classmethod
     def create(cls, name, goal, initial_budget):
-        org = cls(name, goal, initial_budget)
+        org = cls(goal, name, initial_budget)
         org.save()
         return org
 
@@ -528,8 +528,8 @@ class Organization(metaclass=Singleton):
             founder=founder,
             file_path=agent_workspace_directory,
             command_registry=command_registry,
-            organization_goal=self.goal,
             organization_name=self.name,
+            organization_goal=self.goal,
         )
 
         # If it is the founder we set the budget here
@@ -569,8 +569,8 @@ class Organization(metaclass=Singleton):
             founder=founder,
             file_path=agent_workspace_directory,
             command_registry=command_registry,
-            organization_goal=self.goal,
             organization_name=self.name,
+            organization_goal=self.goal,
         )
 
         # If it is the founder we set the budget here

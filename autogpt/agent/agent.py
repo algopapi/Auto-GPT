@@ -345,7 +345,8 @@ class Agent:
             self.system_prompt = self.ai_config.construct_full_prompt(organization=self.organization)
 
             full_prompt = self.system_prompt + "\n" + org_status + "\n" + inbox
-            print("Full system prompt", full_prompt)
+            print(f"{self.ai_name} ORG STATUS: \n{org_status}\n")
+            print(f"{self.ai_name} INBOX:\n{inbox}\n")
 
             # Send message to AI, get response
             # with Spinner("Thinking... ", plain_output=cfg.plain_output):

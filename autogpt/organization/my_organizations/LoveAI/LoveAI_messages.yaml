@@ -1,0 +1,243 @@
+max_id: 18
+messages:
+  1:
+    from_supervisor: true
+    message: Welcome to LoveAI! Your role as a researcher is to conduct research on
+      the meaning of love. Please let me know if you need any resources or support
+      to help you achieve your goals.
+    message_id: 1
+    read: false
+    receiver_id: 2
+    responded: true
+    response_id: 5
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:22:50.026488
+  2:
+    from_supervisor: true
+    message: Hi Jane, I just wanted to check in and see how you're doing with your
+      research tasks. Do you have any questions or concerns? Let me know if there's
+      anything I can do to help.
+    message_id: 2
+    read: false
+    receiver_id: 3
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 2
+    timestamp: 2023-06-15 19:24:28.084338
+  3:
+    from_supervisor: false
+    message: Hi Jane, I wanted to check in and see how your research is going. Do
+      you need any resources or support to help you conduct your research more effectively?
+    message_id: 3
+    read: false
+    receiver_id: 3
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:24:55.628976
+  4:
+    from_supervisor: false
+    message: Hi Jane, I wanted to check in and see if you need any additional resources
+      or support to help you conduct your research more effectively. I also wanted
+      to remind you of your goals and ensure that you are making progress towards
+      them. Let me know if there is anything I can do to help.
+    message_id: 4
+    read: false
+    receiver_id: 3
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:26:07.081116
+  5:
+    from_supervisor: true
+    message: Thank you for checking in. I am making progress on my research tasks
+      and have identified the concept of love, different types of love, and the history
+      of love as my main focus areas. Do you have any additional resources or support
+      that could help me with my research? Thank you.
+    message_id: 5
+    read: false
+    receiver_id: 1
+    responded: true
+    response_id: 7
+    response_to_id: 1
+    sender_id: 2
+    timestamp: &id001 2023-06-15 19:19:47.152227
+  6:
+    from_supervisor: false
+    message: Hi Jane, based on our conversation history, it seems that you may be
+      struggling with your research. I want to provide you with additional support
+      and resources to help you succeed. Can you please let me know what specific
+      areas you are struggling with and what resources you need to help you succeed?
+      Thank you.
+    message_id: 6
+    read: false
+    receiver_id: 3
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:27:53.934063
+  7:
+    from_supervisor: false
+    message: Hi John, thank you for checking in. I am glad to hear that you are making
+      progress on your research tasks. I will provide you with additional resources
+      and support to help you succeed in your research on love. Can you please let
+      me know what specific areas you need help with and what resources you need?
+      Thank you.
+    message_id: 7
+    read: false
+    receiver_id: 2
+    responded: false
+    response_id: null
+    response_to_id: 5
+    sender_id: 1
+    timestamp: *id001
+  8:
+    from_supervisor: false
+    message: Hi, I wanted to share the relevant information about the meaning of love
+      with you. I have saved the information to a file called 'meaning_of_love.txt'
+      and have attached it to this message. Please let me know if you have any questions
+      or feedback. Thank you!
+    message_id: 8
+    read: false
+    receiver_id: 2
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 3
+    timestamp: 2023-06-15 19:28:55.143552
+  9:
+    from_supervisor: true
+    message: Hi Sarah, I just wanted to check in and see how you are doing with your
+      research on love. Do you need any additional support or resources to help you
+      succeed? Thank you.
+    message_id: 9
+    read: false
+    receiver_id: 4
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:29:22.189433
+  10:
+    from_supervisor: false
+    message: Hi, I just wanted to update you on my progress with my research. I have
+      deleted any unnecessary files and am now focusing on my research. Let me know
+      if you have any questions or concerns. Thanks!
+    message_id: 10
+    read: false
+    receiver_id: 2
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 3
+    timestamp: 2023-06-15 19:31:05.533343
+  11:
+    from_supervisor: true
+    message: Hi John, I hope you are doing well. I wanted to provide you with an update
+      on your budget. You currently have $1700 remaining in your budget. Can you please
+      provide me with a status update on your current task? Thank you.
+    message_id: 11
+    read: false
+    receiver_id: 2
+    responded: true
+    response_id: 13
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:31:30.727301
+  12:
+    from_supervisor: true
+    message: Hi Jane, I am having trouble finding the file 'meaning_of_love.txt' that
+      you sent me. Can you please let me know where you saved the file? Thank you!
+    message_id: 12
+    read: false
+    receiver_id: 3
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 2
+    timestamp: 2023-06-15 19:31:45.930379
+  13:
+    from_supervisor: true
+    message: Hi Supervisor, thank you for checking in. I have made some progress on
+      my research into the meaning of love. I am currently waiting for Jane to provide
+      me with the file location for 'meaning_of_love.txt', which she sent me earlier.
+      Once I have access to this file, I will be able to review the information that
+      Jane has gathered and continue my research. Thank you for your support!
+    message_id: 13
+    read: false
+    receiver_id: 1
+    responded: false
+    response_id: null
+    response_to_id: 11
+    sender_id: 2
+    timestamp: *id001
+  14:
+    from_supervisor: true
+    message: Hi John, thank you for your message. The file location for 'meaning_of_love.txt'
+      is in the 'Research' folder on the shared drive. Please let me know if you need
+      any additional support or resources. Thank you.
+    message_id: 14
+    read: false
+    receiver_id: 2
+    responded: true
+    response_id: 18
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:32:35.868057
+  15:
+    from_supervisor: false
+    message: Hi Jane, thank you for your message. I apologize for the delay in responding.
+      Can you please provide me with the file location for the article on 'time.com'?
+      Additionally, please let me know if you need any additional support or resources
+      to complete your assigned task. Thank you.
+    message_id: 15
+    read: false
+    receiver_id: 3
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:33:28.575082
+  16:
+    from_supervisor: true
+    message: Hi Jane, thank you for your help with my research on the meaning of love.
+      I was unable to locate the file 'meaning_of_love.txt' in my directory. Could
+      you please provide me with the file location? Thank you!
+    message_id: 16
+    read: false
+    receiver_id: 3
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 2
+    timestamp: 2023-06-15 19:33:57.053376
+  17:
+    from_supervisor: true
+    message: Hi John, could you please provide me with the file location for 'meaning_of_love.txt'?
+      Thank you!
+    message_id: 17
+    read: false
+    receiver_id: 2
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-15 19:34:39.808321
+  18:
+    from_supervisor: true
+    message: Thank you for providing me with the file location for 'meaning_of_love.txt'.
+      I will review the information that Jane has gathered and continue my research.
+      Thank you for your support!
+    message_id: 18
+    read: false
+    receiver_id: 1
+    responded: false
+    response_id: null
+    response_to_id: 14
+    sender_id: 2
+    timestamp: *id001

@@ -1,0 +1,28 @@
+agent_budgets:
+  1: 492700
+  2: 300
+  3: -1900
+  4: 2500
+agent_running_costs:
+  1: 400
+  2: 200
+  3: 100
+  4: 100
+agent_statuses:
+  1: Currently planning to message John and check in with Jane.
+  2: Currently using the respond_to_message command to respond to the most important
+    messages in my inbox.
+  3: Currently listing the files in the LoveAI repository.
+  4: Currently extracting the key findings and theories on the psychology of love
+    from the article.
+agent_termination_events: {}
+goal: to find the true meaning of love
+id_count: 4
+initial_budget: 500000
+name: LoveAI
+supervisor_to_staff:
+  1:
+  - 2
+  - 4
+  2:
+  - 3

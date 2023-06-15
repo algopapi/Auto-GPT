@@ -175,9 +175,7 @@ def retry_api(
                 backoff = backoff_base ** (attempt + 2)
                 logger.debug(backoff_msg.format(backoff=backoff))
                 time.sleep(backoff)
-
         return _wrapped
-
     return _wrapper
 
 
@@ -198,6 +196,31 @@ def create_chat_completion(
 
     """
     completion: OpenAIObject = openai.ChatCompletion.create(
+        messages=messages,
+        **kwargs,
+    )
+    if not hasattr(completion, "error"):
+        logger.debug(f"Response: {completion}")
+    return completion
+
+
+@meter_api
+@retry_api()
+async def acreate_chat_completion(
+    messages: List[MessageDict],
+    *_,
+    **kwargs,
+) -> OpenAIObject:
+    """Create a chat completion using the OpenAI API
+
+    Args:
+        messages: A list of messages to feed to the chatbot.
+        kwargs: Other arguments to pass to the OpenAI API chat completion call.
+    Returns:
+        OpenAIObject: The ChatCompletion response from OpenAI
+
+    """
+    completion: OpenAIObject = await openai.ChatCompletion.acreate(
         messages=messages,
         **kwargs,
     )

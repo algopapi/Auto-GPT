@@ -1,0 +1,14 @@
+ai_goals:
+- Conduct research on the meaning of love
+ai_id: 2
+ai_name: John Doe
+ai_role: Researcher
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/LoveAI/agents/2_John
+  Doe_workspace
+founder: false
+init_memory: false
+loop_count: 0
+organization_goal: to find the true meaning of love
+organization_name: LoveAI
+terminated: false

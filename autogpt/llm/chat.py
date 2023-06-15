@@ -10,7 +10,7 @@ from autogpt.config import Config
 from autogpt.llm.api_manager import ApiManager
 from autogpt.llm.base import ChatSequence, Message
 from autogpt.llm.utils import (
-    async_chat_completion,
+    acreate_chat_completion,
     count_message_tokens,
     create_chat_completion,
 )
@@ -194,7 +194,7 @@ async def chat_with_ai(
 
     # TODO: use a model defined elsewhere, so that model can contain
     # temperature and other settings we care about
-    assistant_reply = await async_chat_completion(
+    assistant_reply = await acreate_chat_completion(
         prompt=message_sequence,
         max_tokens=tokens_remaining,
     )
