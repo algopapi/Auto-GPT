@@ -119,7 +119,6 @@ async def fire_staff(agent_id: str, agent: Agent) -> str:
     return response
 
 
-
 @command(
     "message_supervisor",
     "Message your supervisor",
