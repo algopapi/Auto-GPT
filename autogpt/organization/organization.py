@@ -1,9 +1,6 @@
 import asyncio
-import functools
 import glob
-import hashlib
 import os
-import signal
 import uuid
 from functools import wraps
 from typing import Dict, List, Union
@@ -12,8 +9,6 @@ import aiofiles
 import matplotlib.pyplot as plt
 import networkx as nx
 import yaml
-from colorama import Fore, Style
-from yaml.constructor import ConstructorError
 
 from autogpt.agent import Agent
 from autogpt.commands.command import CommandRegistry, command
@@ -332,7 +327,7 @@ class Organization(metaclass=Singleton):
     
 
     @update_yaml_after_async
-    async def hire_staff(self, name: str, role: str, goals: str, budget: str, supervisor_id: str) -> str:
+    async def hire_staff(self, name: str, role: str, goals: str, budget: str, supervisor_id: int) -> str:
         try:
             # Validate and convert budget to integer
             budget = int(budget)
@@ -450,7 +445,6 @@ class Organization(metaclass=Singleton):
         agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
         memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
                 # Create the commands that should be passed to the staffmember
-        print("initialized memory passed to new agent = ", memory)
 
         workspace_directory = agent_cfg.file_path # Get the workspace from the agent config
         system_prompt = agent_cfg.construct_full_prompt() # Construct the system prompt
@@ -474,7 +468,6 @@ class Organization(metaclass=Singleton):
     def add_agent(self, agent_cfg, command_registry):
         agent_mem_path = f"{self.org_dir_path}/agents/{agent_cfg.ai_id}_{agent_cfg.ai_name}_workspace/agent_memory.json"
 
-        print("agent mem path", agent_mem_path)
         memory = get_memory(cfg=cfg, agent_mem_path=agent_mem_path)
                 # Create the commands that should be passed to the staffmember
 
@@ -504,7 +497,7 @@ class Organization(metaclass=Singleton):
         goals,
         initial_budget=0,
         founder=False,
-    ):
+    ) -> Agent:
         # generate a new agent_id
         agent_id = self.get_free_agent_id()
 
@@ -546,7 +539,7 @@ class Organization(metaclass=Singleton):
         goals,
         initial_budget = 0,
         founder=False,
-    ):
+    ) -> Agent:
 
         agent_id = self.get_free_agent_id()
 
@@ -656,7 +649,7 @@ class Organization(metaclass=Singleton):
             return "You have no pending messages"  # Agent ID not found in the pending_messages dictionary
         
     
-    async def respond_to_message(self, agent_id: int, message_id: str, response: str) -> str:
+    async def respond_to_message(self, sender_id: int, message_id: str, response: str) -> str:
             """
                 Responds to a message in the inbox. 
 
@@ -676,7 +669,7 @@ class Organization(metaclass=Singleton):
             
             response = await self.message_center.respond_to_message(
                 message_id=message_id,
-                sender_id=agent_id,
+                sender_id=sender_id,
                 response=response,
             )
             return response
@@ -694,6 +687,7 @@ class Organization(metaclass=Singleton):
             return await asyncio.wait_for(self._recursive_calculate_operating_cost(agent_id, cost_per_step=100), timeout=10)
         except asyncio.TimeoutError:
             return 'Error: Recursive calculate operating cost timed out'
+
 
     async def _recursive_calculate_operating_cost(self, agent_id, cost_per_step=100):
         # Base cost for the agent
@@ -820,7 +814,7 @@ class Organization(metaclass=Singleton):
         return None, None
 
 
-    async def get_staff(self, agent_id):
+    async def get_staff(self, agent_id) -> List[Agent]:
         staff_ids = self.supervisor_to_staff.get(agent_id, [])
         staff_list = [self.agents[staff_id] for staff_id in staff_ids]
         return staff_list
@@ -957,7 +951,6 @@ class Organization(metaclass=Singleton):
 
         await self.message_center.a_save()
 
-        print("saving organization at " , self.org_yaml_path)
         # Ensure the directory exists
         if not os.path.exists(self.org_dir_path):
             os.makedirs(self.org_dir_path)
@@ -969,7 +962,7 @@ class Organization(metaclass=Singleton):
 
     def save(self):
         # Create a dictionary to store the relevant attributes
-        self.message_center.a_save()
+        self.message_center.save()
 
         data = {
             'name': self.name,
@@ -982,7 +975,6 @@ class Organization(metaclass=Singleton):
             'id_count': self.id_count,
         }
 
-        print("saving organization at " , self.org_yaml_path)
         # Ensure the directory exists
         if not os.path.exists(self.org_dir_path):
             os.makedirs(self.org_dir_path)
@@ -1018,3 +1010,24 @@ class Organization(metaclass=Singleton):
             self.termination_event.set()
             print("[SHUTDOWN FINISHED] Stopped the event processing loop.")
     
+
+    def get_agent_workspace_path(self, agent_id: str) -> str:
+        """
+            Returns the path to the agent's workspace
+        """
+        # try to convert the agent_id to an integer
+        try:
+            agent_id = int(agent_id)
+        except ValueError:
+            return f"Agent id {agent_id} is not an integer, check the agent_id"
+        
+
+        # get the agent object corresponding to the agent id
+        agent = self.agents.get(agent_id)
+        if agent is None:
+            return f"Agent with id {agent_id} does not exist in the organization, check the agent_id"
+        
+        # get the agent's workspace path
+        agent_workspace_path = agent.workspace_path
+
+        return agent_workspace_path
