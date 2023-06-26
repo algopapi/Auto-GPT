@@ -6,8 +6,6 @@ from functools import wraps
 from typing import Dict, List, Union
 
 import aiofiles
-import matplotlib.pyplot as plt
-import networkx as nx
 import yaml
 
 from autogpt.agent import Agent
@@ -72,7 +70,6 @@ def update_and_visualize(func):
         await self.visualize_organization()
         return result
     return wrapper
-
 
 
 async def update_yaml_after(func):
@@ -842,35 +839,6 @@ class Organization(metaclass=Singleton):
         except KeyError:
             return None
 
-
-    async def visualize_organization(self):
-        G = nx.DiGraph()
-        # Add nodes and edges
-        for supervisor_id, staff_ids in self.supervisor_to_staff.items():
-            supervisor = self.agents.get(supervisor_id)
-            if supervisor is not None:
-                G.add_node(supervisor_id, label=supervisor.name)
-
-                for staff_id in staff_ids:
-                    staff_agent = self.agents.get(staff_id)
-                    if staff_agent is not None:
-                        G.add_node(staff_id, label=staff_agent.name)
-                        G.add_edge(supervisor_id, staff_id)
-
-        # Set node labels
-        labels = {node: f"{data['label']} ({node})\nCost: {self.agent_running_costs[node]}\nBudget: {self.agent_budgets[node]}"
-                  for node, data in G.nodes(data=True)}
-
-        # Plot the graph
-        def plot_graph():
-            pos = nx.spring_layout(G)
-            nx.draw(G, pos, with_labels=False, node_size=3000, node_color="skyblue")
-            nx.draw_networkx_labels(G, pos, labels)
-            plt.show()
-
-        # Schedule the graph plotting on the default event loop
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, plot_graph)
 
 
     @classmethod
