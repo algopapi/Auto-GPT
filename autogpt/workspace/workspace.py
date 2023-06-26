@@ -121,18 +121,21 @@ class Workspace:
         logger.debug(f"Resolved root as '{root}'")
 
         # Allow exception for absolute paths if they are contained in your workspace directory.
-        if relative_path.is_absolute() and not relative_path.is_relative_to(root):
-            raise ValueError(
-                f"Attempted to access absolute path '{relative_path}' in workspace '{root}'."
-            )
+        # if relative_path.is_absolute() and not relative_path.is_relative_to(root):
+        #     raise ValueError(
+        #         f"Attempted to access absolute path '{relative_path}' in workspace '{root}'."
+        #     )
+        # This is commented out for now because agents are allowed to enter each others workspaces. 
 
         full_path = root.joinpath(relative_path).resolve()
 
         logger.debug(f"Joined paths as '{full_path}'")
 
-        if restrict_to_root and not full_path.is_relative_to(root):
-            raise ValueError(
-                f"Attempted to access path '{full_path}' outside of workspace '{root}'."
-            )
+        # if restrict_to_root and not full_path.is_relative_to(root):
+        #     raise ValueError(
+        #         f"Attempted to access path '{full_path}' outside of workspace '{root}'."
+        #     )
+        # This is commented out for now because agents are allowed to enter each others workspaces.
+
 
         return full_path

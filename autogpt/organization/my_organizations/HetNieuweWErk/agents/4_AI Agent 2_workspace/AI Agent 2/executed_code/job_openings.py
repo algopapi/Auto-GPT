@@ -1,0 +1,1 @@
+Python code using BeautifulSoup to extract relevant job openings

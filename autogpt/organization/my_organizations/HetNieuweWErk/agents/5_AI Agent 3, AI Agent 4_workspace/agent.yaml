@@ -1,0 +1,15 @@
+ai_goals:
+- Find all hospitality job openings in the Netherlands
+ai_id: 5
+ai_name: AI Agent 3, AI Agent 4
+ai_role: Job Finder, Data Collector
+api_budget: 0.0
+file_path: /home/algopapi/fullauto/Auto-GPT/autogpt/organization/my_organizations/HetNieuweWErk/agents/5_AI
+  Agent 3, AI Agent 4_workspace
+founder: false
+init_memory: false
+loop_count: 0
+organization_goal: AN organization that finds all hospitatlity job openings in the
+  netherlands- Hilversum
+organization_name: HetNieuweWErk
+terminated: false

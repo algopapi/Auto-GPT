@@ -124,7 +124,7 @@ async def fire_staff(agent_id: str, agent: Agent) -> str:
     "Message your supervisor",
     '"message" : "<message to supervisor>"',
     enabled=False, # change this to be dependent on whether the user is running org mode
-    disabled_reason="not an organization"
+    disabled_reason="Depreciated, use message_agent instead."
 )
 async def message_supervisor( message: str,  agent: Agent) -> str:
     """Messages a employees supervisor with a given message. 
@@ -145,7 +145,7 @@ async def message_supervisor( message: str,  agent: Agent) -> str:
     "Message an agent in the organization",
     '"receiver_id" : "<receiver_id>", "message" : "<message>"',
     enabled=False, # change this to be dependent on whether the user is running org mode
-    disabled_reason="not an organization"
+    disabled_reason="Depreciated, use message_agent instead."
 )
 async def message_staff(receiver_id: str, message: str, agent: Agent) -> str:
     """Messages a staff member (employee) with a given message. 

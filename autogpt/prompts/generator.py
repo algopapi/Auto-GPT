@@ -19,20 +19,26 @@ class PromptGenerator:
             commands, resources, and performance evaluations.
         """
         self.constraints = [
+            "MANAGEMENT CONSTRAINT: Do not use weeks/hrs/days as your main time units but rather thinking steps." 
+            "HIRING CONSTRAINT: You cannot hire other humans but only other AI agents like yourself with youre hire_staff command"
             "YOUR CAPABILITIES ARE LIMITED: You have to subdivide complex task into smaller task for which you hir employees to complete them "
             "YOUR CONSTRAINTS: Your supervisor has given you a budget. Each step will cost you 100$ for yourself and each employee. If you have 5 employees, each step will cost you 600$.",
             "YOUR CONSTRAINTS: Complete your task before you run out of budget. Simple tasks will take you/your employees 10 steps so account for this when budgeting your employees",
         ]
         self.commands = []
         self.resources = [
-            "YOUR STAFF: Here is a list of your staff members, their roles, current spending, and their current engagement.",
+            "YOUR STAFF: A list of your staff members, their roles, current spending, and their current engagement.",
             "YOUR INBOX: Your inbox contains incoming emails that need to be responded to. Prioritize your inbox by responding to the most important emails first.",
             "YOUR BUDGET: Your budget displays: 1) your current budget - allocated by your supervisor. 2) your current spending each step (100$ for each employee) - how much you have spent so far. 3) Remaining steps: how many more steps you have left to complete the project.",
         ]
 
         self.performance_evaluation = [
+            "WORK CONTINUATION: Try to continue working while waiting on responses of your employees."
+            "EMPLOYEES ARE AI AGENTS: Your employees will have the same constraints and resources as you since they are also AI Agents."
+            "DONT MICROMANAGE: Give your employees time to respond and do not send them too many consecutive messages.",
             "DELIVERIES: Your supervisor will evaluate you based on if you and your team manage to complete the assigend task.",
         ]
+        
         self.goals = []
         self.command_registry: CommandRegistry | None = None
         self.name = "Bob"

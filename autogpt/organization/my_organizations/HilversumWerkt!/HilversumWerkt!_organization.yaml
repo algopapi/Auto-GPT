@@ -1,0 +1,13 @@
+agent_budgets:
+  1: 499700
+agent_running_costs:
+  1: 100
+agent_statuses:
+  1: Currently working on creating accounts on relevant job boards and social media
+    platforms.
+agent_termination_events: {}
+goal: Find all hospitality job openings in Hilverum - the netherlands
+id_count: 1
+initial_budget: 500000
+name: HilversumWerkt!
+supervisor_to_staff: {}

@@ -1,0 +1,12 @@
+agent_budgets:
+  1: 499900
+agent_running_costs:
+  1: 100
+agent_statuses:
+  1: starting interaction loop
+agent_termination_events: {}
+goal: Find the best hospitatliy jobs in Hilverum - Netherlands
+id_count: 1
+initial_budget: 500000
+name: CloseDAI
+supervisor_to_staff: {}

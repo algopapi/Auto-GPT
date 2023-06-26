@@ -30,16 +30,12 @@ class JSONFileMemory(VectorMemoryProvider):
             None
         """
         #workspace_path = Path(cfg.workspace_path)
-
-        print("Agent mem path", agent_mem_path)
-
         if(agent_mem_path is None):
             self.file_path = Path(cfg.workspace_path) / "agent_mem.json"
         else:
             self.file_path = Path(agent_mem_path)
 
         self.file_path.touch()
-        print("Initialized json file memory with index path", self.file_path)
         logger.debug(f"Initialized {__name__} with index path {self.file_path}")
 
         self.memories = []

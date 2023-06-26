@@ -1,0 +1,1 @@
+A job search website that lists hospitality job openings in the Netherlands, including positions in hotels, restaurants, and events. The website allows users to filter job listings by contract type, date posted, and company sector. It also offers features such as job alerts and the ability to save and apply for jobs later.

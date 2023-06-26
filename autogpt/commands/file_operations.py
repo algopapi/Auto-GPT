@@ -331,6 +331,36 @@ def list_files(directory: str, agent: Agent) -> list[str]:
     return found_files
 
 
+@command("list_colleague_files", "Lists files of an organization member", '"agent_id": "<agent_id>"')
+def list_agent_files(agent_id: str, agent: Agent) -> list[str]:
+    """lists files of an agent in a directory recursively
+
+    Args:
+        directory (str): The directory to search in
+        agent_id (str): The agent id
+
+    Returns:
+        list[str]: A list of files found in the directory
+    """
+    found_files = []
+    
+    # Get the workspace path of the agent
+    organization = agent.organization
+    agent_workspace_path = organization.get_agent_workspace_path(agent_id)
+    print(f"found workspace path of agent {agent_id}: {agent_workspace_path}")
+    
+    for root, _, files in os.walk(agent_workspace_path):
+        for file in files:
+            if file.startswith("."):
+                continue
+            relative_path = os.path.relpath(
+                os.path.join(root, file), agent_workspace_path
+            )
+            found_files.append(os.path.join(agent_workspace_path, relative_path))
+
+    return found_files
+
+
 @command(
     "download_file",
     "Download File",

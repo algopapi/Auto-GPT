@@ -1,0 +1,58 @@
+agent_budgets:
+  1: 493700
+  2: 2100
+  3: -1000
+  4: 2900
+  5: 1600
+  6: 0
+  7: 300
+  8: 400
+agent_running_costs:
+  1: 800
+  2: 300
+  3: 100
+  4: 100
+  5: 300
+  6: 100
+  7: 100
+  8: 100
+agent_statuses:
+  1:
+    Currently planning on responding to staff member 2's message and offering additional
+    resources to help them complete the task.
+  2: Currently messaging Agent 8 to inform them of their role and responsibilities
+  3: Installing the 'requests' module using pip.
+  4:
+    Currently planning on using the 'hire_staff' command to hire employees with the
+    necessary skills and experience to help me find all hospitality job openings in
+    the Netherlands.
+  5:
+    Currently using the 'google' command to search for other job posting websites
+    that may have the relevant information I need.
+  6:
+    Currently using the 'browse_website' command to visit each website and extract
+    the relevant information such as job title, location, and job description.
+  7:
+    Currently planning on using the 'write_to_file' command to create a list of job
+    openings in the hospitality industry in the Netherlands.
+  8:
+    Currently working on using the 'google' command to search for job openings in
+    Hilversum, Netherlands.
+agent_termination_events: {}
+goal:
+  AN organization that finds all hospitatlity job openings in the netherlands-
+  Hilversum
+id_count: 8
+initial_budget: 500000
+name: HetNieuweWErk
+supervisor_to_staff:
+  1:
+    - 2
+    - 4
+    - 5
+  2:
+    - 3
+    - 8
+  5:
+    - 6
+    - 7

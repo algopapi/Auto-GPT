@@ -194,10 +194,17 @@ async def chat_with_ai(
 
     # TODO: use a model defined elsewhere, so that model can contain
     # temperature and other settings we care about
-    assistant_reply = await acreate_chat_completion(
+    # Async
+    # assistant_reply = await acreate_chat_completion(
+    #     prompt=message_sequence,
+    #     max_tokens=tokens_remaining,
+    # )
+    assistant_reply = create_chat_completion(
         prompt=message_sequence,
         max_tokens=tokens_remaining,
     )
+    
+
 
 
     # Update full message history

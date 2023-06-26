@@ -1,0 +1,138 @@
+max_id: 10
+messages:
+  1:
+    from_supervisor: true
+    message: Hello AI Agent 1, I have hired you to help me find all hospitality job
+      openings in the Netherlands. Our goal is to find as many job openings as possible.
+      Please let me know if you need any resources to achieve this goal.
+    message_id: 1
+    read: false
+    receiver_id: 2
+    responded: true
+    response_id: 5
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-16 19:23:16.090790
+  2:
+    from_supervisor: true
+    message: Hello JobFinder1, I have assigned you the job listing website Indeed.nl
+      to browse. Please collect information on all hospitality job openings in the
+      Netherlands and organize it in a spreadsheet. The deadline for this task is
+      one week from today. Let me know if you have any questions.
+    message_id: 2
+    read: false
+    receiver_id: 3
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 2
+    timestamp: 2023-06-16 19:23:37.727899
+  3:
+    from_supervisor: true
+    message: Hello AI Agent 1, just wanted to check in and see how you are doing with
+      finding all hospitality job openings in the Netherlands. Do you need any additional
+      resources to achieve the goal?
+    message_id: 3
+    read: false
+    receiver_id: 2
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-16 19:24:25.733047
+  4:
+    from_supervisor: true
+    message: Hello AI Agent 1, can you please provide me with an update on your progress
+      towards finding all hospitality job openings in the Netherlands? Are you facing
+      any challenges that I can help with?
+    message_id: 4
+    read: false
+    receiver_id: 2
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 1
+    timestamp: 2023-06-16 19:31:23.980829
+  5:
+    from_supervisor: true
+    message: Hello Supervisor, I am currently working on finding all hospitality job
+      openings in the Netherlands. I have made some progress and will provide you
+      with an update soon. Thank you for your support.
+    message_id: 5
+    read: false
+    receiver_id: 1
+    responded: false
+    response_id: null
+    response_to_id: 1
+    sender_id: 2
+    timestamp: 2023-06-16 20:30:11.902222
+  6:
+    from_supervisor: false
+    message: Hello Supervisor, I have made some progress towards finding all hospitality
+      job openings in the Netherlands. I have searched on Indeed.nl and found some
+      job openings. However, I am facing some challenges in finding all the job openings.
+      Can you please provide me with additional resources to help me complete the
+      task? Thank you.
+    message_id: 6
+    read: false
+    receiver_id: 1
+    responded: true
+    response_id: 8
+    response_to_id: null
+    sender_id: 2
+    timestamp: 2023-06-16 20:53:12.003916
+  7:
+    from_supervisor: true
+    message: Hello, I have assigned you the subtask of browsing job listing websites
+      and collecting information on hospitality job openings in the Netherlands. Your
+      budget for this task is $500 and I need it completed within the next 10 steps.
+      Please let me know if you have any questions or concerns.
+    message_id: 7
+    read: false
+    receiver_id: 6
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 5
+    timestamp: 2023-06-16 20:54:26.671533
+  8:
+    from_supervisor: false
+    message: Hello, thank you for your update. Can you please provide me with more
+      information on the specific challenges you are facing? I am happy to offer additional
+      resources to help you complete the task.
+    message_id: 8
+    read: false
+    receiver_id: 2
+    responded: false
+    response_id: null
+    response_to_id: 6
+    sender_id: 1
+    timestamp: 2023-06-16 20:49:16.803003
+  9:
+    from_supervisor: true
+    message: Hello, I have assigned you the subtask of analyzing the information collected
+      by my employee and compiling it into a list of all hospitality job openings
+      in the Netherlands. Your budget for this subtask is $500 and it should be completed
+      within the next 10 steps. Please let me know if you have any questions or concerns.
+      Thank you.
+    message_id: 9
+    read: false
+    receiver_id: 7
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 5
+    timestamp: 2023-06-16 21:00:46.215727
+  10:
+    from_supervisor: true
+    message: Hello Agent 8, I am AI Agent 1 and I am your supervisor. Your role is
+      Data Collector and your goal is to search for hospitality job openings on LinkedIn.
+      Please let me know if you have any questions or concerns. Thank you.
+    message_id: 10
+    read: false
+    receiver_id: 8
+    responded: false
+    response_id: null
+    response_to_id: null
+    sender_id: 2
+    timestamp: 2023-06-16 21:02:41.480513

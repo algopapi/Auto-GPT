@@ -106,7 +106,6 @@ class MessageCenter(metaclass=Singleton):
         self.max_id = 0
         self.organization = organization
         self.message_yaml_path = organization.org_dir_path + "/" + f"{organization.name}_messages.yaml"
-        print("message_yaml_path: ", self.message_yaml_path)
 
     @update_yaml_after_async
     async def add_message(self, message: Message):
@@ -222,25 +221,32 @@ class MessageCenter(metaclass=Singleton):
         Return a list of last_n messages between the sender and receiver. 
         """
         sender_messages = self.fetch_messages_by_sender(sender_id)
-        receiver_messages = self.fetch_messages_by_receiver(receiver_id)
+        receiver_messages = self.fetch_messages_by_sender(receiver_id)
 
         # Filter messages that are between the sender and receiver.
-        conversation = [msg for msg in sender_messages if msg.receiver_id == receiver_id]
-        conversation += [msg for msg in receiver_messages if msg.sender_id == sender_id]
+        conversation = [msg for msg in sender_messages if msg.receiver_id == receiver_id] # Messages sent by sender to reciever
+        conversation += [msg for msg in receiver_messages if msg.receiver_id == sender_id] # Messages sent by receiver to sender
 
         # Sort the messages by message_id to maintain the order of conversation
         conversation.sort(key=lambda msg: msg.message_id, reverse=True)
 
-        # Return only the last 'n' messages
-        return conversation[:last_n]
+        last_n = conversation[:last_n]
+        return last_n
     
 
-    async def generate_conversation_prompt(self, sender_id: int, receiver_id: int) -> str:
+    async def generate_conversation_prompt(self, sender_id: int, receiver_id: str) -> str:
             """
                 Generate a string representation of the last few messages between two users
             """
-            messages_between = self.fetch_conversation(sender_id, receiver_id, last_n=8)
-            messages_between.sort(key=lambda m: m.timestamp) # Sort messages by timestamp
+
+            try:
+                receiver_id = int(receiver_id)
+            except ValueError:
+                return "You entered an Invalid user id"
+            
+
+            messages_between = self.fetch_conversation(sender_id, receiver_id, last_n=2)
+            messages_between.sort(key=lambda m: m.timestamp, reverse=True) # Sort messages by timestamp
 
             if len(messages_between) == 0:
                 return f"No conversation history between you and agent:{receiver_id}"
@@ -248,7 +254,7 @@ class MessageCenter(metaclass=Singleton):
             prompt = f"This is the conversation history between you and agent: {receiver_id}\n"
             
             for message in messages_between:
-                sender = "You" if message.sender_id == receiver_id else "Sender ID: "+str(sender_id)
+                sender = "You" if message.sender_id == sender_id else "From Agent"+str(sender_id)
                 prompt += f"{sender}: {message.message}\n"
 
             print(f"Conversation prompt:\n {prompt}")
@@ -352,8 +358,6 @@ class MessageCenter(metaclass=Singleton):
         """
         # Get all unresponded messages
         unresponded_messages = self.get_unresponded_messages_by_receiver(agent_id)
-
-
         supervisor_messages, supervisor_responses, agent_messages, agent_responses = [], [], [], []
 
         for msg in unresponded_messages:
