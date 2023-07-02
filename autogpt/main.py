@@ -1,4 +1,6 @@
 """The application entry point.  Can be invoked by a CLI or any other front end application."""
+
+print("THIS IS NOW HERE")
 import logging
 import sys
 from pathlib import Path
