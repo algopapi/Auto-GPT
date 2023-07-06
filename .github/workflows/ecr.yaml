@@ -3,7 +3,7 @@ name: Build and Push Docker image to ECR
 on:
   push:
     branches:
-      - main    # This will trigger the workflow when you push to the master branch
+      - kub_dep    # This will trigger the workflow when you push to the master branch
 
 jobs:
   build-and-push:
